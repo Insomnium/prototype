@@ -1,0 +1,8 @@
+package net.ins.prototype.backend.profile.service
+
+import net.ins.prototype.backend.profile.dao.model.ProfileEntity
+
+interface ProfileService {
+
+    fun findAll(): List<ProfileEntity>
+}

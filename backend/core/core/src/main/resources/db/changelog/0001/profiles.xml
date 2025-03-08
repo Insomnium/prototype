@@ -1,0 +1,52 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.1.xsd
+      http://www.liquibase.org/xml/ns/pro
+      http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd">
+
+
+    <changeSet id="0001_001_profile-init" author="pb">
+        <createTable tableName="profiles">
+            <column name="id_profile" type="bigserial" autoIncrement="true" >
+                <constraints nullable="false" />
+            </column>
+            <column name="title" type="varchar" >
+                <constraints nullable="false" />
+            </column>
+            <column name="birth" type="date" >
+                <constraints nullable="true" />
+            </column>
+            <column name="gender" type="char" > <!-- 'M'/'F' -->
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="profiles" columnNames="id_profile" constraintName="pk_profiles" />
+    </changeSet>
+
+    <changeSet id="0001_002_interests" author="pb">
+        <createTable tableName="interests">
+            <column name="id_interest" type="bigserial" autoIncrement="true">
+                <constraints nullable="false" />
+            </column>
+            <column name="id_profile" type="bigint" >
+                <constraints nullable="false" />
+            </column>
+            <column name="purpose_dating" type="bool" defaultValueBoolean="false" >
+                <constraints nullable="false" />
+            </column>
+            <column name="purpose_sexting" type="bool" defaultValueBoolean="false" >
+                <constraints nullable="false" />
+            </column>
+            <column name="purpose_relationships" type="bool" defaultValueBoolean="false" >
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+        <addPrimaryKey tableName="interests" columnNames="id_interest" constraintName="pk_interests" />
+        <addForeignKeyConstraint baseTableName="interests" baseColumnNames="id_profile" constraintName="pk_interests-to_profiles"
+                                 referencedTableName="profiles"
+                                 referencedColumnNames="id_profile" />
+    </changeSet>
+</databaseChangeLog>

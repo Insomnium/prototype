@@ -1,0 +1,9 @@
+spring:
+  application.name: core
+
+  liquibase:
+    change-log: classpath*:db/changelog/master.xml
+
+server:
+  servlet:
+    context-path: /core
