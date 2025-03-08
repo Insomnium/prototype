@@ -28,19 +28,13 @@
 
     <changeSet id="0001_002_interests" author="pb">
         <createTable tableName="interests">
-            <column name="id_interest" type="bigserial" autoIncrement="true">
+            <column name="id_interest" type="bigint">
                 <constraints nullable="false" />
             </column>
             <column name="id_profile" type="bigint" >
                 <constraints nullable="false" />
             </column>
-            <column name="purpose_dating" type="bool" defaultValueBoolean="false" >
-                <constraints nullable="false" />
-            </column>
-            <column name="purpose_sexting" type="bool" defaultValueBoolean="false" >
-                <constraints nullable="false" />
-            </column>
-            <column name="purpose_relationships" type="bool" defaultValueBoolean="false" >
+            <column name="mask" type="int4" >
                 <constraints nullable="false" />
             </column>
         </createTable>
@@ -48,5 +42,6 @@
         <addForeignKeyConstraint baseTableName="interests" baseColumnNames="id_profile" constraintName="pk_interests-to_profiles"
                                  referencedTableName="profiles"
                                  referencedColumnNames="id_profile" />
+        <addUniqueConstraint tableName="profiles" columnNames="id_profile" constraintName="uniq_id_profile" />
     </changeSet>
 </databaseChangeLog>

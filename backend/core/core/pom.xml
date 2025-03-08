@@ -30,6 +30,9 @@
         <java.version>21</java.version>
         <kotlin.version>1.9.25</kotlin.version>
         <sentry.version>8.3.0</sentry.version>
+
+        <kotest.jvm.version>4.0.7</kotest.jvm.version>
+        <kotest.version>5.9.1</kotest.version>
     </properties>
     <dependencies>
         <dependency>
@@ -84,6 +87,19 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-jvm</artifactId>
+            <version>${kotest.jvm.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-core</artifactId>
+            <version>${kotest.version}</version>
+            <type>pom</type>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
