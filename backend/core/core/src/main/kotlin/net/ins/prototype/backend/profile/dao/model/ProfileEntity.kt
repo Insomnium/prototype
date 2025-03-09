@@ -28,7 +28,7 @@ class ProfileEntity(
     var gender: Gender,
     @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
     @PrimaryKeyJoinColumn
-    var interest: PurposeEntity,
+    var purpose: PurposeEntity,
 ) {
 
     @PrePersist

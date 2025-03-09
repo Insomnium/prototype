@@ -14,6 +14,16 @@ class ProfileResponseConverter : Converter<ProfileEntity, Profile> {
         title = source.title,
         birth = source.birth,
         gender = source.gender,
-        purposes = Purpose.unmask(source.interest.mask),
+        purposes = convertPurposes(source),
     )
+
+    private fun convertPurposes(source: ProfileEntity): Set<Purpose> {
+        val purposes: MutableSet<Purpose> = mutableSetOf()
+        with(source.purpose) {
+            if (dating) purposes += Purpose.DATING
+            if (sexting) purposes += Purpose.SEXTING
+            if (relationships) purposes += Purpose.RELATIONSHIPS
+        }
+        return purposes
+    }
 }
