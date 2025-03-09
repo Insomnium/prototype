@@ -11,6 +11,10 @@ class PurposeEntity(
     @Id
     @Column(name = "id_purpose")
     var id: Long? = null,
-    @Column(name = "mask")
-    val mask: Int,
+    @Column(name = "dating")
+    val dating: Boolean,
+    @Column(name = "sexting")
+    val sexting: Boolean,
+    @Column(name = "relationships")
+    val relationships: Boolean,
 )

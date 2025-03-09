@@ -5,7 +5,6 @@ import net.ins.prototype.backend.profile.dao.model.PurposeEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
-import net.ins.prototype.backend.profile.model.calculateMask
 import net.ins.prototype.backend.profile.service.ProfileSearchContext
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
@@ -21,9 +20,16 @@ interface ProfileRepository : JpaRepository<ProfileEntity, Long>, JpaSpecificati
             }
 
         private fun purposesIn(purposes: Set<Purpose>): Specification<ProfileEntity> =
-            Specification<ProfileEntity> { root, _, criteriaBuilder ->
-                val interestJoin: Join<ProfileEntity, PurposeEntity> = root.join("interest")
-                criteriaBuilder.equal(interestJoin.get<Int>("mask"), purposes.calculateMask())
+            Specification<ProfileEntity> { root, _, cb ->
+                val purposeJoin: Join<ProfileEntity, PurposeEntity> = root.join("purpose")
+                val predicates = purposes.map { purpose ->
+                    when (purpose) {
+                        Purpose.DATING -> cb.isTrue(purposeJoin.get("dating"))
+                        Purpose.SEXTING -> cb.isTrue(purposeJoin.get("sexting"))
+                        Purpose.RELATIONSHIPS -> cb.isTrue(purposeJoin.get("relationships"))
+                    }
+                }
+                cb.or(*predicates.toTypedArray())
             }
 
 

@@ -34,7 +34,13 @@
             <column name="id_profile" type="bigint" >
                 <constraints nullable="false" />
             </column>
-            <column name="mask" type="int4" >
+            <column name="sexting" type="bool">
+                <constraints nullable="false" />
+            </column>
+            <column name="dating" type="bool">
+                <constraints nullable="false" />
+            </column>
+            <column name="relationships" type="bool">
                 <constraints nullable="false" />
             </column>
         </createTable>
