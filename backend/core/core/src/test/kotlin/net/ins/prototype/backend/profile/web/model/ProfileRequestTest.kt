@@ -2,9 +2,7 @@ package net.ins.prototype.backend.profile.web.model
 
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.equals.shouldBeEqual
-import io.kotest.matchers.should
-import io.kotest.matchers.shouldBe
-import net.ins.prototype.backend.profile.model.Interest
+import net.ins.prototype.backend.profile.model.Purpose
 import net.ins.prototype.backend.profile.model.calculateMask
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.params.ParameterizedTest
@@ -17,53 +15,53 @@ class ProfileRequestTest {
     @MethodSource("interests")
     @DisplayName("should mask interests")
     fun shouldMaskInterests(
-        interests: List<Interest>,
+        purposes: List<Purpose>,
         expectedCode: Int,
     ) {
-        interests.calculateMask() shouldBeEqual expectedCode
+        purposes.calculateMask() shouldBeEqual expectedCode
     }
 
     @ParameterizedTest
     @MethodSource("interests")
     @DisplayName("should unmask interests")
     fun shouldUnmaskInterests(
-        expectedInterests: List<Interest>,
+        expectedPurposes: List<Purpose>,
         code: Int,
     ) {
-        Interest.unmask(code) shouldContainExactlyInAnyOrder expectedInterests
+        Purpose.unmask(code) shouldContainExactlyInAnyOrder expectedPurposes
     }
 
     companion object {
 
         @JvmStatic
         fun interests(): List<Arguments> = listOf(
-            Arguments.of(emptyList<Interest>(), 0),
+            Arguments.of(emptyList<Purpose>(), 0),
 
-            Arguments.of(listOf(Interest.DATING), 1),
-            Arguments.of(listOf(Interest.SEXTING), 4),
-            Arguments.of(listOf(Interest.RELATIONSHIPS), 8),
+            Arguments.of(listOf(Purpose.DATING), 1),
+            Arguments.of(listOf(Purpose.SEXTING), 4),
+            Arguments.of(listOf(Purpose.RELATIONSHIPS), 8),
 
-            Arguments.of(listOf(Interest.DATING, Interest.SEXTING), 5),
-            Arguments.of(listOf(Interest.SEXTING, Interest.DATING), 5),
+            Arguments.of(listOf(Purpose.DATING, Purpose.SEXTING), 5),
+            Arguments.of(listOf(Purpose.SEXTING, Purpose.DATING), 5),
 
-            Arguments.of(listOf(Interest.DATING, Interest.RELATIONSHIPS), 9),
-            Arguments.of(listOf(Interest.RELATIONSHIPS, Interest.DATING), 9),
+            Arguments.of(listOf(Purpose.DATING, Purpose.RELATIONSHIPS), 9),
+            Arguments.of(listOf(Purpose.RELATIONSHIPS, Purpose.DATING), 9),
 
-            Arguments.of(listOf(Interest.SEXTING, Interest.RELATIONSHIPS), 12),
-            Arguments.of(listOf(Interest.RELATIONSHIPS, Interest.SEXTING), 12),
+            Arguments.of(listOf(Purpose.SEXTING, Purpose.RELATIONSHIPS), 12),
+            Arguments.of(listOf(Purpose.RELATIONSHIPS, Purpose.SEXTING), 12),
 
-            Arguments.of(listOf(Interest.SEXTING, Interest.DATING), 5),
-            Arguments.of(listOf(Interest.DATING, Interest.SEXTING), 5),
+            Arguments.of(listOf(Purpose.SEXTING, Purpose.DATING), 5),
+            Arguments.of(listOf(Purpose.DATING, Purpose.SEXTING), 5),
 
 
-            Arguments.of(listOf(Interest.DATING, Interest.SEXTING, Interest.RELATIONSHIPS), 13),
-            Arguments.of(listOf(Interest.DATING, Interest.RELATIONSHIPS, Interest.SEXTING), 13),
+            Arguments.of(listOf(Purpose.DATING, Purpose.SEXTING, Purpose.RELATIONSHIPS), 13),
+            Arguments.of(listOf(Purpose.DATING, Purpose.RELATIONSHIPS, Purpose.SEXTING), 13),
 
-            Arguments.of(listOf(Interest.RELATIONSHIPS, Interest.DATING, Interest.SEXTING), 13),
-            Arguments.of(listOf(Interest.RELATIONSHIPS, Interest.SEXTING, Interest.DATING), 13),
+            Arguments.of(listOf(Purpose.RELATIONSHIPS, Purpose.DATING, Purpose.SEXTING), 13),
+            Arguments.of(listOf(Purpose.RELATIONSHIPS, Purpose.SEXTING, Purpose.DATING), 13),
 
-            Arguments.of(listOf(Interest.SEXTING, Interest.DATING, Interest.RELATIONSHIPS), 13),
-            Arguments.of(listOf(Interest.SEXTING, Interest.RELATIONSHIPS, Interest.DATING), 13),
+            Arguments.of(listOf(Purpose.SEXTING, Purpose.DATING, Purpose.RELATIONSHIPS), 13),
+            Arguments.of(listOf(Purpose.SEXTING, Purpose.RELATIONSHIPS, Purpose.DATING), 13),
         )
     }
 }
