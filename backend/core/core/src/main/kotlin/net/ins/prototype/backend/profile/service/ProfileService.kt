@@ -4,5 +4,5 @@ import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 
 interface ProfileService {
 
-    fun findAll(): List<ProfileEntity>
+    fun findAll(search: ProfileSearchContext): List<ProfileEntity>
 }

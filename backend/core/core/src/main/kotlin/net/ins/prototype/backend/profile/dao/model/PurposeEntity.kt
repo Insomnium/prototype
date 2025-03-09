@@ -6,10 +6,10 @@ import jakarta.persistence.Id
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "interests")
-class InterestEntity(
+@Table(name = "purposes")
+class PurposeEntity(
     @Id
-    @Column(name = "id_interest")
+    @Column(name = "id_purpose")
     var id: Long? = null,
     @Column(name = "mask")
     val mask: Int,

@@ -7,5 +7,5 @@ data class Profile(
     val title: String,
     val birth: LocalDate,
     val gender: Gender,
-    val interests: Set<Interest>,
+    val purposes: Set<Purpose>,
 )
