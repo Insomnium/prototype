@@ -22,32 +22,10 @@
             <column name="gender" type="char" > <!-- 'M'/'F' -->
                 <constraints nullable="false" />
             </column>
+            <column name="purpose_mask" type="int4">
+                <constraints nullable="false" />
+            </column>
         </createTable>
         <addPrimaryKey tableName="profiles" columnNames="id_profile" constraintName="pk_profiles" />
-    </changeSet>
-
-    <changeSet id="0001_002_purposes" author="pb">
-        <createTable tableName="purposes">
-            <column name="id_purpose" type="bigint">
-                <constraints nullable="false" />
-            </column>
-            <column name="id_profile" type="bigint" >
-                <constraints nullable="false" />
-            </column>
-            <column name="sexting" type="bool">
-                <constraints nullable="false" />
-            </column>
-            <column name="dating" type="bool">
-                <constraints nullable="false" />
-            </column>
-            <column name="relationships" type="bool">
-                <constraints nullable="false" />
-            </column>
-        </createTable>
-        <addPrimaryKey tableName="purposes" columnNames="id_purpose" constraintName="pk_purposes" />
-        <addForeignKeyConstraint baseTableName="purposes" baseColumnNames="id_profile" constraintName="pk_purposes-to_profiles"
-                                 referencedTableName="profiles"
-                                 referencedColumnNames="id_profile" />
-        <addUniqueConstraint tableName="purposes" columnNames="id_profile" constraintName="uniq_id_profile" />
     </changeSet>
 </databaseChangeLog>

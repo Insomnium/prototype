@@ -1,7 +1,5 @@
 package net.ins.prototype.backend.profile.dao.repo
 
-import jakarta.persistence.criteria.Join
-import net.ins.prototype.backend.profile.dao.model.PurposeEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
@@ -20,16 +18,14 @@ interface ProfileRepository : JpaRepository<ProfileEntity, Long>, JpaSpecificati
             }
 
         private fun purposesIn(purposes: Set<Purpose>): Specification<ProfileEntity> =
-            Specification<ProfileEntity> { root, _, cb ->
-                val purposeJoin: Join<ProfileEntity, PurposeEntity> = root.join("purpose")
-                val predicates = purposes.map { purpose ->
-                    when (purpose) {
-                        Purpose.DATING -> cb.isTrue(purposeJoin.get("dating"))
-                        Purpose.SEXTING -> cb.isTrue(purposeJoin.get("sexting"))
-                        Purpose.RELATIONSHIPS -> cb.isTrue(purposeJoin.get("relationships"))
-                    }
+            Specification<ProfileEntity> { root, query, cb ->
+                val masks = purposes.map { purpose ->
+                    cb.equal(
+                        cb.function("BITAND", Int::class.java, root.get<Int>("purposeMask"), cb.literal(purpose.code)),
+                        purpose.code
+                    )
                 }
-                cb.or(*predicates.toTypedArray())
+                cb.or(*masks.toTypedArray())
             }
 
 

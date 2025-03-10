@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 class ControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
-    fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ResponseEntity<RequestValidationResponse> {
-        return ResponseEntity
-            .status(HttpStatus.BAD_REQUEST)
-            .body(RequestValidationResponse(e.bindingResult.fieldErrors.map { FieldValidationError(it.field, it.defaultMessage ?: "Invalid value") }))
-    }
+    fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ResponseEntity<RequestValidationResponse> = ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(RequestValidationResponse(e.bindingResult.fieldErrors.map { FieldValidationError(it.field, it.defaultMessage ?: "Invalid value") }))
 }
