@@ -40,8 +40,7 @@ class ProfileServiceImpl(
         }
         val searchCriteria = criteria.fold(Criteria(), Criteria::or).and(Criteria("gender").`is`(search.gender.code))
 
-        val esResult = esOperations.search(CriteriaQuery(searchCriteria), ProfileEsEntity::class.java)
-        return esResult
+        return esOperations.search(CriteriaQuery(searchCriteria), ProfileEsEntity::class.java)
     }
 
     @Transactional
