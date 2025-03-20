@@ -28,7 +28,7 @@ class ProfileServiceImpl(
         .takeUnless { it.isEmpty }
         ?.map { it.content.dbId }
         ?.let { profileRepository.findAllById(it) }
-        ?: profileRepository.findAll(ProfileRepository.search(search))
+        ?: profileRepository.findAll(ProfileRepository.search(search)) // FIXME: does it make sense? ES should be trustworthy
 
     private fun esEntitySearchHits(search: ProfileSearchContext): SearchHits<ProfileEsEntity> {
         val criteria = search.purposes.map {
@@ -38,12 +38,9 @@ class ProfileServiceImpl(
                 Purpose.RELATIONSHIPS -> Criteria("purpose.relationships").`is`(true)
             }
         }
-        val searchCriteria = criteria.fold(Criteria()) { l, r ->
-            l.or(r)
-        }.and(Criteria("gender").`is`(search.gender.code))
+        val searchCriteria = criteria.fold(Criteria(), Criteria::or).and(Criteria("gender").`is`(search.gender.code))
 
-        val esResult = esOperations.search(CriteriaQuery(searchCriteria), ProfileEsEntity::class.java)
-        return esResult
+        return esOperations.search(CriteriaQuery(searchCriteria), ProfileEsEntity::class.java)
     }
 
     @Transactional
