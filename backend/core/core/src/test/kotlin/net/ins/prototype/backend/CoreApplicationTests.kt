@@ -1,5 +1,6 @@
 package net.ins.prototype.backend
 
+import net.ins.prototype.backend.conf.TestcontainersConfiguration
 import net.ins.prototype.backend.meta.TestProfile
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
 import org.junit.jupiter.api.Test

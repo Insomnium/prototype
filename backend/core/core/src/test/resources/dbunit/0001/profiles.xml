@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <dataset>
-    <profiles id_profile="1" title=""
-
+    <profiles id_profile="1" title="V" birth="1996-11-17" gender="F" purpose_mask="9" /> <!-- DATING, RELATIONSHIPS -->
+    <profiles id_profile="2" title="X" birth="1996-12-17" gender="F" purpose_mask="5" /> <!-- DATING, SEXTING -->
+    <profiles id_profile="3" title="I" birth="1990-03-10" gender="M" purpose_mask="8" /> <!-- RELATIONSHIPS -->
 </dataset>
