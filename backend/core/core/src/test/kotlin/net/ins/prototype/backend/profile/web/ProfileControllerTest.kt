@@ -10,20 +10,28 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
 import net.ins.prototype.backend.conf.TestcontainersConfiguration
 import net.ins.prototype.backend.meta.TestProfile
+import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
 import net.ins.prototype.backend.profile.model.calculateMask
 import net.ins.prototype.backend.profile.web.model.NewProfileRequest
 import org.hamcrest.Matchers.containsInAnyOrder
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.reset
+import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations
+import org.springframework.data.jpa.domain.Specification
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestExecutionListeners
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
@@ -41,6 +49,7 @@ import java.time.LocalDate
 @DatabaseTearDown("classpath:/dbunit/0001/profiles-cleanup.xml")
 class ProfileControllerTest {
 
+    @MockitoSpyBean
     @Autowired
     private lateinit var repo: ProfileRepository
 
@@ -49,6 +58,15 @@ class ProfileControllerTest {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @MockitoSpyBean
+    @Autowired
+    private lateinit var esOperations: ElasticsearchOperations
+
+    @AfterEach
+    fun tearDown() {
+        reset(repo, esOperations)
+    }
 
     @Test
     @DisplayName("Should create new profile")
@@ -109,6 +127,43 @@ class ProfileControllerTest {
                 jsonPath("$.profiles[1].purposes.length()") { value(2) }
                 jsonPath("$.profiles[1].purposes") { containsInAnyOrder("DATING", "SEXTING") }
             }
+        }
+
+        verify(repo) {
+            0 * { findAllById(any()) }
+            1 * { findAll(any<Specification<ProfileEntity>>()) }
+        }
+    }
+
+    @Test
+    @DisplayName("Should respond with profiles when no purposes set")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
+    fun shouldFindProfilesWithNoSpecificPurposes() {
+        mockMvc.get("/v1/profiles") {
+            accept = MediaType.APPLICATION_JSON
+            queryParam("gender", "FEMALE")
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.profiles.length()") { value(2) }
+        }
+
+        verify(repo) {
+            0 * { findAllById(any()) }
+            1 * { findAll(any<Specification<ProfileEntity>>()) }
+        }
+    }
+
+    @Test
+    @DisplayName("Should respond with empty profiles array when none found")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
+    fun shouldRespondWithNoProfilesWhenNoneMatches() {
+        mockMvc.get("/v1/profiles") {
+            accept = MediaType.APPLICATION_JSON
+            queryParam("gender", "MALE")
+            queryParam("purposes", "RELATIONSHIPS")
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.profiles.length()") { value(0) }
         }
     }
 }
