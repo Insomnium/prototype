@@ -105,12 +105,6 @@
         </dependency>
         <dependency>
             <groupId>io.kotest</groupId>
-            <artifactId>kotest-assertions-jvm</artifactId>
-            <version>${kotest.jvm.version}</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.kotest</groupId>
             <artifactId>kotest-assertions-core</artifactId>
             <version>${kotest.version}</version>
             <type>pom</type>
