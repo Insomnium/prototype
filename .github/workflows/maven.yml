@@ -27,6 +27,8 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
+    - name: Change working folder
+      run: cd backend/core/core
     - name: Verify with maven
       run: mvn clean verify
 
