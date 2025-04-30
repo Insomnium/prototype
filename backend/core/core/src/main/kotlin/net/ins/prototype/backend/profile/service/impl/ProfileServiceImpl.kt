@@ -1,5 +1,7 @@
 package net.ins.prototype.backend.profile.service.impl
 
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery
+import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders
 import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery
 import jakarta.transaction.Transactional
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
@@ -55,7 +57,24 @@ class ProfileServiceImpl(
             purposeCriteria?.let { and(it) }
         }
 
-        return esOperations.search(CriteriaQuery(searchCriteria), ProfileEsEntity::class.java)
+        val criteria = QueryBuilders.bool().apply {
+            must(QueryBuilders.term { term -> term.field("gender").value(search.gender.code.toString()) })
+            search.countryId?.let { countryId -> must(QueryBuilders.term { term -> term.field("countryId").value(countryId) }) }
+            search.purposes.map { purpose ->
+                when (purpose) {
+                    Purpose.DATING -> should(QueryBuilders.term { term -> term.field("purpose.dating").value(true) })
+                    Purpose.SEXTING -> should(QueryBuilders.term { term -> term.field("purpose.sexting").value(true) })
+                    Purpose.RELATIONSHIPS -> should(QueryBuilders.term { term -> term.field("purpose.relationships").value(true) })
+                }
+            }
+        }
+
+        val query = NativeQuery.builder()
+            .withQuery(criteria.build()._toQuery())
+            .build()
+
+        return esOperations.search(query, ProfileEsEntity::class.java)
+//        return esOperations.search(CriteriaQuery(searchCriteria), ProfileEsEntity::class.java)
     }
 
     @Transactional
