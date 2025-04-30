@@ -8,4 +8,5 @@ data class Profile(
     val birth: LocalDate,
     val gender: Gender,
     val purposes: Set<Purpose>,
+    val countryId: String,
 )

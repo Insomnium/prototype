@@ -30,7 +30,7 @@ class ProfileController(
     @GetMapping
     fun list(@Valid @ModelAttribute request: ProfileRequest): ProfileResponse = ProfileResponse(
         profiles = profileService.findAll(
-            ProfileSearchContext(gender = requireNotNull(request.gender), purposes = requireNotNull(request.purposes))
+            ProfileSearchContext(gender = requireNotNull(request.gender), purposes = requireNotNull(request.purposes), countryId = request.countryId)
         ).map(profileResponseConverter::convert)
     )
 
@@ -42,7 +42,8 @@ class ProfileController(
                 title = request.title,
                 birth = request.birth,
                 gender = request.gender,
-                purposes = request.purposes
+                countryId = request.countryId,
+                purposes = request.purposes,
             )
         ).toString()
     )

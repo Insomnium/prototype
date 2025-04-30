@@ -75,7 +75,8 @@ class ProfileControllerTest {
             title = "Z",
             birth = LocalDate.of(1990, 10, 3),
             gender = Gender.MALE,
-            purposes = setOf(Purpose.SEXTING, Purpose.RELATIONSHIPS, Purpose.DATING)
+            countryId = "RU",
+            purposes = setOf(Purpose.SEXTING, Purpose.RELATIONSHIPS, Purpose.DATING),
         )
 
         mockMvc.post("/v1/profiles") {
@@ -108,6 +109,7 @@ class ProfileControllerTest {
             accept = MediaType.APPLICATION_JSON
             queryParam("gender", "FEMALE")
             queryParam("purposes", "DATING,SEXTING")
+            queryParam("countryId", "RU")
         }.andExpect {
             status { isOk() }
             content {

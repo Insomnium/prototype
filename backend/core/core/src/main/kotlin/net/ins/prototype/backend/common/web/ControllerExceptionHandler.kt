@@ -2,6 +2,8 @@ package net.ins.prototype.backend.common.web
 
 import net.ins.prototype.backend.common.web.model.FieldValidationError
 import net.ins.prototype.backend.common.web.model.RequestValidationResponse
+import net.ins.prototype.backend.common.exception.ContextValidationException
+import net.ins.prototype.backend.common.web.model.InvalidRequestResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -15,4 +17,9 @@ class ControllerExceptionHandler {
     fun handleMethodArgumentNotValid(e: MethodArgumentNotValidException): ResponseEntity<RequestValidationResponse> = ResponseEntity
         .status(HttpStatus.BAD_REQUEST)
         .body(RequestValidationResponse(e.bindingResult.fieldErrors.map { FieldValidationError(it.field, it.defaultMessage ?: "Invalid value") }))
+
+    @ExceptionHandler(ContextValidationException::class)
+    fun handleContextValidationException(e: ContextValidationException): ResponseEntity<InvalidRequestResponse> = ResponseEntity
+        .status(HttpStatus.BAD_REQUEST)
+        .body(InvalidRequestResponse(e.code, e.message ?: "Unknown error occurred"))
 }

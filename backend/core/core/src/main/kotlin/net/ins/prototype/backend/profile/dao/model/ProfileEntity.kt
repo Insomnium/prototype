@@ -26,16 +26,19 @@ class ProfileEntity(
     var genderCode: Char,
     @Transient
     var gender: Gender,
+    @Column(name = "country_id")
+    val countryId: String,
     @Column(name = "purpose_mask")
     var purposeMask: Int,
 ) {
 
-    constructor(title: String, birth: LocalDate, gender: Gender, purposeMask: Int) : this(
+    constructor(title: String, birth: LocalDate, gender: Gender, purposeMask: Int, countryId: String) : this(
         title = title,
         birth = birth,
         gender = gender,
         genderCode = gender.code,
         purposeMask = purposeMask,
+        countryId = countryId,
     )
 
 

@@ -28,11 +28,19 @@ interface ProfileRepository : JpaRepository<ProfileEntity, Long>, JpaSpecificati
                 cb.or(*masks.toTypedArray())
             }
 
+        private fun locationIs(countryCode: String): Specification<ProfileEntity> =
+            Specification<ProfileEntity> { root, _, cb ->
+                cb.equal(root.get<Char>("countryId"), countryCode)
+            }
+
 
         fun search(search: ProfileSearchContext): Specification<ProfileEntity> =
             genderIs(search.gender)
                 .let { spec ->
                     spec.takeIf { search.purposes.isNotEmpty() }?.and(purposesIn(search.purposes)) ?: spec
+                }
+                .let { spec ->
+                    search.countryId?.let { location -> spec.and(locationIs(location)) } ?: spec
                 }
     }
 }

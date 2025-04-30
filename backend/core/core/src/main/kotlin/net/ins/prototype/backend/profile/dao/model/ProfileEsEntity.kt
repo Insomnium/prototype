@@ -16,6 +16,8 @@ data class ProfileEsEntity(
     val gender: String,
     @Field(type = FieldType.Date)
     val birth: LocalDate,
+    @Field(type = FieldType.Text)
+    val countryId: String,
     @Field(type = FieldType.Auto)
     val purpose: PurposeEsSubEntity,
 )
