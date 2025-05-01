@@ -1,8 +1,6 @@
 package net.ins.prototype.backend.profile.service.impl
 
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders
-import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery
 import jakarta.transaction.Transactional
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEsEntity
@@ -18,10 +16,7 @@ import net.ins.prototype.backend.profile.service.validator.impl.NewProfileContex
 import org.springframework.data.elasticsearch.client.elc.NativeQuery
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHits
-import org.springframework.data.elasticsearch.core.query.Criteria
-import org.springframework.data.elasticsearch.core.query.CriteriaQuery
 import org.springframework.stereotype.Service
-import java.util.Arrays
 
 @Service
 class ProfileServiceImpl(
@@ -35,38 +30,27 @@ class ProfileServiceImpl(
         .takeUnless { it.isEmpty }
         ?.map { it.content.dbId }
         ?.let { profileRepository.findAllById(it) }
-//        ?: profileRepository.findAll(ProfileRepository.search(search)) // FIXME: does it make sense? ES should be trustworthy
-        ?: emptyList()
+        ?: profileRepository.findAll(ProfileRepository.search(search))
 
     private fun esEntitySearchHits(search: ProfileSearchContext): SearchHits<ProfileEsEntity> {
-        val genderCriteria = Criteria("gender").`is`(search.gender.code)
-        val locationCriteria = search.countryId?.let { Criteria("countryId").`is`(it) }
-        val purposeCriteria = search.purposes.takeUnless { it.isEmpty() }?.map {
-            when (it) {
-                Purpose.DATING -> Criteria("purpose.dating").`is`(true)
-                Purpose.SEXTING -> Criteria("purpose.sexting").`is`(true)
-                Purpose.RELATIONSHIPS -> Criteria("purpose.relationships").`is`(true)
-            }
-//        }.fold(Criteria(), Criteria::or)
-        }?.reduce { acc, criteria -> acc.or(criteria) }
-
-//        val searchCriteria: Criteria = purposeCriteria
-        val searchCriteria: Criteria = Criteria().apply {
-            and(genderCriteria)
-            locationCriteria?.let { and(it) }
-            purposeCriteria?.let { and(it) }
-        }
 
         val criteria = QueryBuilders.bool().apply {
-            must(QueryBuilders.term { term -> term.field("gender").value(search.gender.code.toString()) })
-            search.countryId?.let { countryId -> must(QueryBuilders.term { term -> term.field("countryId").value(countryId) }) }
-            search.purposes.map { purpose ->
-                when (purpose) {
-                    Purpose.DATING -> should(QueryBuilders.term { term -> term.field("purpose.dating").value(true) })
-                    Purpose.SEXTING -> should(QueryBuilders.term { term -> term.field("purpose.sexting").value(true) })
-                    Purpose.RELATIONSHIPS -> should(QueryBuilders.term { term -> term.field("purpose.relationships").value(true) })
-                }
-            }
+            must(QueryBuilders.match { m -> m.field("gender").query(search.gender.code.toString()) })
+            search.countryId?.let { countryId -> must(QueryBuilders.match { m -> m.field("countryId").query(countryId) }) }
+
+            must(
+                listOf(
+                    QueryBuilders.bool().apply {
+                        search.purposes.map { purpose ->
+                            when (purpose) {
+                                Purpose.DATING -> should { it.match { m -> m.field("purpose.dating").query(true) } }
+                                Purpose.SEXTING -> should { it.match { m -> m.field("purpose.sexting").query(true) } }
+                                Purpose.RELATIONSHIPS -> should { it.match { m -> m.field("purpose.relationships").query(true) } }
+                            }
+                        }
+                    }.build()._toQuery()
+                )
+            )
         }
 
         val query = NativeQuery.builder()
@@ -74,7 +58,6 @@ class ProfileServiceImpl(
             .build()
 
         return esOperations.search(query, ProfileEsEntity::class.java)
-//        return esOperations.search(CriteriaQuery(searchCriteria), ProfileEsEntity::class.java)
     }
 
     @Transactional
@@ -107,8 +90,3 @@ class ProfileServiceImpl(
         )
     }
 }
-
-// 9: V, dating,relationships
-// 10: X, dating,sexting
-// 11: Z, sexting
-// 12: I, relationships
