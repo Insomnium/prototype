@@ -1,0 +1,6 @@
+[
+  {
+    "name": "dev cluster",
+    "uri": "http://localhost:9200"
+  }
+]

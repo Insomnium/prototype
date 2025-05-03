@@ -5,7 +5,7 @@ services:
     ports:
       - 5432:5432
     volumes:
-      - /data/prototype/core:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${CORE_PG_USER}
       POSTGRES_USER: ${CORE_PG_PASSWORD}
@@ -22,12 +22,16 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=false
+      - http.cors.allow-origin=http://localhost:8085
+      - http.cors.enabled=true
+      - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+      - http.cors.allow-credentials=true
     ulimits:
       memlock:
         soft: -1
         hard: -1
     volumes:
-      - esdata:/usr/share/elasticsearch/data
+      - elastic_data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -46,8 +50,20 @@ services:
     depends_on:
       - elasticsearch
 
+  elasticvue:
+    image: cars10/elasticvue
+    container_name: elasticvue
+    volumes:
+      - "/config.json:$pwd/etc/docker/elasticvue_conf.json"
+    ports:
+      - "8085:8080"
+    networks:
+      - elastic
+
 volumes:
-  esdata:
+  elastic_data:
+    driver: local
+  postgres_data:
     driver: local
 
 networks:

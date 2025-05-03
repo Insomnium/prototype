@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <dataset>
-    <profiles id_profile="1" title="V" birth="1996-11-17" gender="F" purpose_mask="9" /> <!-- DATING, RELATIONSHIPS -->
-    <profiles id_profile="2" title="X" birth="1996-12-17" gender="F" purpose_mask="5" /> <!-- DATING, SEXTING -->
-    <profiles id_profile="3" title="I" birth="1990-03-10" gender="M" purpose_mask="1" /> <!-- DATING -->
+    <profiles id_profile="1" title="A" birth="1996-11-17" gender="F" country_id="RU" purpose_mask="9" /> <!-- DATING, RELATIONSHIPS -->
+    <profiles id_profile="2" title="B" birth="1996-12-17" gender="F" country_id="RU" purpose_mask="5" /> <!-- DATING, SEXTING -->
+    <profiles id_profile="3" title="C" birth="1997-12-17" gender="F" country_id="RU" purpose_mask="12" /> <!-- SEXTING, RELATIONSHIPS -->
+
+    <profiles id_profile="4" title="D" birth="1998-12-17" gender="F" country_id="BY" purpose_mask="1" /> <!-- DATING -->
+
+    <profiles id_profile="5" title="E" birth="1990-03-10" gender="M" country_id="RU" purpose_mask="1" /> <!-- DATING -->
 </dataset>

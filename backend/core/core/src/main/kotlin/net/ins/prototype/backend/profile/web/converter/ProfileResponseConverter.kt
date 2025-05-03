@@ -15,5 +15,6 @@ class ProfileResponseConverter : Converter<ProfileEntity, Profile> {
         birth = source.birth,
         gender = source.gender,
         purposes = Purpose.unmask(source.purposeMask),
+        countryId = source.countryId,
     )
 }

@@ -1,0 +1,21 @@
+meta {
+  name: Create profile - F1
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/core/v1/profiles
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "V",
+    "birth": "1996-11-17",
+    "gender": "FEMALE",
+    "purposes": [ "DATING", "RELATIONSHIPS" ],
+    "countryId": "RU"
+  }
+}

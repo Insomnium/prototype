@@ -7,6 +7,9 @@
       http://www.liquibase.org/xml/ns/pro
       http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.1.xsd">
 
+    <changeSet id="0001_001_geo-init" author="pb">
+        <sqlFile path="geo.sql" relativeToChangelogFile="true" splitStatements="true" stripComments="true" />
+    </changeSet>
 
     <changeSet id="0001_001_profile-init" author="pb">
         <createTable tableName="profiles">
@@ -25,7 +28,13 @@
             <column name="purpose_mask" type="int4">
                 <constraints nullable="false" />
             </column>
+            <column name="country_id" type="varchar(2)" >
+                <constraints nullable="false" />
+            </column>
         </createTable>
         <addPrimaryKey tableName="profiles" columnNames="id_profile" constraintName="pk_profiles" />
+        <addUniqueConstraint tableName="profiles" columnNames="title" />
+        <addForeignKeyConstraint baseTableName="profiles" baseColumnNames="country_id" constraintName="profiles_to_countries_fk" referencedTableName="countries"
+                                 referencedColumnNames="id" />
     </changeSet>
 </databaseChangeLog>
