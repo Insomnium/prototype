@@ -1,0 +1,21 @@
+meta {
+  name: Create profile - F4
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/core/v1/profiles
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "S",
+    "birth": "1998-12-17",
+    "gender": "FEMALE",
+    "purposes": [ "SEXTING" ],
+    "countryId": "BY"
+  }
+}

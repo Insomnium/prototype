@@ -1,0 +1,59 @@
+meta {
+  name: ES search
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:9200/profiles/_search?search_type=query_then_fetch&typed_keys=true
+  body: json
+  auth: inherit
+}
+
+params:query {
+  search_type: query_then_fetch
+  typed_keys: true
+}
+
+body:json {
+  {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match": {
+              "gender": {
+                "query": "F"
+              }
+            }
+          },
+          {
+            "bool": {
+              "should": [
+                {
+                  "match": {
+                    "purpose.relationships": {
+                      "query": true
+                    }
+                  }
+                },
+                {
+                  "match": {
+                    "purpose.sexting": {
+                      "query": true
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "size": 10,
+    "sort": [],
+    "track_scores": false,
+    "version": true
+  }
+}

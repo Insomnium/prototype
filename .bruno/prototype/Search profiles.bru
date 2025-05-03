@@ -1,0 +1,27 @@
+meta {
+  name: Search profiles
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:8080/core/v1/profiles?gender=FEMALE&purposes=SEXTING,DATING&countryId=RU
+  body: none
+  auth: inherit
+}
+
+params:query {
+  gender: FEMALE
+  purposes: SEXTING,DATING
+  countryId: RU
+}
+
+body:json {
+  {
+    "title": "I",
+    "birth": "1996-12-17",
+    "gender": "MALE",
+    "purposes": [ "DATING" ],
+    "countryId": "RU"
+  }
+}

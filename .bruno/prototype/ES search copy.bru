@@ -1,0 +1,39 @@
+meta {
+  name: ES search copy
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:9200/profiles/_search?search_type=query_then_fetch&typed_keys=true
+  body: json
+  auth: inherit
+}
+
+params:query {
+  search_type: query_then_fetch
+  typed_keys: true
+}
+
+body:json {
+  {
+    "from": 0,
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "match": {
+              "gender": {
+                "query": "F"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "size": 10,
+    "sort": [],
+    "track_scores": false,
+    "version": true
+  }
+}
