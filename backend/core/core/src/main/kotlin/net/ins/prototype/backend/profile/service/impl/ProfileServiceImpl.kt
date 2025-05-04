@@ -2,13 +2,13 @@ package net.ins.prototype.backend.profile.service.impl
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders
 import jakarta.transaction.Transactional
+import net.ins.prototype.backend.profile.converter.ProfileContextToProfileEntityConverter
+import net.ins.prototype.backend.profile.converter.ProfileEntityToProfileEsEntityConverter
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEsEntity
-import net.ins.prototype.backend.profile.dao.model.PurposeEsSubEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileEsRepository
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
 import net.ins.prototype.backend.profile.model.Purpose
-import net.ins.prototype.backend.profile.model.calculateMask
 import net.ins.prototype.backend.profile.service.NewProfileContext
 import net.ins.prototype.backend.profile.service.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileService
@@ -24,6 +24,8 @@ class ProfileServiceImpl(
     private val profileEsRepository: ProfileEsRepository,
     private val esOperations: ElasticsearchOperations,
     private val newProfileContextValidator: NewProfileContextValidator,
+    private val profileContextToEntityConverter: ProfileContextToProfileEntityConverter,
+    private val profileEntityToProfileEsEntityConverter: ProfileEntityToProfileEsEntityConverter,
 ) : ProfileService {
 
     override fun findAll(search: ProfileSearchContext): List<ProfileEntity> = esEntitySearchHits(search)
@@ -64,28 +66,8 @@ class ProfileServiceImpl(
     override fun create(newProfile: NewProfileContext): Long {
         newProfileContextValidator.validate(newProfile)
         return requireNotNull(
-            profileRepository.save(
-                ProfileEntity(
-                    title = newProfile.title,
-                    birth = newProfile.birth,
-                    gender = newProfile.gender,
-                    countryId = newProfile.countryId,
-                    purposeMask = newProfile.purposes.calculateMask()
-                ) // FIXME: replace with converter?
-            ).also {
-                profileEsRepository.save(
-                    ProfileEsEntity(
-                        dbId = requireNotNull(it.id),
-                        gender = newProfile.gender.code.toString(),
-                        birth = newProfile.birth,
-                        countryId = newProfile.countryId,
-                        purpose = PurposeEsSubEntity(
-                            dating = Purpose.DATING in newProfile.purposes,
-                            sexting = Purpose.SEXTING in newProfile.purposes,
-                            relationships = Purpose.RELATIONSHIPS in newProfile.purposes,
-                        ),
-                    ) // TODO: replace with converter
-                )
+            profileRepository.save(profileContextToEntityConverter.convert(newProfile)).also {
+                profileEsRepository.save(profileEntityToProfileEsEntityConverter.convert(it)) // TODO: propagate via Kafka
             }.id
         )
     }
