@@ -10,3 +10,9 @@ spring:
 server:
   servlet:
     context-path: /core
+
+app:
+  integrations:
+    topics:
+      profiles:
+        name: profile

@@ -2,20 +2,25 @@ package net.ins.prototype.backend.profile.service.impl
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders
 import jakarta.transaction.Transactional
+import net.ins.prototype.backend.conf.AppProperties
 import net.ins.prototype.backend.profile.converter.ProfileContextToProfileEntityConverter
 import net.ins.prototype.backend.profile.converter.ProfileEntityToProfileEsEntityConverter
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEsEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileEsRepository
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
+import net.ins.prototype.backend.profile.event.ProfileCreatedEvent
+import net.ins.prototype.backend.profile.event.ProfileEvent
 import net.ins.prototype.backend.profile.model.Purpose
 import net.ins.prototype.backend.profile.service.NewProfileContext
 import net.ins.prototype.backend.profile.service.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileService
 import net.ins.prototype.backend.profile.service.validator.impl.NewProfileContextValidator
+import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.data.elasticsearch.client.elc.NativeQuery
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHits
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
 @Service
@@ -26,6 +31,8 @@ class ProfileServiceImpl(
     private val newProfileContextValidator: NewProfileContextValidator,
     private val profileContextToEntityConverter: ProfileContextToProfileEntityConverter,
     private val profileEntityToProfileEsEntityConverter: ProfileEntityToProfileEsEntityConverter,
+    private val kafkaTemplate: KafkaTemplate<Long, ProfileEvent>,
+    private val appProperties: AppProperties,
 ) : ProfileService {
 
     override fun findAll(search: ProfileSearchContext): List<ProfileEntity> = esEntitySearchHits(search)
@@ -67,7 +74,20 @@ class ProfileServiceImpl(
         newProfileContextValidator.validate(newProfile)
         return requireNotNull(
             profileRepository.save(profileContextToEntityConverter.convert(newProfile)).also {
-                profileEsRepository.save(profileEntityToProfileEsEntityConverter.convert(it)) // TODO: propagate via Kafka
+
+                val debug = ProducerRecord<Long, ProfileEvent>(
+                    appProperties.integrations.topics.profiles.name,
+                    it.id,
+                    ProfileCreatedEvent(
+                        dbId = requireNotNull(it.id),
+                        gender = it.gender.code.toString(),
+                        birth = it.birth,
+                        countryId = it.countryId,
+                        purposes = newProfile.purposes,
+                    )
+                )
+                kafkaTemplate.send(debug)
+//                profileEsRepository.save(profileEntityToProfileEsEntityConverter.convert(it)) // TODO: propagate via Kafka
             }.id
         )
     }
