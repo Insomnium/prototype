@@ -54,7 +54,7 @@ services:
     image: cars10/elasticvue
     container_name: elasticvue
     volumes:
-      - "/config.json:$pwd/etc/docker/elasticvue_conf.json"
+      - "$pwd/etc/docker/elasticvue_conf.json:/usr/share/nginx/html/api/default_clusters.json"
     ports:
       - "8085:8080"
     networks:
