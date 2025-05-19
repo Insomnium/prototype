@@ -1,0 +1,22 @@
+meta {
+  name: Delete schema
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8081/subjects/net.ins.prototype.backend.profile.event.ProfileCreatedEvent/versions
+  body: json
+  auth: inherit
+}
+
+headers {
+  ~Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+}
+
+body:json {
+  {
+    "schema": "{   \"type\": \"record\",   \"name\": \"ProfileCreatedEvent\",   \"namespace\": \"net.ins.prototype.backend.profile.event\",   \"fields\": [     {       \"name\": \"birth\",       \"type\": {         \"type\": \"record\",         \"name\": \"LocalDate\",         \"namespace\": \"java.time\",         \"fields\": []       }     },     {       \"name\": \"countryId\",       \"type\": \"string\"     },     {       \"name\": \"dbId\",       \"type\": \"long\"     },     {       \"name\": \"gender\",       \"type\": \"string\"     },     {       \"name\": \"purposes\",       \"type\": {         \"type\": \"array\",         \"items\": {           \"type\": \"enum\",           \"name\": \"Purpose\",           \"namespace\": \"net.ins.prototype.backend.profile.model\",           \"symbols\": [             \"DATING\",             \"SEXTING\",             \"RELATIONSHIPS\"           ]         },         \"java-class\": \"java.util.Set\"       }     }   ] } ",
+    "schemaType": "AVRO"
+  }
+}
