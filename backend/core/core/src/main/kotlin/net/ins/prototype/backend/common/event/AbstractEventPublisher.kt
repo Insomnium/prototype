@@ -1,5 +1,6 @@
 package net.ins.prototype.backend.common.event
 
+import net.ins.prototype.backend.common.logger
 import net.ins.prototype.backend.conf.AppProperties
 import net.ins.prototype.backend.conf.Topics
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -21,11 +22,14 @@ abstract class AbstractEventPublisher<S : Any, K : Any, V : Any> {
     protected abstract fun topic(topics: Topics): String
 
     fun publish(source: S) {
+        val key = key(source)
+        val payload = payload(source)
+        logger.trace("Publishing event [key={}; payload={}]", key, payload)
         kafkaTemplate.send(
             ProducerRecord(
                 topic(appProperties.integrations.topics),
-                key(source),
-                payload(source)
+                key,
+                payload,
             )
         )
     }

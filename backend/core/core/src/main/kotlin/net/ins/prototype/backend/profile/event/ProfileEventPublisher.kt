@@ -11,7 +11,7 @@ class ProfileEventPublisher : AbstractEventPublisher<ProfileEntity, Long, Profil
 
     override fun payload(source: ProfileEntity): ProfileEvent = ProfileCreatedEvent(
         dbId = requireNotNull(source.id),
-        gender = source.gender.code.toString(),
+        gender = source.gender,
         birth = source.birth,
         countryId = source.countryId,
         purposes = Purpose.unmask(source.purposeMask),

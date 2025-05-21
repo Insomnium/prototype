@@ -28,9 +28,13 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>1.9.25</kotlin.version>
+<!--        <kotlin.version>1.9.25</kotlin.version>-->
+        <kotlin.version>2.1.0</kotlin.version>
         <sentry.version>8.3.0</sentry.version>
         <kafka.confluent.avro.version>7.9.0</kafka.confluent.avro.version>
+<!--        <avro4k.version>2.2.0</avro4k.version>-->
+        <avro4k.version>1.10.1</avro4k.version>
+        <classgraph.version>4.8.179</classgraph.version>
 
         <kotest.jvm.version>4.0.7</kotest.jvm.version>
         <kotest.version>5.9.1</kotest.version>
@@ -73,12 +77,55 @@
             <artifactId>kafka-avro-serializer</artifactId>
             <version>${kafka.confluent.avro.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-protobuf-serializer</artifactId>
+            <version>7.9.1</version>
+        </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>io.confluent</groupId>-->
-<!--            <artifactId>kafka-schema-serializer</artifactId>-->
-<!--            <version>${kafka.confluent.avro.version}</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-protobuf</artifactId>
+            <version>1.8.1</version>
+<!--            <type>pom</type>-->
+<!--            <scope>runtime</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.avro-kotlin.avro4k</groupId>
+            <artifactId>avro4k-core</artifactId>
+            <version>${avro4k.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlinx</groupId>
+                    <artifactId>kotlinx-serialization-core-jvm</artifactId>
+                </exclusion>
+            </exclusions>
+<!--            <scope>runtime</scope>-->
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-core-jvm</artifactId>
+            <version>1.8.1</version>
+<!--            <scope>runtime</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>${classgraph.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-serializer</artifactId>
+            <version>${kafka.confluent.avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.thake.avro4k</groupId>
+            <artifactId>avro4k-kafka-serializer</artifactId>
+            <version>0.14.0</version>
+        </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
@@ -224,11 +271,13 @@
                         <plugin>jpa</plugin>
                         <plugin>all-open</plugin>
                         <plugin>kotlinx-serialization</plugin>
+                        <plugin>no-arg</plugin>
                     </compilerPlugins>
                     <pluginOptions>
                         <option>all-open:annotation=jakarta.persistence.Entity</option>
                         <option>all-open:annotation=jakarta.persistence.MappedSuperclass</option>
                         <option>all-open:annotation=jakarta.persistence.Embeddable</option>
+                        <option>no-arg:annotation=net.ins.prototype.backend.common.event.NoArgConstructor</option>
                     </pluginOptions>
                     <jvmTarget>21</jvmTarget>
                 </configuration>

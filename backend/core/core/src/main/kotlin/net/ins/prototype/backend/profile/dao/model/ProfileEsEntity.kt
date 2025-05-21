@@ -1,5 +1,6 @@
 package net.ins.prototype.backend.profile.dao.model
 
+import net.ins.prototype.backend.profile.model.Gender
 import org.springframework.data.annotation.Id
 import org.springframework.data.elasticsearch.annotations.Document
 import org.springframework.data.elasticsearch.annotations.Field
@@ -13,7 +14,7 @@ data class ProfileEsEntity(
     @Field(type = FieldType.Long)
     val dbId: Long,
     @Field(type = FieldType.Text)
-    val gender: String,
+    val gender: Gender,
     @Field(type = FieldType.Date)
     val birth: LocalDate,
     @Field(type = FieldType.Text)
