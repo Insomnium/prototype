@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 echo "Cleaning up profiles from postgres"
-docker exec postgres-prototype psql -U postgres -c "delete from public.profiles"
+docker exec postgres-prototype psql -U postgres -c "delete from profiles"
 
 echo "Removing ES profile index"
 curl -XDELETE http://localhost:9200/profile
