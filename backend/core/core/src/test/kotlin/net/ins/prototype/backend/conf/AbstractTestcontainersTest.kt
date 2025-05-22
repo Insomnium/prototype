@@ -1,7 +1,14 @@
 package net.ins.prototype.backend.conf
 
 import net.ins.prototype.backend.profile.event.ProfileCreatedEvent
+import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.ConsumerRecord
+import org.apache.kafka.clients.consumer.KafkaConsumer
+import org.apache.kafka.common.serialization.Deserializer
+import org.apache.kafka.common.serialization.LongDeserializer
+import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeAll
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -13,9 +20,14 @@ import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.redpanda.RedpandaContainer
 import org.testcontainers.utility.DockerImageName
 import org.testcontainers.utility.MountableFile
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 
 @Testcontainers
 open class AbstractTestcontainersTest {
+
+    @Autowired
+    protected lateinit var appProperties: AppProperties
 
     companion object {
 
@@ -24,6 +36,8 @@ open class AbstractTestcontainersTest {
 
         const val SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE = "/tmp/profile.json"
         const val SCHEMA_REGISTRY_PORT = 8081
+
+        private val deserializersByTopic: MutableMap<String, KafkaConsumer<*, *>> = ConcurrentHashMap()
 
         @JvmStatic
         @Container
@@ -49,7 +63,10 @@ open class AbstractTestcontainersTest {
         @Container
         private val redpandaContainer: RedpandaContainer =
             RedpandaContainer(DockerImageName.parse("docker.redpanda.com/redpandadata/redpanda:v23.1.2"))
-                .withCopyFileToContainer(MountableFile.forClasspathResource("kafka/schema/profile.json"), SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE)
+                .withCopyFileToContainer(
+                    MountableFile.forClasspathResource("kafka/schema/profile.json"),
+                    SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE
+                )
 
         /**
          * Postgres and ES properties are populated via [@ServiceConnection] as these datasources are mapped to standard spring boot
@@ -89,6 +106,45 @@ open class AbstractTestcontainersTest {
                 "curl -XDELETE http://localhost:${elasticSearchContainer.exposedPorts[0]}/$indexName"
             )
             assert(result.exitCode == 0) { "Failed to cleanup index $indexName due to ${result.stdout}" }
+        }
+    }
+
+    protected fun <K : Any, V : Any> assertEventReceived(
+        topic: String,
+        awaitDuration: Duration = Duration.ofSeconds(5),
+        expectedRecordsCount: Int = 1,
+        keyDeserializer: Deserializer<K> = LongDeserializer() as Deserializer<K>,
+        valueDeserializer: Deserializer<V>,
+        assertion: (List<ConsumerRecord<K, V>>) -> Unit,
+    ) {
+        val consumer = deserializersByTopic.computeIfAbsent(topic) {
+            KafkaConsumer<K, V>(
+                mapOf(
+                    ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to appProperties.kafka.bootstrapServers,
+                    ConsumerConfig.GROUP_ID_CONFIG to "test-group",
+                    ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
+                ),
+                keyDeserializer,
+                valueDeserializer,
+            ) as KafkaConsumer<K, V>
+        }.apply {
+            unsubscribe()
+            subscribe(listOf(topic))
+        }
+
+        try {
+            var records: MutableList<ConsumerRecord<K, V>> = mutableListOf()
+            await.atMost(awaitDuration).until {
+                val recs = consumer.poll(Duration.ofSeconds(3))
+                records += recs.records(topic) as Iterable<ConsumerRecord<K, V>>
+                records.size >= expectedRecordsCount
+            }
+
+            assertion(records)
+        } catch (e: Exception) {
+            throw e
+        } finally {
+            consumer.unsubscribe()
         }
     }
 }

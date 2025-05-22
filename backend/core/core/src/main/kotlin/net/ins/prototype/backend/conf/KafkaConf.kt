@@ -7,10 +7,10 @@ import net.ins.prototype.backend.common.logger
 import net.ins.prototype.backend.profile.event.Avro4kKotlinProfileDeserializer
 import net.ins.prototype.backend.profile.event.ProfileEvent
 import net.ins.prototype.backend.profile.event.UnserializableProfileEvent
+import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.LongSerializer
 import org.apache.kafka.common.serialization.Serializer
 import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
@@ -25,7 +25,6 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 @Configuration
 class KafkaConf(
     val appProperties: AppProperties,
-    val appContext: ApplicationContext,
 ) {
 
     companion object {
@@ -33,6 +32,7 @@ class KafkaConf(
 
         const val PROFILE_EVENT_CONSUMER_FACTORY = "profileEventConsumerFactory"
         const val PROFILE_EVENT_LISTENER_CONTAINER_FACTORY = "profileEventListenerContainerFactory"
+        const val PROFILE_EVENT_DESERIALIZER = "profileEventDeserializer"
         const val PROFILE_ERROR_HANDLING_DESERIALIZER = "profileErrorHandlingDeserializer"
     }
 
@@ -57,15 +57,19 @@ class KafkaConf(
     @Bean
     fun schemaRegistryClient(): SchemaRegistryClient = CachedSchemaRegistryClient(
         appProperties.kafka.consumer.properties["schema.registry.url"],
-        100
+        100,
     )
+
+    @Bean(PROFILE_EVENT_DESERIALIZER)
+    fun profileEventDeserializer(schemaRegistryClient: SchemaRegistryClient): Deserializer<ProfileEvent> =
+        Avro4kKotlinProfileDeserializer<ProfileEvent>(schemaRegistryClient)
 
     @Bean(PROFILE_ERROR_HANDLING_DESERIALIZER)
     @Suppress("UNCHECKED_CAST")
     fun errorHandlingDeserializer(
-        schemaRegistryClient: SchemaRegistryClient
+        @Qualifier(PROFILE_EVENT_DESERIALIZER) deserializer: Deserializer<ProfileEvent>,
     ): ErrorHandlingDeserializer<ProfileEvent> = ErrorHandlingDeserializer(
-        Avro4kKotlinProfileDeserializer<ProfileEvent>(schemaRegistryClient)
+        deserializer,
     ).apply {
         setFailedDeserializationFunction {
             logger.error("Failed to deserialize message from ${it.topic}", it.exception)

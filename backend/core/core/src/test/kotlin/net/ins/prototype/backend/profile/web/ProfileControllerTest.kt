@@ -5,6 +5,7 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
 import com.github.springtestdbunit.annotation.DatabaseTearDown
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldBeNull
@@ -13,10 +14,13 @@ import net.ins.prototype.backend.conf.AbstractTestcontainersTest
 import net.ins.prototype.backend.meta.TestProfile
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
+import net.ins.prototype.backend.profile.event.ProfileCreatedEvent
+import net.ins.prototype.backend.profile.event.ProfileEvent
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
 import net.ins.prototype.backend.profile.model.calculateMask
 import net.ins.prototype.backend.profile.web.model.NewProfileRequest
+import org.apache.kafka.common.serialization.Deserializer
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -38,6 +42,7 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.time.Duration
 import java.time.LocalDate
 
 @Import(AbstractTestcontainersTest::class)
@@ -64,6 +69,9 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
     @MockitoSpyBean
     @Autowired
     private lateinit var esOperations: ElasticsearchOperations
+
+    @Autowired
+    private lateinit var profileEventDeserializer: Deserializer<ProfileEvent>
 
     @BeforeEach
     fun beforeEach() {
@@ -108,6 +116,21 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
                 gender shouldBeEqual newProfileRequest.gender
                 purposeMask shouldBeEqual newProfileRequest.purposes.calculateMask()
                 lastIndexedAt.shouldBeNull()
+            }
+        }
+
+        assertEventReceived<Long, ProfileEvent>(
+            topic = appProperties.integrations.topics.profiles.name,
+            valueDeserializer = profileEventDeserializer,
+        ) {
+            assertSoftly {
+                it shouldHaveSize 1
+                val profileCreatedEvent = it.first().value() as ProfileCreatedEvent
+                profileCreatedEvent.gender shouldBeEqual newProfileRequest.gender
+                profileCreatedEvent.birth shouldBeEqual newProfileRequest.birth
+                profileCreatedEvent.countryId shouldBeEqual newProfileRequest.countryId
+                profileCreatedEvent.purposes shouldContainExactlyInAnyOrder newProfileRequest.purposes
+                profileCreatedEvent.dbId shouldBeEqual profiles.first().id!!
             }
         }
     }
