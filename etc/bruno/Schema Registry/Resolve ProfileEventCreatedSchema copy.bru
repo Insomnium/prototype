@@ -1,0 +1,26 @@
+meta {
+  name: Resolve ProfileEventCreatedSchema copy
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{schema-registry}}/subjects/net.ins.prototype.backend.profile.event.ProfileCreatedEvent?normalize=false&deleted=false
+  body: json
+  auth: inherit
+}
+
+params:query {
+  normalize: false
+  deleted: false
+}
+
+headers {
+  Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+}
+
+body:json {
+  {
+    "schema": "{\"type\":\"record\",\"name\":\"ProfileCreatedEvent\",\"namespace\":\"net.ins.prototype.backend.profile.event\",\"fields\":[{\"name\":\"dbId\",\"type\":\"long\"},{\"name\":\"gender\",\"type\":\"string\"},{\"name\":\"countryId\",\"type\":\"string\"},{\"name\":\"purposes\",\"type\":{\"type\":\"array\",\"items\":\"string\"}}]}"
+  }
+}
