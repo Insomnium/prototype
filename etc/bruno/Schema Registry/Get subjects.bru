@@ -1,0 +1,15 @@
+meta {
+  name: Get subjects
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{schema-registry}}/subjects
+  body: none
+  auth: inherit
+}
+
+headers {
+  ~Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+}

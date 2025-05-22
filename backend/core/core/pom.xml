@@ -28,8 +28,11 @@
     </scm>
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>1.9.25</kotlin.version>
+        <kotlin.version>2.1.0</kotlin.version>
         <sentry.version>8.3.0</sentry.version>
+        <kafka.confluent.avro.version>7.9.0</kafka.confluent.avro.version>
+        <avro4k.version>1.10.1</avro4k.version>
+        <classgraph.version>4.8.179</classgraph.version>
 
         <kotest.jvm.version>4.0.7</kotest.jvm.version>
         <kotest.version>5.9.1</kotest.version>
@@ -62,6 +65,48 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-avro-serializer</artifactId>
+            <version>${kafka.confluent.avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.avro-kotlin.avro4k</groupId>
+            <artifactId>avro4k-core</artifactId>
+            <version>${avro4k.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlinx</groupId>
+                    <artifactId>kotlinx-serialization-core-jvm</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-core-jvm</artifactId>
+            <version>1.8.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.classgraph</groupId>
+            <artifactId>classgraph</artifactId>
+            <version>${classgraph.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-schema-serializer</artifactId>
+            <version>${kafka.confluent.avro.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.thake.avro4k</groupId>
+            <artifactId>avro4k-kafka-serializer</artifactId>
+            <version>0.14.0</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
@@ -147,6 +192,16 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>redpanda</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test</artifactId>
             <version>${kotlin.version}</version>
@@ -156,6 +211,11 @@
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
             <version>${mockito.kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility-kotlin</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -207,11 +267,14 @@
                         <plugin>spring</plugin>
                         <plugin>jpa</plugin>
                         <plugin>all-open</plugin>
+                        <plugin>kotlinx-serialization</plugin>
+                        <plugin>no-arg</plugin>
                     </compilerPlugins>
                     <pluginOptions>
                         <option>all-open:annotation=jakarta.persistence.Entity</option>
                         <option>all-open:annotation=jakarta.persistence.MappedSuperclass</option>
                         <option>all-open:annotation=jakarta.persistence.Embeddable</option>
+                        <option>no-arg:annotation=net.ins.prototype.backend.common.event.NoArgConstructor</option>
                     </pluginOptions>
                     <jvmTarget>21</jvmTarget>
                 </configuration>
@@ -224,6 +287,11 @@
                     <dependency>
                         <groupId>org.jetbrains.kotlin</groupId>
                         <artifactId>kotlin-maven-noarg</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-serialization</artifactId>
                         <version>${kotlin.version}</version>
                     </dependency>
                 </dependencies>
@@ -254,5 +322,16 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+            <name>Confluent Maven Repo</name>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
 </project>

@@ -5,17 +5,22 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
 import com.github.springtestdbunit.annotation.DatabaseTearDown
 import io.kotest.assertions.assertSoftly
+import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
-import net.ins.prototype.backend.conf.TestcontainersConfiguration
+import net.ins.prototype.backend.conf.AbstractTestcontainersTest
 import net.ins.prototype.backend.meta.TestProfile
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
+import net.ins.prototype.backend.profile.event.ProfileCreatedEvent
+import net.ins.prototype.backend.profile.event.ProfileEvent
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
 import net.ins.prototype.backend.profile.model.calculateMask
 import net.ins.prototype.backend.profile.web.model.NewProfileRequest
+import org.apache.kafka.common.serialization.Deserializer
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -37,9 +42,10 @@ import org.springframework.test.context.support.DependencyInjectionTestExecution
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
+import java.time.Duration
 import java.time.LocalDate
 
-@Import(TestcontainersConfiguration::class)
+@Import(AbstractTestcontainersTest::class)
 @TestExecutionListeners(
     DependencyInjectionTestExecutionListener::class,
     DbUnitTestExecutionListener::class,
@@ -48,7 +54,7 @@ import java.time.LocalDate
 @AutoConfigureMockMvc
 @TestProfile
 @DatabaseTearDown("classpath:/dbunit/0001/profiles-cleanup.xml")
-class ProfileControllerTest {    
+class ProfileControllerTest : AbstractTestcontainersTest() {
 
     @MockitoSpyBean
     @Autowired
@@ -64,21 +70,24 @@ class ProfileControllerTest {
     @Autowired
     private lateinit var esOperations: ElasticsearchOperations
 
+    @Autowired
+    private lateinit var profileEventDeserializer: Deserializer<ProfileEvent>
+
     @BeforeEach
     fun beforeEach() {
-        TestcontainersConfiguration.fillEsIndex()
+        fillEsIndex()
     }
 
     @AfterEach
     fun tearDown() {
         reset(repo, esOperations)
-        TestcontainersConfiguration.cleanupEsIndex()
+        cleanupEsIndex()
     }
 
     @Test
     @DisplayName("Should create new profile")
     fun shouldCreateProfile() {
-        TestcontainersConfiguration.cleanupEsIndex()
+        cleanupEsIndex()
 
         val newProfileRequest = NewProfileRequest(
             title = "Z",
@@ -106,6 +115,22 @@ class ProfileControllerTest {
                 birth shouldBeEqual newProfileRequest.birth
                 gender shouldBeEqual newProfileRequest.gender
                 purposeMask shouldBeEqual newProfileRequest.purposes.calculateMask()
+                lastIndexedAt.shouldBeNull()
+            }
+        }
+
+        assertEventReceived<Long, ProfileEvent>(
+            topic = appProperties.integrations.topics.profiles.name,
+            valueDeserializer = profileEventDeserializer,
+        ) {
+            assertSoftly {
+                it shouldHaveSize 1
+                val profileCreatedEvent = it.first().value() as ProfileCreatedEvent
+                profileCreatedEvent.gender shouldBeEqual newProfileRequest.gender
+                profileCreatedEvent.birth shouldBeEqual newProfileRequest.birth
+                profileCreatedEvent.countryId shouldBeEqual newProfileRequest.countryId
+                profileCreatedEvent.purposes shouldContainExactlyInAnyOrder newProfileRequest.purposes
+                profileCreatedEvent.dbId shouldBeEqual profiles.first().id!!
             }
         }
     }

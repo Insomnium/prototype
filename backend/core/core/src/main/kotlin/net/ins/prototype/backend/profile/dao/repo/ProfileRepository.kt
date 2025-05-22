@@ -18,7 +18,7 @@ interface ProfileRepository : JpaRepository<ProfileEntity, Long>, JpaSpecificati
             }
 
         private fun purposesIn(purposes: Set<Purpose>): Specification<ProfileEntity> =
-            Specification<ProfileEntity> { root, query, cb ->
+            Specification<ProfileEntity> { root, _, cb ->
                 val masks = purposes.map { purpose ->
                     cb.equal(
                         cb.function("BITAND", Int::class.java, root.get<Int>("purposeMask"), cb.literal(purpose.code)),

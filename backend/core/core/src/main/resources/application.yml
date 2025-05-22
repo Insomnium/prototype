@@ -10,3 +10,26 @@ spring:
 server:
   servlet:
     context-path: /core
+
+app:
+  integrations:
+    topics:
+      profiles:
+        name: profile
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      properties:
+        schema.registry.url: ${SCHEMA_REGISTRY_URL}
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
+        auto.register.schemas: false
+        use.latest.version: true
+        schema.reflection: true
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      group-id: cg-core.test
+      properties:
+        schema.registry.url: ${SCHEMA_REGISTRY_URL}
+        auto.reset.offset: earliest
+        enable.auto.commit: false

@@ -13,6 +13,6 @@ class ProfileContextToProfileEntityConverter : Converter<NewProfileContext, Prof
         birth = source.birth,
         gender = source.gender,
         countryId = source.countryId,
-        purposeMask = source.purposes.calculateMask()
+        purposeMask = source.purposes.calculateMask(),
     )
 }
