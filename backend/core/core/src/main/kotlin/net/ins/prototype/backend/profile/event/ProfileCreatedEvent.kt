@@ -16,4 +16,9 @@ data class ProfileCreatedEvent(
     val birth: LocalDate,
     val countryId: String,
     val purposes: Set<Purpose> = emptySet(),
-) : ProfileEvent
+) : ProfileEvent {
+
+    companion object {
+        const val SUBJECT = "net.ins.prototype.backend.profile.event.ProfileCreatedEvent"
+    }
+}

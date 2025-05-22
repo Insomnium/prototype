@@ -5,11 +5,11 @@ meta {
 }
 
 get {
-  url: http://localhost:8081/subjects/net.ins.prototype.backend.profile.event.ProfileCreatedEvent/versions/latest
+  url: {{schema-registry}}/subjects/net.ins.prototype.backend.profile.event.ProfileCreatedEvent/versions/latest
   body: none
   auth: inherit
 }
 
 headers {
-  Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+  ~Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
 }

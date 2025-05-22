@@ -1,10 +1,10 @@
 { "index": { "_index": "profiles" } }
-{ "dbId": 1, "gender": "F", "birth" : "1996-11-17", "countryId": "RU", "purpose": { "sexting": false, "dating": true, "relationships": true } }
+{ "dbId": 1, "gender": "FEMALE", "birth" : "1996-11-17", "countryId": "RU", "purpose": { "sexting": false, "dating": true, "relationships": true } }
 { "index": { "_index": "profiles" } }
-{ "dbId": 2, "gender": "F", "birth" : "1996-12-17", "countryId": "RU", "purpose": { "sexting": true, "dating": true, "relationships": false } }
+{ "dbId": 2, "gender": "FEMALE", "birth" : "1996-12-17", "countryId": "RU", "purpose": { "sexting": true, "dating": true, "relationships": false } }
 { "index": { "_index": "profiles" } }
-{ "dbId": 3, "gender": "F", "birth" : "1997-12-17", "countryId": "RU", "purpose": { "sexting": true, "dating": false, "relationships": true } }
+{ "dbId": 3, "gender": "FEMALE", "birth" : "1997-12-17", "countryId": "RU", "purpose": { "sexting": true, "dating": false, "relationships": true } }
 { "index": { "_index": "profiles" } }
-{ "dbId": 4, "gender": "F", "birth" : "1998-12-17", "countryId": "BY", "purpose": { "sexting": false, "dating": true, "relationships": false } }
+{ "dbId": 4, "gender": "FEMALE", "birth" : "1998-12-17", "countryId": "BY", "purpose": { "sexting": false, "dating": true, "relationships": false } }
 { "index": { "_index": "profiles" } }
-{ "dbId": 5, "gender": "M", "birth" : "1990-03-10", "countryId": "RU", "purpose": { "sexting": false, "dating": true, "relationships": false } }
+{ "dbId": 5, "gender": "MALE", "birth" : "1990-03-10", "countryId": "RU", "purpose": { "sexting": false, "dating": true, "relationships": false } }

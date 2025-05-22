@@ -10,6 +10,7 @@ import net.ins.prototype.backend.profile.event.UnserializableProfileEvent
 import org.apache.kafka.common.serialization.LongSerializer
 import org.apache.kafka.common.serialization.Serializer
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
@@ -24,6 +25,7 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
 @Configuration
 class KafkaConf(
     val appProperties: AppProperties,
+    val appContext: ApplicationContext,
 ) {
 
     companion object {

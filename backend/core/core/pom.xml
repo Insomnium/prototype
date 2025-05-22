@@ -78,20 +78,6 @@
             <version>${kafka.confluent.avro.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.confluent</groupId>
-            <artifactId>kafka-protobuf-serializer</artifactId>
-            <version>7.9.1</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.jetbrains.kotlinx</groupId>
-            <artifactId>kotlinx-serialization-protobuf</artifactId>
-            <version>1.8.1</version>
-<!--            <type>pom</type>-->
-<!--            <scope>runtime</scope>-->
-        </dependency>
-
-        <dependency>
             <groupId>com.github.avro-kotlin.avro4k</groupId>
             <artifactId>avro4k-core</artifactId>
             <version>${avro4k.version}</version>
@@ -101,13 +87,11 @@
                     <artifactId>kotlinx-serialization-core-jvm</artifactId>
                 </exclusion>
             </exclusions>
-<!--            <scope>runtime</scope>-->
         </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-core-jvm</artifactId>
             <version>1.8.1</version>
-<!--            <scope>runtime</scope>-->
         </dependency>
 
         <dependency>
@@ -207,6 +191,16 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>elasticsearch</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>redpanda</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

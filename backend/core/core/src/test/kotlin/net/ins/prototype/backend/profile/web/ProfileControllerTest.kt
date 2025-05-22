@@ -8,7 +8,7 @@ import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
-import net.ins.prototype.backend.conf.TestcontainersConfiguration
+import net.ins.prototype.backend.conf.AbstractTestcontainersTest
 import net.ins.prototype.backend.meta.TestProfile
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
@@ -39,7 +39,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 import java.time.LocalDate
 
-@Import(TestcontainersConfiguration::class)
+@Import(AbstractTestcontainersTest::class)
 @TestExecutionListeners(
     DependencyInjectionTestExecutionListener::class,
     DbUnitTestExecutionListener::class,
@@ -48,7 +48,7 @@ import java.time.LocalDate
 @AutoConfigureMockMvc
 @TestProfile
 @DatabaseTearDown("classpath:/dbunit/0001/profiles-cleanup.xml")
-class ProfileControllerTest {    
+class ProfileControllerTest : AbstractTestcontainersTest() {
 
     @MockitoSpyBean
     @Autowired
@@ -66,19 +66,19 @@ class ProfileControllerTest {
 
     @BeforeEach
     fun beforeEach() {
-        TestcontainersConfiguration.fillEsIndex()
+        fillEsIndex()
     }
 
     @AfterEach
     fun tearDown() {
         reset(repo, esOperations)
-        TestcontainersConfiguration.cleanupEsIndex()
+        cleanupEsIndex()
     }
 
     @Test
     @DisplayName("Should create new profile")
     fun shouldCreateProfile() {
-        TestcontainersConfiguration.cleanupEsIndex()
+        cleanupEsIndex()
 
         val newProfileRequest = NewProfileRequest(
             title = "Z",
