@@ -28,9 +28,13 @@
             <column name="purpose_mask" type="int4">
                 <constraints nullable="false" />
             </column>
+            <column name="created_at" type="timestamp" defaultValueComputed="current_timestamp" >
+                <constraints nullable="false" />
+            </column>
             <column name="country_id" type="varchar(2)" >
                 <constraints nullable="false" />
             </column>
+            <column name="last_indexed_at" type="timestamp" />
         </createTable>
         <addPrimaryKey tableName="profiles" columnNames="id_profile" constraintName="pk_profiles" />
         <addUniqueConstraint tableName="profiles" columnNames="title" />

@@ -5,8 +5,8 @@ meta {
 }
 
 delete {
-  url: http://localhost:8081/subjects/net.ins.prototype.backend.profile.event.ProfileCreatedEvent
-  body: json
+  url: {{schema-registry}}/subjects/profile-value
+  body: none
   auth: inherit
 }
 

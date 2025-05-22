@@ -7,7 +7,7 @@ import org.springframework.data.elasticsearch.annotations.Field
 import org.springframework.data.elasticsearch.annotations.FieldType
 import java.time.LocalDate
 
-@Document(indexName = "profiles")
+@Document(indexName = "profile")
 data class ProfileEsEntity(
     @Id
     val id: String? = null,

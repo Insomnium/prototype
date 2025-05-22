@@ -2,6 +2,7 @@ package net.ins.prototype.backend.profile.service.impl
 
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders
 import jakarta.transaction.Transactional
+import net.ins.prototype.backend.common.exception.EntityNotFoundException
 import net.ins.prototype.backend.profile.converter.ProfileContextToProfileEntityConverter
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEsEntity
@@ -17,7 +18,9 @@ import net.ins.prototype.backend.profile.service.validator.impl.NewProfileContex
 import org.springframework.data.elasticsearch.client.elc.NativeQuery
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHits
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class ProfileServiceImpl(
@@ -32,7 +35,7 @@ class ProfileServiceImpl(
     override fun findAll(search: ProfileSearchContext): List<ProfileEntity> = esEntitySearchHits(search)
         .takeUnless { it.isEmpty }
         ?.map { it.content.dbId }
-        ?.let { profileRepository.findAllById(it) }
+        ?.let { profileRepository.findAllById(it.toList()) }
         ?: profileRepository.findAll(ProfileRepository.search(search))
 
     private fun esEntitySearchHits(search: ProfileSearchContext): SearchHits<ProfileEsEntity> {
@@ -70,7 +73,11 @@ class ProfileServiceImpl(
         return requireNotNull(dbProfile.id)
     }
 
+    @Transactional
     override fun index(profileEsEntity: ProfileEsEntity) {
+        val dbProfile = profileRepository.findByIdOrNull(requireNotNull(profileEsEntity.dbId))
+            ?: throw EntityNotFoundException("No profile found by id: ${profileEsEntity.dbId}")
         profileEsRepository.save(profileEsEntity)
+        profileRepository.save(dbProfile.apply { lastIndexedAt = LocalDateTime.now() })
     }
 }

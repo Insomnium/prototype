@@ -7,6 +7,7 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
+import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import net.ins.prototype.backend.conf.AbstractTestcontainersTest
 import net.ins.prototype.backend.meta.TestProfile
@@ -106,6 +107,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
                 birth shouldBeEqual newProfileRequest.birth
                 gender shouldBeEqual newProfileRequest.gender
                 purposeMask shouldBeEqual newProfileRequest.purposes.calculateMask()
+                lastIndexedAt.shouldBeNull()
             }
         }
     }

@@ -10,6 +10,7 @@ import jakarta.persistence.PrePersist
 import jakarta.persistence.Table
 import net.ins.prototype.backend.profile.model.Gender
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "profiles")
@@ -30,6 +31,10 @@ class ProfileEntity(
     val countryId: String,
     @Column(name = "purpose_mask")
     var purposeMask: Int,
+    @Column(name = "created_at")
+    var createdAt: LocalDateTime,
+    @Column("last_indexed_at")
+    var lastIndexedAt: LocalDateTime? = null,
 ) {
 
     constructor(title: String, birth: LocalDate, gender: Gender, purposeMask: Int, countryId: String) : this(
@@ -39,6 +44,7 @@ class ProfileEntity(
         genderCode = gender.code,
         purposeMask = purposeMask,
         countryId = countryId,
+        createdAt = LocalDateTime.now(),
     )
 
 
