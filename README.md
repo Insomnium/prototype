@@ -1,5 +1,6 @@
 # Motivation
-Boredom
+Boredom.
+The first idea came to mind - dating service. Why? Да хз.
 
 # Backend
 Currently consists of `core` service: 
@@ -8,7 +9,7 @@ Currently consists of `core` service:
 * Kafka to asynchronously index profiles being created
 
 ## Plans
-* Core service extension for basic business features like profile editing, including photos uploading (CDN?)
+* Core service extension with support for basic business features like profile editing, including photos uploading (CDN?)
 * Spring Cloud Gateway based API Gateway (security, observability, underlying services scalability)
 * Dedicated chatting service
 * Observability (at least logging, tracing)
