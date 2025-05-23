@@ -1,5 +1,6 @@
 package net.ins.prototype.backend.profile.converter
 
+import net.ins.prototype.backend.common.converter.Converter
 import net.ins.prototype.backend.profile.dao.model.ProfileEsEntity
 import net.ins.prototype.backend.profile.dao.model.PurposeEsSubEntity
 import net.ins.prototype.backend.profile.event.ProfileCreatedEvent

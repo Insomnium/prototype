@@ -34,3 +34,7 @@ One day maybe
 # Local env URIs:  
 [ElasticVue](http://localhost:8085/)  
 [Kafka Control Center](http://localhost:9021/)
+
+# Important note
+I've got another username, which I used in couple of commits from another machine, Github considers they were authored by other GH account. It's a freaking coincidence.
+
