@@ -10,6 +10,7 @@ import org.awaitility.kotlin.await
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("UNCHECKED_CAST")
 object KafkaTestConsumer {
 
     private val deserializersByTopic: MutableMap<String, KafkaConsumer<*, *>> = ConcurrentHashMap()

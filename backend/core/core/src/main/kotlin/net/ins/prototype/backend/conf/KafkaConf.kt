@@ -62,7 +62,7 @@ class KafkaConf(
 
     @Bean(PROFILE_EVENT_DESERIALIZER)
     fun profileEventDeserializer(schemaRegistryClient: SchemaRegistryClient): Deserializer<ProfileEvent> =
-        Avro4kKotlinProfileDeserializer<ProfileEvent>(schemaRegistryClient)
+        Avro4kKotlinProfileDeserializer(schemaRegistryClient)
 
     @Bean(PROFILE_ERROR_HANDLING_DESERIALIZER)
     @Suppress("UNCHECKED_CAST")

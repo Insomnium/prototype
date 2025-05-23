@@ -14,7 +14,7 @@ import net.ins.prototype.backend.profile.service.NewProfileContext
 import net.ins.prototype.backend.profile.service.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileSearchService
 import net.ins.prototype.backend.profile.service.ProfileService
-import net.ins.prototype.backend.profile.service.validator.impl.NewProfileContextValidator
+import net.ins.prototype.backend.profile.validation.NewProfileContextValidator
 import org.springframework.data.elasticsearch.client.elc.NativeQuery
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHits

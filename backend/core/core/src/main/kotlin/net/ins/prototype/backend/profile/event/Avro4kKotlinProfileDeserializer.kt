@@ -11,25 +11,23 @@ import org.apache.kafka.common.serialization.Deserializer
 import kotlin.reflect.KClass
 
 @OptIn(InternalSerializationApi::class)
-class Avro4kKotlinProfileDeserializer<T : Any>(
+class Avro4kKotlinProfileDeserializer(
     schemaRegistryClient: SchemaRegistryClient,
 ) : Deserializer<ProfileEvent> {
     private val avro = Avro.default
     private val eventClasses: Map<String, KClass<out ProfileEvent>> = findEventClasses()
     private val vanillaDeserializer = KafkaAvroDeserializer(schemaRegistryClient)
 
-    override fun deserialize(topic: String, data: ByteArray?): ProfileEvent? {
-        return data?.let {
-            val genericRecord = vanillaDeserializer.deserialize(topic, it) as GenericRecord
-            val eventClass = requireNotNull(eventClasses[genericRecord.schema.name])
-            return avro.fromRecord(eventClass.serializer(), genericRecord)
-        }
+    override fun deserialize(topic: String, data: ByteArray?): ProfileEvent? = data?.let {
+        val genericRecord = vanillaDeserializer.deserialize(topic, it) as GenericRecord
+        val eventClass = requireNotNull(eventClasses[genericRecord.schema.name])
+        avro.fromRecord(eventClass.serializer(), genericRecord)
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun findEventClasses(): Map<String, KClass<out ProfileEvent>> = ClassGraph()
         .enableClassInfo()
-        .acceptPackages("net.ins.prototype.backend.profile.event")
+        .acceptPackages(ProfileEvent::class.java.packageName)
         .scan()
         .use { clazz ->
             clazz.getClassesImplementing(ProfileEvent::class.java.name).standardClasses.associate { it.simpleName to it.loadClass().kotlin as KClass<out ProfileEvent> }

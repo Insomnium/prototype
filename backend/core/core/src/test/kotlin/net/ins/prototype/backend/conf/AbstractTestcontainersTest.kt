@@ -109,7 +109,8 @@ open class AbstractTestcontainersTest {
         }
     }
 
-    protected fun <K : Any, V : Any> assertEventReceived(
+    @Suppress("UNCHECKED_CAST")
+    protected fun <K : Any, V : Any> assertEventPublished(
         topic: String,
         awaitDuration: Duration = Duration.ofSeconds(5),
         expectedRecordsCount: Int = 1,
@@ -133,7 +134,7 @@ open class AbstractTestcontainersTest {
         }
 
         try {
-            var records: MutableList<ConsumerRecord<K, V>> = mutableListOf()
+            val records: MutableList<ConsumerRecord<K, V>> = mutableListOf()
             await.atMost(awaitDuration).until {
                 val recs = consumer.poll(Duration.ofSeconds(3))
                 records += recs.records(topic) as Iterable<ConsumerRecord<K, V>>
@@ -141,8 +142,6 @@ open class AbstractTestcontainersTest {
             }
 
             assertion(records)
-        } catch (e: Exception) {
-            throw e
         } finally {
             consumer.unsubscribe()
         }

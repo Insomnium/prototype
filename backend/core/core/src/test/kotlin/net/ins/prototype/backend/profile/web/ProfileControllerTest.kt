@@ -7,6 +7,7 @@ import com.github.springtestdbunit.annotation.DatabaseTearDown
 import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
@@ -21,6 +22,7 @@ import net.ins.prototype.backend.profile.model.Purpose
 import net.ins.prototype.backend.profile.model.calculateMask
 import net.ins.prototype.backend.profile.web.model.NewProfileRequest
 import org.apache.kafka.common.serialization.Deserializer
+import org.awaitility.kotlin.await
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -35,6 +37,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.jpa.domain.Specification
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestExecutionListeners
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
@@ -119,7 +122,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             }
         }
 
-        assertEventReceived<Long, ProfileEvent>(
+        assertEventPublished<Long, ProfileEvent>(
             topic = appProperties.integrations.topics.profiles.name,
             valueDeserializer = profileEventDeserializer,
         ) {
@@ -132,6 +135,13 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
                 profileCreatedEvent.purposes shouldContainExactlyInAnyOrder newProfileRequest.purposes
                 profileCreatedEvent.dbId shouldBeEqual profiles.first().id!!
             }
+        }
+
+        await.atMost(Duration.ofSeconds(5)).until {
+            repo.findByIdOrNull(profiles.first().id)?.lastIndexedAt != null
+        }
+        with (repo.findAll().first()) {
+            createdAt shouldBeLessThan requireNotNull(lastIndexedAt)
         }
     }
 
