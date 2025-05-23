@@ -1,9 +1,9 @@
-package net.ins.prototype.backend.profile.service.validator.impl
+package net.ins.prototype.backend.profile.validation
 
 import net.ins.prototype.backend.common.exception.ContextValidationException
 import net.ins.prototype.backend.geo.dao.repo.LocationRepository
 import net.ins.prototype.backend.profile.service.NewProfileContext
-import net.ins.prototype.backend.profile.service.validator.Validator
+import net.ins.prototype.backend.common.validation.Validator
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Component
 

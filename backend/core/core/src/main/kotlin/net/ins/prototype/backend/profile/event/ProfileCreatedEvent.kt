@@ -2,7 +2,7 @@ package net.ins.prototype.backend.profile.event
 
 import com.github.avrokotlin.avro4k.serializer.LocalDateSerializer
 import kotlinx.serialization.Serializable
-import net.ins.prototype.backend.common.event.NoArgConstructor
+import net.ins.prototype.backend.common.meta.NoArgConstructor
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
 import java.time.LocalDate

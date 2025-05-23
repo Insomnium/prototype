@@ -8,8 +8,8 @@ import net.ins.prototype.backend.profile.service.ProfileSearchService
 import net.ins.prototype.backend.profile.service.ProfileService
 import net.ins.prototype.backend.profile.web.converter.ProfileResponseConverter
 import net.ins.prototype.backend.profile.web.model.NewProfileRequest
-import net.ins.prototype.backend.profile.web.model.ProfileRequest
-import net.ins.prototype.backend.profile.web.model.ProfileResponse
+import net.ins.prototype.backend.profile.web.model.ProfileSearchRequest
+import net.ins.prototype.backend.profile.web.model.ProfilesListResponse
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -30,7 +30,7 @@ class ProfileController(
 ) {
 
     @GetMapping
-    fun list(@Valid @ModelAttribute request: ProfileRequest): ProfileResponse = ProfileResponse(
+    fun list(@Valid @ModelAttribute request: ProfileSearchRequest): ProfilesListResponse = ProfilesListResponse(
         profiles = profileSearchService.findAll(
             ProfileSearchContext(gender = requireNotNull(request.gender), purposes = requireNotNull(request.purposes), countryId = request.countryId)
         ).map(profileResponseConverter::convert)

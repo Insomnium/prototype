@@ -1,4 +1,4 @@
-package net.ins.prototype.backend.profile.service.validator
+package net.ins.prototype.backend.common.validation
 
 interface Validator<in T> {
 

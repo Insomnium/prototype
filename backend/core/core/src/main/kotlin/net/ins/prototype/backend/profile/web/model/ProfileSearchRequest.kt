@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotNull
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
 
-data class ProfileRequest(
+data class ProfileSearchRequest(
     @field:NotNull(message = "gender can't be null or empty")
     val gender: Gender?,
     val purposes: Set<Purpose>? = emptySet(),
