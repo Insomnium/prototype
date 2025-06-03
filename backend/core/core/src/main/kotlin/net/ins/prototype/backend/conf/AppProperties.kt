@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AppProperties(
     val kafka: KafkaProperties,
     val integrations: Integrations,
+    val images: Images,
 )
 
 data class Integrations(
@@ -19,4 +20,9 @@ data class Topics(
 
 data class Topic(
     val name: String,
+)
+
+data class Images(
+    val fsBaseUri: String,
+    val cdnBaseUri: String,
 )

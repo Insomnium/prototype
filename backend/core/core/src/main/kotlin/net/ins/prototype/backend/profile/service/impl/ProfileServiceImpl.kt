@@ -3,6 +3,7 @@ package net.ins.prototype.backend.profile.service.impl
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders
 import jakarta.transaction.Transactional
 import net.ins.prototype.backend.common.exception.EntityNotFoundException
+import net.ins.prototype.backend.image.service.ImageService
 import net.ins.prototype.backend.profile.converter.ProfileContextToProfileEntityConverter
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEsEntity
@@ -75,9 +76,10 @@ class ProfileServiceImpl(
 
     @Transactional
     override fun index(profileEsEntity: ProfileEsEntity) {
-        val dbProfile = profileRepository.findByIdOrNull(requireNotNull(profileEsEntity.dbId))
-            ?: throw EntityNotFoundException("No profile found by id: ${profileEsEntity.dbId}")
+        val dbProfile = getById(profileEsEntity.dbId)
         profileEsRepository.save(profileEsEntity)
         profileRepository.save(dbProfile.apply { lastIndexedAt = LocalDateTime.now() })
     }
+
+    override fun getById(id: Long): ProfileEntity = profileRepository.findByIdOrNull(id) ?: throw EntityNotFoundException("No profile found by id: $id")
 }

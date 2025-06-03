@@ -1,6 +1,7 @@
 package net.ins.prototype.backend.profile.web
 
 import jakarta.validation.Valid
+import net.ins.prototype.backend.image.service.ImageService
 import net.ins.prototype.backend.profile.dao.model.EntityIdResponse
 import net.ins.prototype.backend.profile.service.NewProfileContext
 import net.ins.prototype.backend.profile.service.ProfileSearchContext
@@ -14,17 +15,21 @@ import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("v1/profiles")
 @Validated
 class ProfileController(
     private val profileService: ProfileService,
+    private val imageService: ImageService,
     private val profileSearchService: ProfileSearchService,
     private val profileResponseConverter: ProfileResponseConverter,
 ) {
@@ -49,5 +54,10 @@ class ProfileController(
             )
         ).toString()
     )
-}
 
+    @PostMapping("/{id}/images")
+    fun uploadPhoto(
+        @RequestParam("file") file: MultipartFile,
+        @PathVariable("id") userId: Long,
+    ): EntityIdResponse = EntityIdResponse(requireNotNull(imageService.saveImage(file, userId).id).toString())
+}

@@ -11,7 +11,10 @@ import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.string.shouldStartWith
 import net.ins.prototype.backend.conf.AbstractTestcontainersTest
+import net.ins.prototype.backend.conf.AppProperties
+import net.ins.prototype.backend.image.dao.repo.ImageRepository
 import net.ins.prototype.backend.meta.TestProfile
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
@@ -39,12 +42,15 @@ import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.TestExecutionListeners
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.post
+import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDate
 
@@ -61,17 +67,16 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
 
     @MockitoSpyBean
     @Autowired
-    private lateinit var repo: ProfileRepository
+    private lateinit var profileRepo: ProfileRepository
+
+    @Autowired
+    private lateinit var imageRepo: ImageRepository
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
-
-    @MockitoSpyBean
-    @Autowired
-    private lateinit var esOperations: ElasticsearchOperations
 
     @Autowired
     private lateinit var profileEventDeserializer: Deserializer<ProfileEvent>
@@ -83,7 +88,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
 
     @AfterEach
     fun tearDown() {
-        reset(repo, esOperations)
+        reset(profileRepo, esOperations)
         cleanupEsIndex()
     }
 
@@ -109,7 +114,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             status { isCreated() }
         }
 
-        val profiles = repo.findAll()
+        val profiles = profileRepo.findAll()
         assertSoftly {
             profiles shouldHaveSize 1
             with(profiles.first()) {
@@ -138,9 +143,9 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         }
 
         await.atMost(Duration.ofSeconds(5)).until {
-            repo.findByIdOrNull(profiles.first().id)?.lastIndexedAt != null
+            profileRepo.findByIdOrNull(profiles.first().id)?.lastIndexedAt != null
         }
-        with (repo.findAll().first()) {
+        with (profileRepo.findAll().first()) {
             createdAt shouldBeLessThan requireNotNull(lastIndexedAt)
         }
     }
@@ -187,7 +192,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             }
         }
 
-        verify(repo) {
+        verify(profileRepo) {
             1 * { findAllById(any()) }
             0 * { findAll(any<Specification<ProfileEntity>>()) }
         }
@@ -205,7 +210,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             jsonPath("$.profiles.length()") { value(4) }
         }
 
-        verify(repo) {
+        verify(profileRepo) {
             1 * { findAllById(any()) }
             0 * { findAll(any<Specification<ProfileEntity>>()) }
         }
@@ -222,6 +227,45 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         }.andExpect {
             status { isOk() }
             jsonPath("$.profiles.length()") { value(0) }
+        }
+    }
+
+    @Test
+    @DisplayName("Should respond with error on image uploading for non-existing profile")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
+    fun shouldNotUploadImageForNonExistingProfile() {
+        mockMvc.multipart("/v1/profiles/999/images") {
+            contentType = MediaType.IMAGE_PNG
+            file(MockMultipartFile("file", readResourcesFile("/images/fox.png")))
+        }.andExpect {
+            status { isNotFound() }
+        }
+    }
+
+    @Test
+    @DisplayName("Should successfully upload primary profile photo")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
+    fun shouldUploadPrimaryProfilePhoto() {
+        val profileId: Long = 1
+        mockMvc.multipart("/v1/profiles/$profileId/images") {
+            contentType = MediaType.IMAGE_PNG
+            file(MockMultipartFile("file", readResourcesFile("/images/fox.png")))
+        }.andExpect {
+            status { isOk() }
+        }
+
+        assertSoftly {
+            imageRepo.count() shouldBeEqual 1
+            val image = imageRepo.findAll().first()
+            image.id.shouldNotBeNull()
+            image.primary shouldBeEqual true
+            image.profileId shouldBeEqual profileId
+            image.approved shouldBeEqual false
+            image.hidden shouldBeEqual false
+            image.primary shouldBeEqual true
+            image.internalFileName.shouldNotBeNull()
+            image.folderUri shouldStartWith Path.of(appProperties.images.fsBaseUri, profileId.toString()).toAbsolutePath().toString()
+            image.cdnUri shouldBeEqual "${appProperties.images.cdnBaseUri}/$profileId/${image.internalFileName}"
         }
     }
 }

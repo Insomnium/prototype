@@ -160,11 +160,44 @@ services:
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
 
+  weblist:
+    image: ghcr.io/umputun/weblist:latest
+    container_name: weblist
+    ports:
+      - "9000:8080"
+    volumes:
+      - weblist:/data:rw
+    environment:
+#      - LISTEN=:8080
+      - THEME=light
+      - ROOT_DIR=/data
+      - EXCLUDE=.git,.env
+#      - AUTH=your_password  # Optional: Enable password authentication
+#      - AUTH_USER=admin  # Optional: Custom username for authentication (default: weblist)
+#      - SESSION_SECRET=your_secure_key  # Optional: Secret for signing session tokens
+#      - SESSION_TTL=24h  # Optional: Session timeout duration
+      - BRAND_NAME=Admin Console  # Optional: Display company name in navbar
+#      - BRAND_COLOR=#3498db  # Optional: Custom color for navbar
+#      - CUSTOM_FOOTER="<a href='https://example.com'>Example</a> | © 2025"  # Optional: Custom footer text
+#      - SFTP_ENABLED=true   # Optional: Enable SFTP server
+#      - SFTP_USER=sftp_user # Optional: Username for SFTP access
+#      - SFTP_ADDRESS=:2022  # Optional: SFTP port
+#      - SFTP_KEY=/data/ssh_key  # Optional: Path to SSH host key
+#      - SFTP_AUTHORIZED=/data/authorized_keys  # Optional: Path to authorized_keys file for public key auth
+#      - SYNTAX_HIGHLIGHT=true  # Optional: Enable syntax highlighting for code files
+#      - MULTI_SELECT=true  # Optional: Enable multi-file selection and download
+
 volumes:
   elastic_data:
     driver: local
   postgres_data:
     driver: local
+  weblist:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./photo
 
 networks:
   elastic:
