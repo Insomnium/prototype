@@ -11,7 +11,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
-import org.springframework.data.elasticsearch.core.indexOps
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -110,7 +109,7 @@ open class AbstractTestcontainersTest {
     }
 
     fun cleanupEsIndex(indexName: String = DEFAULT_PROFILES_ES_INDEX) {
-        assert(esOperations.indexOps(IndexCoordinates.of(indexName)).delete()) { "Failed to delete index $indexName" }
+        esOperations.indexOps(IndexCoordinates.of(indexName)).takeIf { it.exists() }?.run { delete() }
     }
 
     protected fun readResourcesFile(cpPath: String): InputStream = javaClass.getResourceAsStream(cpPath)

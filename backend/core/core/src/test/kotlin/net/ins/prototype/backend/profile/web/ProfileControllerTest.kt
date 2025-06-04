@@ -62,7 +62,7 @@ import java.time.LocalDate
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @TestProfile
-@DatabaseTearDown("classpath:/dbunit/0001/profiles-cleanup.xml")
+@DatabaseTearDown("classpath:/dbunit/0001/cleanup.xml")
 class ProfileControllerTest : AbstractTestcontainersTest() {
 
     @MockitoSpyBean
@@ -151,9 +151,9 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
     }
 
     @Test
-    @DisplayName("Should respond with found profiles")
+    @DisplayName("Should find profiles in DB when no index exists")
     @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
-    fun shouldFindProfiles() {
+    fun shouldFindProfilesBasedOnEsIndex() {
         mockMvc.get("/v1/profiles") {
             accept = MediaType.APPLICATION_JSON
             queryParam("gender", "FEMALE")
@@ -199,7 +199,57 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
     }
 
     @Test
-    @DisplayName("Should respond with profiles based on ES/PG-ids when no purposes set")
+    @DisplayName("Should find profiles by ES index")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
+    fun shouldFindProfilesWithDbInIndexAbsence() {
+        cleanupEsIndex()
+
+        mockMvc.get("/v1/profiles") {
+            accept = MediaType.APPLICATION_JSON
+            queryParam("gender", "FEMALE")
+            queryParam("purposes", "DATING,SEXTING")
+            queryParam("countryId", "RU")
+        }.andExpect {
+            status { isOk() }
+            content {
+                contentType(MediaType.APPLICATION_JSON)
+                jsonPath("$.profiles") { isArray() }
+                jsonPath("$.profiles.length()") { value(3) }
+
+                jsonPath("$.profiles[0].id") { value("1") }
+                jsonPath("$.profiles[0].gender") { value("FEMALE") }
+                jsonPath("$.profiles[0].title") { value("A") }
+                jsonPath("$.profiles[0].birth") { value("1996-11-17") }
+                jsonPath("$.profiles[0].countryId") { value("RU") }
+                jsonPath("$.profiles[0].purposes.length()") { value(2) }
+                jsonPath("$.profiles[0].purposes") { containsInAnyOrder("DATING", "RELATIONSHIPS") }
+
+                jsonPath("$.profiles[1].id") { value("2") }
+                jsonPath("$.profiles[1].gender") { value("FEMALE") }
+                jsonPath("$.profiles[1].title") { value("B") }
+                jsonPath("$.profiles[1].birth") { value("1996-12-17") }
+                jsonPath("$.profiles[1].countryId") { value("RU") }
+                jsonPath("$.profiles[1].purposes.length()") { value(2) }
+                jsonPath("$.profiles[1].purposes") { containsInAnyOrder("DATING", "SEXTING") }
+
+                jsonPath("$.profiles[2].id") { value("3") }
+                jsonPath("$.profiles[2].gender") { value("FEMALE") }
+                jsonPath("$.profiles[2].title") { value("C") }
+                jsonPath("$.profiles[2].birth") { value("1997-12-17") }
+                jsonPath("$.profiles[2].countryId") { value("RU") }
+                jsonPath("$.profiles[2].purposes.length()") { value(2) }
+                jsonPath("$.profiles[2].purposes") { containsInAnyOrder("SEXTING", "RELATIONSHIPS") }
+            }
+        }
+
+        verify(profileRepo) {
+            0 * { findAllById(any()) }
+            1 * { findAll(any<Specification<ProfileEntity>>()) }
+        }
+    }
+
+    @Test
+    @DisplayName("Should respond with profiles found based on ES index")
     @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
     fun shouldFindProfilesWithNoSpecificPurposes() {
         mockMvc.get("/v1/profiles") {
@@ -266,6 +316,30 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             image.internalFileName.shouldNotBeNull()
             image.folderUri shouldStartWith Path.of(appProperties.images.fsBaseUri, profileId.toString()).toAbsolutePath().toString()
             image.cdnUri shouldBeEqual "${appProperties.images.cdnBaseUri}/$profileId/${image.internalFileName}"
+        }
+    }
+
+    @Test
+    @DisplayName("Should successfully upload secondary profile photo")
+    @DatabaseSetup(
+        "classpath:/dbunit/0001/profiles.xml",
+        "classpath:/dbunit/0001/images.xml",
+    )
+    fun shouldUploadSecondaryProfilePhoto() {
+        val profileId: Long = 1
+        mockMvc.multipart("/v1/profiles/$profileId/images") {
+            contentType = MediaType.IMAGE_PNG
+            file(MockMultipartFile("file", readResourcesFile("/images/fox.png")))
+        }.andExpect {
+            status { isOk() }
+        }
+
+        assertSoftly {
+            imageRepo.count() shouldBeEqual 2
+            val images = imageRepo.findAll()
+            images shouldHaveSize 2
+            images.count { it.primary } shouldBeEqual 1
+            images.count { !it.primary } shouldBeEqual 1
         }
     }
 }

@@ -3,7 +3,6 @@ package net.ins.prototype.backend.profile.service.impl
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders
 import jakarta.transaction.Transactional
 import net.ins.prototype.backend.common.exception.EntityNotFoundException
-import net.ins.prototype.backend.image.service.ImageService
 import net.ins.prototype.backend.profile.converter.ProfileContextToProfileEntityConverter
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.model.ProfileEsEntity
@@ -16,6 +15,7 @@ import net.ins.prototype.backend.profile.service.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileSearchService
 import net.ins.prototype.backend.profile.service.ProfileService
 import net.ins.prototype.backend.profile.validation.NewProfileContextValidator
+import org.springframework.data.elasticsearch.NoSuchIndexException
 import org.springframework.data.elasticsearch.client.elc.NativeQuery
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHits
@@ -34,12 +34,12 @@ class ProfileServiceImpl(
 ) : ProfileService, ProfileSearchService {
 
     override fun findAll(search: ProfileSearchContext): List<ProfileEntity> = esEntitySearchHits(search)
-        .takeUnless { it.isEmpty }
+        ?.takeUnless { it.isEmpty }
         ?.map { it.content.dbId }
         ?.let { profileRepository.findAllById(it.toList()) }
         ?: profileRepository.findAll(ProfileRepository.search(search))
 
-    private fun esEntitySearchHits(search: ProfileSearchContext): SearchHits<ProfileEsEntity> {
+    private fun esEntitySearchHits(search: ProfileSearchContext): SearchHits<ProfileEsEntity>? {
         val criteria = QueryBuilders.bool().apply {
             must(QueryBuilders.match { m -> m.field("gender").query(search.gender.name) })
             search.countryId?.let { countryId -> must(QueryBuilders.match { m -> m.field("countryId").query(countryId) }) }
@@ -63,7 +63,12 @@ class ProfileServiceImpl(
             .withQuery(criteria.build()._toQuery())
             .build()
 
-        return esOperations.search(query, ProfileEsEntity::class.java)
+        return runCatching { esOperations.search(query, ProfileEsEntity::class.java) }.getOrElse {
+            when {
+                it is NoSuchIndexException -> null
+                else -> throw it
+            }
+        }
     }
 
     @Transactional
@@ -81,5 +86,6 @@ class ProfileServiceImpl(
         profileRepository.save(dbProfile.apply { lastIndexedAt = LocalDateTime.now() })
     }
 
-    override fun getById(id: Long): ProfileEntity = profileRepository.findByIdOrNull(id) ?: throw EntityNotFoundException("No profile found by id: $id")
+    override fun getById(id: Long): ProfileEntity =
+        profileRepository.findByIdOrNull(id) ?: throw EntityNotFoundException("No profile found by id: $id")
 }

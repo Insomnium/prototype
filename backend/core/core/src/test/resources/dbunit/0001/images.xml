@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <images id_profile="1" approved="true" hidden="false" main="true" folder_uri="/some/path" cdn_uri="https://some.cdn/image.jpg" internal_file_name="my_photo.jpg" />
+</dataset>

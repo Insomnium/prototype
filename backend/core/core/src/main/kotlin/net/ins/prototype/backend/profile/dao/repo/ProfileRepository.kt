@@ -13,7 +13,8 @@ interface ProfileRepository : JpaRepository<ProfileEntity, Long>, JpaSpecificati
     companion object {
 
         private fun genderIs(gender: Gender): Specification<ProfileEntity> =
-            Specification<ProfileEntity> { root, _, cb ->
+            Specification<ProfileEntity> { root, cq, cb ->
+                requireNotNull(cq).orderBy(cb.asc(root.get<Long>("id")))
                 cb.equal(root.get<Char>("genderCode"), gender.code)
             }
 
