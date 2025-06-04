@@ -81,5 +81,5 @@ class ProfileServiceImpl(
         profileRepository.save(dbProfile.apply { lastIndexedAt = LocalDateTime.now() })
     }
 
-    override fun getById(id: Long): ProfileEntity = profileRepository.findByIdOrNull(id) ?: throw EntityNotFoundException("No profile found by id: ${id}")
+    override fun getById(id: Long): ProfileEntity = profileRepository.findByIdOrNull(id) ?: throw EntityNotFoundException("No profile found by id: $id")
 }
