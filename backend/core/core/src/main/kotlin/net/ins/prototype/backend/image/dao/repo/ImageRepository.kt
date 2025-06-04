@@ -6,4 +6,6 @@ import org.springframework.data.repository.CrudRepository
 interface ImageRepository : CrudRepository<ImageEntity, Long> {
 
     fun existsByProfileId(profileId: Long): Boolean
+
+    fun findByProfileIdOrderById(profileId: Long): List<ImageEntity>
 }

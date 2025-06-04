@@ -10,8 +10,8 @@ import net.ins.prototype.backend.profile.dao.repo.ProfileEsRepository
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
 import net.ins.prototype.backend.profile.event.ProfileEventPublisher
 import net.ins.prototype.backend.profile.model.Purpose
-import net.ins.prototype.backend.profile.service.NewProfileContext
-import net.ins.prototype.backend.profile.service.ProfileSearchContext
+import net.ins.prototype.backend.profile.service.context.NewProfileContext
+import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileSearchService
 import net.ins.prototype.backend.profile.service.ProfileService
 import net.ins.prototype.backend.profile.validation.NewProfileContextValidator

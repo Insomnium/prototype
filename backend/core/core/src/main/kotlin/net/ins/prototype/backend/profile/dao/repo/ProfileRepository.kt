@@ -3,7 +3,7 @@ package net.ins.prototype.backend.profile.dao.repo
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
-import net.ins.prototype.backend.profile.service.ProfileSearchContext
+import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor

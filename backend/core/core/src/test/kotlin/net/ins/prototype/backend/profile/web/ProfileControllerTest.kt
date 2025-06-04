@@ -13,7 +13,6 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.string.shouldStartWith
 import net.ins.prototype.backend.conf.AbstractTestcontainersTest
-import net.ins.prototype.backend.conf.AppProperties
 import net.ins.prototype.backend.image.dao.repo.ImageRepository
 import net.ins.prototype.backend.meta.TestProfile
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
@@ -38,7 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.context.annotation.Import
-import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.http.MediaType
@@ -47,6 +45,7 @@ import org.springframework.test.context.TestExecutionListeners
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.post
@@ -145,7 +144,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         await.atMost(Duration.ofSeconds(5)).until {
             profileRepo.findByIdOrNull(profiles.first().id)?.lastIndexedAt != null
         }
-        with (profileRepo.findAll().first()) {
+        with(profileRepo.findAll().first()) {
             createdAt shouldBeLessThan requireNotNull(lastIndexedAt)
         }
     }
@@ -340,6 +339,124 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             images shouldHaveSize 2
             images.count { it.primary } shouldBeEqual 1
             images.count { !it.primary } shouldBeEqual 1
+        }
+    }
+
+    @Test
+    @DisplayName("Should respond with all profile images")
+    @DatabaseSetup(
+        "classpath:/dbunit/0001/profiles.xml",
+        "classpath:/dbunit/0001/images-multiple.xml",
+    )
+    fun shouldGetAllTheProfilePhotos() {
+        val profileId: Long = 1
+        mockMvc.get("/v1/profiles/$profileId/images") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content {
+                contentType(MediaType.APPLICATION_JSON)
+                jsonPath("$.results") { isArray() }
+                jsonPath("$.results.length()") { value(3) }
+
+                jsonPath("$.results[0].id") { value("0") }
+                jsonPath("$.results[0].cdnUri") { value("https://some.cdn/image1.jpg") }
+                jsonPath("$.results[0].primary") { value("true") }
+
+                jsonPath("$.results[1].id") { value("1") }
+                jsonPath("$.results[1].cdnUri") { value("https://some.cdn/image2.jpg") }
+                jsonPath("$.results[1].primary") { value("false") }
+
+                jsonPath("$.results[2].id") { value("2") }
+                jsonPath("$.results[2].cdnUri") { value("https://some.cdn/image3.jpg") }
+                jsonPath("$.results[2].primary") { value("false") }
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should respond with empty images array when none")
+    @DatabaseSetup(
+        "classpath:/dbunit/0001/profiles.xml",
+        "classpath:/dbunit/0001/images-multiple.xml",
+    )
+    fun shouldRespondWithNoProfilePhotos() {
+        val profileId: Long = 2
+        mockMvc.get("/v1/profiles/$profileId/images") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect {
+            status { isOk() }
+            content {
+                contentType(MediaType.APPLICATION_JSON)
+                jsonPath("$.results") { isArray() }
+                jsonPath("$.results.length()") { value(0) }
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("Should remove primary image and mark the next uploaded as of same type")
+    @DatabaseSetup(
+        "classpath:/dbunit/0001/profiles.xml",
+        "classpath:/dbunit/0001/images-multiple.xml",
+    )
+    fun shouldDeletePrimaryProfilePhoto() {
+        val profileId: Long = 1
+        val primaryImageId: Long = 0
+        mockMvc.delete("/v1/profiles/$profileId/images/$primaryImageId") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect { status { isOk() } }
+
+        val profileImages = imageRepo.findAll()
+        assertSoftly {
+            profileImages shouldHaveSize 2
+            profileImages.count { it.primary } shouldBeEqual 1
+            profileImages.count { !it.primary } shouldBeEqual 1
+            profileImages.single { requireNotNull(it.id) == 1L }.primary shouldBeEqual true
+        }
+    }
+
+    @Test
+    @DisplayName("Should remove primary image and mark the next uploaded as of same type")
+    @DatabaseSetup(
+        "classpath:/dbunit/0001/profiles.xml",
+        "classpath:/dbunit/0001/images-multiple.xml",
+    )
+    fun shouldDeleteNonPrimaryProfilePhoto() {
+        val profileId: Long = 1
+        val nonPrimaryImageId: Long = 2
+        mockMvc.delete("/v1/profiles/$profileId/images/$nonPrimaryImageId") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect { status { isOk() } }
+
+        val profileImages = imageRepo.findAll()
+        assertSoftly {
+            profileImages shouldHaveSize 2
+            profileImages.count { it.primary } shouldBeEqual 1
+            profileImages.count { !it.primary } shouldBeEqual 1
+            profileImages.single { requireNotNull(it.id) == 0L }.primary shouldBeEqual true
+        }
+    }
+
+    @Test
+    @DisplayName("Should respond with 404 when profile image not found")
+    @DatabaseSetup(
+        "classpath:/dbunit/0001/profiles.xml",
+        "classpath:/dbunit/0001/images-multiple.xml",
+    )
+    fun shouldFailOnRemovingNonExistentProfilePhoto() {
+        val profileId: Long = 1
+        val nonExistentImageId: Long = 999
+        mockMvc.delete("/v1/profiles/$profileId/images/$nonExistentImageId") {
+            accept = MediaType.APPLICATION_JSON
+        }.andExpect { status { isNotFound() } }
+
+        val profileImages = imageRepo.findAll()
+        assertSoftly {
+            profileImages shouldHaveSize 3
+            profileImages.count { it.primary } shouldBeEqual 1
+            profileImages.count { !it.primary } shouldBeEqual 2
+            profileImages.single { requireNotNull(it.id) == 0L }.primary shouldBeEqual true
         }
     }
 }

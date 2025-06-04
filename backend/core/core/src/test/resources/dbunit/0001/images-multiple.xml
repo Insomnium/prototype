@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <images id_image="0" id_profile="1" approved="true" hidden="false" main="true" folder_uri="/some/path" cdn_uri="https://some.cdn/image1.jpg" internal_file_name="my_photo1.jpg" />
+    <images id_image="1" id_profile="1" approved="true" hidden="false" main="false" folder_uri="/some/path" cdn_uri="https://some.cdn/image2.jpg" internal_file_name="my_photo2.jpg" />
+    <images id_image="2" id_profile="1" approved="true" hidden="false" main="false" folder_uri="/some/path" cdn_uri="https://some.cdn/image3.jpg" internal_file_name="my_photo3.jpg" />
+</dataset>

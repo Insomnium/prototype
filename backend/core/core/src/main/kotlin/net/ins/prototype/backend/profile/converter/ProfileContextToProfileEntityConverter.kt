@@ -3,7 +3,7 @@ package net.ins.prototype.backend.profile.converter
 import net.ins.prototype.backend.common.converter.Converter
 import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.model.calculateMask
-import net.ins.prototype.backend.profile.service.NewProfileContext
+import net.ins.prototype.backend.profile.service.context.NewProfileContext
 import org.springframework.stereotype.Component
 
 @Component

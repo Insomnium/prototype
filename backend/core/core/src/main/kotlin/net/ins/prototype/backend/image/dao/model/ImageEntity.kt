@@ -21,7 +21,7 @@ class ImageEntity(
     @Column(name = "hidden")
     val hidden: Boolean = false,
     @Column(name = "main")
-    val primary: Boolean,
+    var primary: Boolean,
     @Column(name = "folder_uri")
     val folderUri: String,
     @Column(name = "cdn_uri")
