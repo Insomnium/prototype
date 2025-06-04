@@ -1,18 +1,18 @@
 # Motivation
 Boredom.
-The first idea came to mind - dating service. Why? Да хз.
+The first idea came to mind is a dating service. Why? Да хз.
 
 # Backend
 Currently consists of `core` service: 
 * Postgres as a primary DB
-* ElasticSearch for indexing and search performance improvement
+* ElasticSearch: indexing and searching performance improvement
 * Kafka to asynchronously index profiles being created
 
 ## Plans
 * Core service extension with support for basic business features like profile editing, including photos uploading (CDN?)
 * Spring Cloud Gateway based API Gateway (security, observability, underlying services scalability)
 * Dedicated chatting service
-* Observability (at least logging, tracing)
+* Observability (logging and tracing at least)
 
 ## Setup
 
@@ -31,10 +31,10 @@ Makefile is to be done
 # Frontend
 One day maybe
 
-# Local env URIs:  
+# Local env URIs  
 [ElasticVue](http://localhost:8085/)  
 [Kafka Control Center](http://localhost:9021/)
 
 # Important note
-I've got another username, which I used in couple of commits from another machine, Github considers they were authored by other GH account. It's a freaking coincidence.
+I've got another username, which've I used in a couple of commits from another machine, Github considers them as authored by another GH account. That's a freaking coincidence.
 
