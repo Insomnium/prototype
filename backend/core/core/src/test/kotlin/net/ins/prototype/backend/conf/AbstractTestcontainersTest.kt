@@ -10,8 +10,11 @@ import org.awaitility.kotlin.await
 import org.junit.jupiter.api.BeforeAll
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations
+import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.elasticsearch.ElasticsearchContainer
 import org.testcontainers.junit.jupiter.Container
@@ -20,6 +23,7 @@ import org.testcontainers.kafka.ConfluentKafkaContainer
 import org.testcontainers.redpanda.RedpandaContainer
 import org.testcontainers.utility.DockerImageName
 import org.testcontainers.utility.MountableFile
+import java.io.InputStream
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 
@@ -29,10 +33,14 @@ open class AbstractTestcontainersTest {
     @Autowired
     protected lateinit var appProperties: AppProperties
 
+    @MockitoSpyBean
+    @Autowired
+    protected lateinit var esOperations: ElasticsearchOperations
+
     companion object {
 
         const val DEFAULT_PROFILES_ES_CONTAINER_FILE_PATH = "/tmp/profiles.ndjson"
-        const val DEFAULT_PROFILES_ES_INDEX = "profiles"
+        const val DEFAULT_PROFILES_ES_INDEX = "profile"
 
         const val SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE = "/tmp/profile.json"
         const val SCHEMA_REGISTRY_PORT = 8081
@@ -89,25 +97,22 @@ open class AbstractTestcontainersTest {
                 "curl -XPOST -H 'Content-Type: application/json' --data-binary @$SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE http://localhost:$SCHEMA_REGISTRY_PORT/subjects/${ProfileCreatedEvent.SUBJECT}/versions"
             )
         }
-
-        fun fillEsIndex(containerFilePath: String = DEFAULT_PROFILES_ES_CONTAINER_FILE_PATH) {
-            val result = elasticSearchContainer.execInContainer(
-                "/bin/sh",
-                "-c",
-                "curl -XPOST -H 'Content-Type: application/x-ndjson' http://localhost:${elasticSearchContainer.exposedPorts[0]}/_bulk?refresh=true --data-binary @$containerFilePath"
-            )
-            assert(result.exitCode == 0) { "Failed to upload index from file $containerFilePath due to: ${result.stdout}" }
-        }
-
-        fun cleanupEsIndex(indexName: String = DEFAULT_PROFILES_ES_INDEX) {
-            val result = elasticSearchContainer.execInContainer(
-                "/bin/sh",
-                "-c",
-                "curl -XDELETE http://localhost:${elasticSearchContainer.exposedPorts[0]}/$indexName"
-            )
-            assert(result.exitCode == 0) { "Failed to cleanup index $indexName due to ${result.stdout}" }
-        }
     }
+
+    fun fillEsIndex(containerFilePath: String = DEFAULT_PROFILES_ES_CONTAINER_FILE_PATH) {
+        val result = elasticSearchContainer.execInContainer(
+            "/bin/sh",
+            "-c",
+            "curl -XPOST -H 'Content-Type: application/x-ndjson' http://localhost:${elasticSearchContainer.exposedPorts[0]}/_bulk?refresh=true --data-binary @$containerFilePath"
+        )
+        assert(result.exitCode == 0) { "Failed to upload index from file $containerFilePath due to: ${result.stdout}" }
+    }
+
+    fun cleanupEsIndex(indexName: String = DEFAULT_PROFILES_ES_INDEX) {
+        esOperations.indexOps(IndexCoordinates.of(indexName)).takeIf { it.exists() }?.run { delete() }
+    }
+
+    protected fun readResourcesFile(cpPath: String): InputStream = javaClass.getResourceAsStream(cpPath)
 
     @Suppress("UNCHECKED_CAST")
     protected fun <K : Any, V : Any> assertEventPublished(

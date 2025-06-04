@@ -1,22 +1,16 @@
 package net.ins.prototype.backend.profile.validation
 
-import net.ins.prototype.backend.common.exception.ContextValidationException
-import net.ins.prototype.backend.geo.dao.repo.LocationRepository
-import net.ins.prototype.backend.profile.service.NewProfileContext
 import net.ins.prototype.backend.common.validation.Validator
-import org.springframework.data.repository.findByIdOrNull
+import net.ins.prototype.backend.geo.service.LocationService
+import net.ins.prototype.backend.profile.service.context.NewProfileContext
 import org.springframework.stereotype.Component
 
 @Component
 class NewProfileContextValidator(
-    private val locationRepository: LocationRepository,
-) : Validator<NewProfileContext> {
+    private val locationService: LocationService,
+) : Validator<NewProfileContext>() {
 
-    override fun validate(source: NewProfileContext) {
-        locationRepository.findByIdOrNull(source.countryId)
-            ?: throw ContextValidationException(
-                "profile.validation.countryId",
-                "No country found by id: ${source.countryId}"
-            )
+    override fun performValidation(source: NewProfileContext) {
+        locationService.getById(source.countryId)
     }
 }

@@ -10,11 +10,13 @@ import net.ins.prototype.backend.profile.dao.repo.ProfileEsRepository
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
 import net.ins.prototype.backend.profile.event.ProfileEventPublisher
 import net.ins.prototype.backend.profile.model.Purpose
-import net.ins.prototype.backend.profile.service.NewProfileContext
-import net.ins.prototype.backend.profile.service.ProfileSearchContext
+import net.ins.prototype.backend.profile.service.context.NewProfileContext
+import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileSearchService
 import net.ins.prototype.backend.profile.service.ProfileService
 import net.ins.prototype.backend.profile.validation.NewProfileContextValidator
+import net.ins.prototype.backend.profile.validation.ProfileSearchContextValidator
+import org.springframework.data.elasticsearch.NoSuchIndexException
 import org.springframework.data.elasticsearch.client.elc.NativeQuery
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
 import org.springframework.data.elasticsearch.core.SearchHits
@@ -30,15 +32,17 @@ class ProfileServiceImpl(
     private val newProfileContextValidator: NewProfileContextValidator,
     private val profileContextToEntityConverter: ProfileContextToProfileEntityConverter,
     private val profileEventPublisher: ProfileEventPublisher,
+    private val profileSearchContextValidator: ProfileSearchContextValidator,
 ) : ProfileService, ProfileSearchService {
 
-    override fun findAll(search: ProfileSearchContext): List<ProfileEntity> = esEntitySearchHits(search)
-        .takeUnless { it.isEmpty }
+    override fun findAll(search: ProfileSearchContext): List<ProfileEntity> =
+        esEntitySearchHits(profileSearchContextValidator.validate(search))
+        ?.takeUnless { it.isEmpty }
         ?.map { it.content.dbId }
         ?.let { profileRepository.findAllById(it.toList()) }
         ?: profileRepository.findAll(ProfileRepository.search(search))
 
-    private fun esEntitySearchHits(search: ProfileSearchContext): SearchHits<ProfileEsEntity> {
+    private fun esEntitySearchHits(search: ProfileSearchContext): SearchHits<ProfileEsEntity>? {
         val criteria = QueryBuilders.bool().apply {
             must(QueryBuilders.match { m -> m.field("gender").query(search.gender.name) })
             search.countryId?.let { countryId -> must(QueryBuilders.match { m -> m.field("countryId").query(countryId) }) }
@@ -62,7 +66,12 @@ class ProfileServiceImpl(
             .withQuery(criteria.build()._toQuery())
             .build()
 
-        return esOperations.search(query, ProfileEsEntity::class.java)
+        return runCatching { esOperations.search(query, ProfileEsEntity::class.java) }.getOrElse {
+            when {
+                it is NoSuchIndexException -> null
+                else -> throw it
+            }
+        }
     }
 
     @Transactional
@@ -75,9 +84,11 @@ class ProfileServiceImpl(
 
     @Transactional
     override fun index(profileEsEntity: ProfileEsEntity) {
-        val dbProfile = profileRepository.findByIdOrNull(requireNotNull(profileEsEntity.dbId))
-            ?: throw EntityNotFoundException("No profile found by id: ${profileEsEntity.dbId}")
+        val dbProfile = getById(profileEsEntity.dbId)
         profileEsRepository.save(profileEsEntity)
         profileRepository.save(dbProfile.apply { lastIndexedAt = LocalDateTime.now() })
     }
+
+    override fun getById(id: Long): ProfileEntity =
+        profileRepository.findByIdOrNull(id) ?: throw EntityNotFoundException("No profile found by id: $id")
 }

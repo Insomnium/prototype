@@ -1,3 +1,4 @@
-#spring:
-#  datasource:
-#    url: jdbc:postgresql://localhost:5432/postgres
+app:
+  images:
+    fs-base-uri: ${PWD}/photo
+    cdn-base-uri: http://dummy/view

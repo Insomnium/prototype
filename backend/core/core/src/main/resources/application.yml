@@ -33,3 +33,8 @@ app:
         schema.registry.url: ${SCHEMA_REGISTRY_URL}
         auto.reset.offset: earliest
         enable.auto.commit: false
+  images:
+    fs-base-uri: ${FS_BASE_URL}
+    cdn-base-uri: ${CDN_BASE_URL}
+
+

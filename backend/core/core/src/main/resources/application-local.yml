@@ -29,6 +29,9 @@ app:
         schema.registry.url: http://localhost:8081
         auto.reset.offset: earliest
         enable.auto.commit: false
+  images:
+    fs-base-uri: ${PWD}/photo
+    cdn-base-uri: http://localhost:9000/view
 
 logging:
   level:
