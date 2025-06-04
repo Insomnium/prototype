@@ -91,6 +91,11 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         cleanupEsIndex()
     }
 
+    companion object {
+        const val SAMPLE_FEMALE_PROFILE_ID = 1
+        const val SAMPLE_MALE_PROFILE_ID = 5
+    }
+
     @Test
     @DisplayName("Should create new profile")
     fun shouldCreateProfile() {
@@ -150,6 +155,19 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
     }
 
     @Test
+    @DisplayName("Should respond with error on same gender search")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
+    fun shouldForbidSameGenderSearch() {
+        mockMvc.get("/v1/profiles") {
+            accept = MediaType.APPLICATION_JSON
+            queryParam("gender", "FEMALE")
+            queryParam("purposes", "DATING,SEXTING")
+            queryParam("countryId", "RU")
+            header("x-user-id", SAMPLE_FEMALE_PROFILE_ID)
+        }.andExpect { status { isBadRequest() } }
+    }
+
+    @Test
     @DisplayName("Should find profiles in DB when no index exists")
     @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
     fun shouldFindProfilesBasedOnEsIndex() {
@@ -158,6 +176,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             queryParam("gender", "FEMALE")
             queryParam("purposes", "DATING,SEXTING")
             queryParam("countryId", "RU")
+            header("x-user-id", SAMPLE_MALE_PROFILE_ID)
         }.andExpect {
             status { isOk() }
             content {
@@ -208,6 +227,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             queryParam("gender", "FEMALE")
             queryParam("purposes", "DATING,SEXTING")
             queryParam("countryId", "RU")
+            header("x-user-id", SAMPLE_MALE_PROFILE_ID)
         }.andExpect {
             status { isOk() }
             content {
@@ -254,6 +274,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         mockMvc.get("/v1/profiles") {
             accept = MediaType.APPLICATION_JSON
             queryParam("gender", "FEMALE")
+            header("x-user-id", SAMPLE_MALE_PROFILE_ID)
         }.andExpect {
             status { isOk() }
             jsonPath("$.profiles.length()") { value(4) }
@@ -273,6 +294,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             accept = MediaType.APPLICATION_JSON
             queryParam("gender", "MALE")
             queryParam("purposes", "RELATIONSHIPS")
+            header("x-user-id", SAMPLE_FEMALE_PROFILE_ID)
         }.andExpect {
             status { isOk() }
             jsonPath("$.profiles.length()") { value(0) }

@@ -15,6 +15,7 @@ import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileSearchService
 import net.ins.prototype.backend.profile.service.ProfileService
 import net.ins.prototype.backend.profile.validation.NewProfileContextValidator
+import net.ins.prototype.backend.profile.validation.ProfileSearchContextValidator
 import org.springframework.data.elasticsearch.NoSuchIndexException
 import org.springframework.data.elasticsearch.client.elc.NativeQuery
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations
@@ -31,9 +32,11 @@ class ProfileServiceImpl(
     private val newProfileContextValidator: NewProfileContextValidator,
     private val profileContextToEntityConverter: ProfileContextToProfileEntityConverter,
     private val profileEventPublisher: ProfileEventPublisher,
+    private val profileSearchContextValidator: ProfileSearchContextValidator,
 ) : ProfileService, ProfileSearchService {
 
-    override fun findAll(search: ProfileSearchContext): List<ProfileEntity> = esEntitySearchHits(search)
+    override fun findAll(search: ProfileSearchContext): List<ProfileEntity> =
+        esEntitySearchHits(profileSearchContextValidator.validate(search))
         ?.takeUnless { it.isEmpty }
         ?.map { it.content.dbId }
         ?.let { profileRepository.findAllById(it.toList()) }

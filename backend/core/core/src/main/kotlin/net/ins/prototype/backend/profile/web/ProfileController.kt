@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -40,9 +41,13 @@ class ProfileController(
 ) {
 
     @GetMapping
-    fun list(@Valid @ModelAttribute request: ProfileSearchRequest): ProfilesListResponse = ProfilesListResponse(
+    fun list(
+        @RequestHeader("x-user-id") userId: Long,
+        @Valid @ModelAttribute request: ProfileSearchRequest
+    ): ProfilesListResponse = ProfilesListResponse(
         profiles = profileSearchService.findAll(
             ProfileSearchContext(
+                userId = userId,
                 gender = requireNotNull(request.gender),
                 purposes = requireNotNull(request.purposes),
                 countryId = request.countryId

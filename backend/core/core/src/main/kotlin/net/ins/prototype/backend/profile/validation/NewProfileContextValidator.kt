@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component
 @Component
 class NewProfileContextValidator(
     private val locationService: LocationService,
-) : Validator<NewProfileContext> {
+) : Validator<NewProfileContext>() {
 
-    override fun validate(source: NewProfileContext) {
+    override fun performValidation(source: NewProfileContext) {
         locationService.getById(source.countryId)
     }
 }

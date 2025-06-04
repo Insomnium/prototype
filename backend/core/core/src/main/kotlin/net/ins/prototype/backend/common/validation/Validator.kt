@@ -1,6 +1,11 @@
 package net.ins.prototype.backend.common.validation
 
-interface Validator<in T> {
+abstract class Validator<T> {
 
-    fun validate(source: T)
+    protected abstract fun performValidation(source: T)
+
+    fun validate(source: T): T {
+        performValidation(source)
+        return source
+    }
 }
