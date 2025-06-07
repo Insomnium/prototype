@@ -1,0 +1,15 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CoreApplication local" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="local" />
+    <envs>
+      <env name="PG_USERNAME" value="postgres" />
+      <env name="PG_PASSWORD" value="postgres" />
+    </envs>
+    <module name="backend" />
+    <option name="PROGRAM_PARAMETERS" value="--logging.level.net.ins.prototype.backend=TRACE" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="net.ins.prototype.backend.CoreApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

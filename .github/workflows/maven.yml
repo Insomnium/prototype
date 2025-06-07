@@ -34,6 +34,6 @@ jobs:
         cache: maven
     - name: Verify with maven
       run: |
-        cd backend/core/core
+        cd backend
         mvn clean verify
 

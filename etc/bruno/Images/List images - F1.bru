@@ -1,0 +1,29 @@
+meta {
+  name: List images - F1
+  type: http
+  seq: 2
+}
+
+get {
+  url: http://localhost:8080/core/v1/profiles/1/images
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-user-id: 5
+}
+
+body:json {
+  {
+    "title": "I",
+    "birth": "1996-12-17",
+    "gender": "MALE",
+    "purposes": [ "DATING" ],
+    "countryId": "RU"
+  }
+}
+
+body:multipart-form {
+  file: @file(/home/insomnium/IdeaProjects/prototype/backend/core/src/test/resources/images/fox.png)
+}
