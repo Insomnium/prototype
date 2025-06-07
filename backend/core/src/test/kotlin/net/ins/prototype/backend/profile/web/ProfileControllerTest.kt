@@ -147,7 +147,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         }
 
         await.atMost(Duration.ofSeconds(5)).until {
-            profileRepo.findByIdOrNull(profiles.first().id)?.lastIndexedAt != null
+            profileRepo.findByIdOrNull(profiles.first().id!!)?.lastIndexedAt != null
         }
         with(profileRepo.findAll().first()) {
             createdAt shouldBeLessThan requireNotNull(lastIndexedAt)

@@ -1,11 +1,11 @@
 meta {
   name: ES search
   type: http
-  seq: 7
+  seq: 9
 }
 
 post {
-  url: http://localhost:9200/profiles/_search?search_type=query_then_fetch&typed_keys=true
+  url: http://localhost:9200/profile/_search?search_type=query_then_fetch&typed_keys=true
   body: json
   auth: inherit
 }
@@ -24,7 +24,7 @@ body:json {
           {
             "match": {
               "gender": {
-                "query": "F"
+                "query": "FEMALE"
               }
             }
           },

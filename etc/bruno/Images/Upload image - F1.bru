@@ -1,0 +1,29 @@
+meta {
+  name: Upload image - F1
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/core/v1/profiles/1/images
+  body: multipartForm
+  auth: inherit
+}
+
+headers {
+  x-user-id: 5
+}
+
+body:json {
+  {
+    "title": "I",
+    "birth": "1996-12-17",
+    "gender": "MALE",
+    "purposes": [ "DATING" ],
+    "countryId": "RU"
+  }
+}
+
+body:multipart-form {
+  file: @file(/home/insomnium/IdeaProjects/prototype/backend/core/src/test/resources/images/fox.png)
+}
