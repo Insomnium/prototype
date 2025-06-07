@@ -1,0 +1,13 @@
+-- Create CORE database and user
+CREATE DATABASE core;
+CREATE USER app_core WITH PASSWORD 'core_password';
+
+-- Connect to the database
+\c core
+
+-- Grant privileges
+GRANT ALL PRIVILEGES ON SCHEMA public TO app_core;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO app_core;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO app_core;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON TABLES TO app_core;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL PRIVILEGES ON SEQUENCES TO app_core;
