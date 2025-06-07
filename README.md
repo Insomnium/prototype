@@ -18,7 +18,7 @@ Currently consists of `core` service:
 
 ### Run locally
 
-1. Use `docker-compose.yml` from the root folder to setup local infrastructure
+1. Use `docker-compose.yml` from the root folder to setup local infrastructure. Run: `docker compose --profile all up`
 2. Build and run core service
     1. Navigate `backend/core/core` folder
     2. Build service via `./mvnw clean package`
