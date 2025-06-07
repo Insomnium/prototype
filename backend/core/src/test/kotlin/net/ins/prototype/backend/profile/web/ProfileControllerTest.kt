@@ -403,7 +403,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         "classpath:/dbunit/0001/images-multiple.xml",
     )
     fun shouldRespondWithNoProfilePhotos() {
-        val profileId: Long = 2
+        val profileId: Long = 3
         mockMvc.get("/v1/profiles/$profileId/images") {
             accept = MediaType.APPLICATION_JSON
         }.andExpect {
@@ -429,7 +429,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             accept = MediaType.APPLICATION_JSON
         }.andExpect { status { isOk() } }
 
-        val profileImages = imageRepo.findAll()
+        val profileImages = imageRepo.findAll().filter { it.profileId == profileId }
         assertSoftly {
             profileImages shouldHaveSize 2
             profileImages.count { it.primary } shouldBeEqual 1
@@ -451,7 +451,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             accept = MediaType.APPLICATION_JSON
         }.andExpect { status { isOk() } }
 
-        val profileImages = imageRepo.findAll()
+        val profileImages = imageRepo.findAll().filter { it.profileId == profileId }
         assertSoftly {
             profileImages shouldHaveSize 2
             profileImages.count { it.primary } shouldBeEqual 1
@@ -461,7 +461,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
     }
 
     @Test
-    @DisplayName("Should respond with 404 when profile image not found")
+    @DisplayName("Should respond with 404 when profile image not found on deletion")
     @DatabaseSetup(
         "classpath:/dbunit/0001/profiles.xml",
         "classpath:/dbunit/0001/images-multiple.xml",
@@ -473,7 +473,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             accept = MediaType.APPLICATION_JSON
         }.andExpect { status { isNotFound() } }
 
-        val profileImages = imageRepo.findAll()
+        val profileImages = imageRepo.findAll().filter { it.profileId == profileId }
         assertSoftly {
             profileImages shouldHaveSize 3
             profileImages.count { it.primary } shouldBeEqual 1
