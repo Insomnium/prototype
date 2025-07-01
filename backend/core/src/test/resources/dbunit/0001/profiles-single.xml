@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<dataset>
+    <profiles id_profile="1" title="A" birth="1996-11-17" gender="F" country_id="RU" purpose_mask="9" last_indexed_at="[now-1d]" />
+</dataset>

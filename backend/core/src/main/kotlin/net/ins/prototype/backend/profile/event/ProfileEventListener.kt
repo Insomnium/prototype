@@ -3,8 +3,7 @@ package net.ins.prototype.backend.profile.event
 import net.ins.prototype.backend.common.event.UnserializableEvent
 import net.ins.prototype.backend.common.logger
 import net.ins.prototype.backend.conf.KafkaConf
-import net.ins.prototype.backend.profile.converter.ProfileEventToProfileEsEntityConverter
-import net.ins.prototype.backend.profile.service.ProfileSearchService
+import net.ins.prototype.backend.profile.service.ProfileIndexService
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment
@@ -12,8 +11,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ProfileEventListener(
-    private val profileSearchService: ProfileSearchService,
-    private val profileEventToEsEntityConverter: ProfileEventToProfileEsEntityConverter,
+    private val profileIndexService: ProfileIndexService,
 ) {
 
     @KafkaListener(
@@ -25,7 +23,8 @@ class ProfileEventListener(
         logger.trace("Received event [key={}; payload={}]", event.key(), event.value())
         when(val payload = event.value()) {
             is UnserializableEvent -> logger.debug("Unserializable event at offset: {}", event.offset())
-            is ProfileCreatedEvent -> profileSearchService.index(profileEventToEsEntityConverter.convert(payload))
+            is ProfileCreatedEvent -> profileIndexService.index(payload)
+            is ProfileUpdatedEvent -> profileIndexService.updateIndex(payload)
         }
         ack.acknowledge()
     }

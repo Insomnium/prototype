@@ -9,7 +9,6 @@ import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.equals.shouldBeEqual
-import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.string.shouldStartWith
 import net.ins.prototype.backend.conf.AbstractTestcontainersTest
@@ -19,10 +18,12 @@ import net.ins.prototype.backend.profile.dao.model.ProfileEntity
 import net.ins.prototype.backend.profile.dao.repo.ProfileRepository
 import net.ins.prototype.backend.profile.event.ProfileCreatedEvent
 import net.ins.prototype.backend.profile.event.ProfileEvent
+import net.ins.prototype.backend.profile.event.ProfileUpdatedEvent
 import net.ins.prototype.backend.profile.model.Gender
 import net.ins.prototype.backend.profile.model.Purpose
 import net.ins.prototype.backend.profile.model.calculateMask
-import net.ins.prototype.backend.profile.web.model.NewProfileRequest
+import net.ins.prototype.backend.profile.web.model.CreateProfileRequest
+import net.ins.prototype.backend.profile.web.model.UpdateProfileRequest
 import org.apache.kafka.common.serialization.Deserializer
 import org.awaitility.kotlin.await
 import org.hamcrest.Matchers.containsInAnyOrder
@@ -49,6 +50,7 @@ import org.springframework.test.web.servlet.delete
 import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.post
+import org.springframework.test.web.servlet.put
 import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDate
@@ -101,7 +103,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
     fun shouldCreateProfile() {
         cleanupEsIndex()
 
-        val newProfileRequest = NewProfileRequest(
+        val newProfileRequest = CreateProfileRequest(
             title = "Z",
             birth = LocalDate.of(1990, 10, 3),
             gender = Gender.MALE,
@@ -111,25 +113,13 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
 
         mockMvc.post("/v1/profiles") {
             contentType = MediaType.APPLICATION_JSON
-            content = objectMapper.writeValueAsString(
-                newProfileRequest
-            )
+            content = objectMapper.writeValueAsString(newProfileRequest)
         }.andExpect {
             status { isCreated() }
         }
 
         val profiles = profileRepo.findAll()
-        assertSoftly {
-            profiles shouldHaveSize 1
-            with(profiles.first()) {
-                id.shouldNotBeNull()
-                title shouldBeEqual newProfileRequest.title
-                birth shouldBeEqual newProfileRequest.birth
-                gender shouldBeEqual newProfileRequest.gender
-                purposeMask shouldBeEqual newProfileRequest.purposes.calculateMask()
-                lastIndexedAt.shouldBeNull()
-            }
-        }
+        profiles shouldHaveSize 1
 
         assertEventPublished<Long, ProfileEvent>(
             topic = appProperties.integrations.topics.profiles.name,
@@ -147,10 +137,90 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         }
 
         await.atMost(Duration.ofSeconds(5)).until {
-            profileRepo.findByIdOrNull(profiles.first().id!!)?.lastIndexedAt != null
+            profileRepo.findByIdOrNull(profileRepo.findAll().first().id!!)?.lastIndexedAt != null
         }
         with(profileRepo.findAll().first()) {
             createdAt shouldBeLessThan requireNotNull(lastIndexedAt)
+            id.shouldNotBeNull()
+            title shouldBeEqual newProfileRequest.title
+            birth shouldBeEqual newProfileRequest.birth
+            gender shouldBeEqual newProfileRequest.gender
+            purposeMask shouldBeEqual newProfileRequest.purposes.calculateMask()
+            indexId.shouldNotBeNull()
+        }
+    }
+
+    @Test
+    @DisplayName("Should update existing profile")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles-single.xml")
+    fun shouldUpdateProfile() {
+        fillEsIndex()
+        val profileId: Long = 1
+        val existentProfileLastIndexedAt = profileRepo.findAll().first().lastIndexedAt!!
+        val profileUpdateRequest = UpdateProfileRequest(
+            title = "XXX",
+            birth = LocalDate.of(1990, 1, 1),
+            gender = Gender.FEMALE,
+            countryId = "BY",
+            purposes = setOf(Purpose.RELATIONSHIPS),
+        )
+        mockMvc.put("/v1/profiles/$profileId") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(profileUpdateRequest)
+        }.andExpect {
+            status { isAccepted() }
+        }
+
+        val profiles = profileRepo.findAll()
+        profiles shouldHaveSize 1
+
+        assertEventPublished<Long, ProfileEvent>(
+            topic = appProperties.integrations.topics.profiles.name,
+            valueDeserializer = profileEventDeserializer,
+            awaitDuration = Duration.ofSeconds(5000),
+        ) {
+            assertSoftly {
+                it shouldHaveSize 1
+                val profileUpdatedEvent = it.first().value() as ProfileUpdatedEvent
+                profileUpdatedEvent.gender shouldBeEqual profileUpdateRequest.gender
+                profileUpdatedEvent.birth shouldBeEqual profileUpdateRequest.birth
+                profileUpdatedEvent.countryId shouldBeEqual profileUpdatedEvent.countryId
+                profileUpdatedEvent.purposes shouldContainExactlyInAnyOrder profileUpdateRequest.purposes
+                profileUpdatedEvent.dbId shouldBeEqual profiles.first().id!!
+            }
+        }
+
+        await.atMost(Duration.ofSeconds(5)).until {
+            profileRepo.findAll().first().lastIndexedAt!! > existentProfileLastIndexedAt
+        }
+        with(profileRepo.findAll().first()) {
+            title shouldBeEqual profileUpdateRequest.title
+            birth shouldBeEqual profileUpdateRequest.birth
+            countryId shouldBeEqual profileUpdateRequest.countryId
+            purposeMask shouldBeEqual profileUpdateRequest.purposes.calculateMask()
+        }
+    }
+
+    @Test
+    @DisplayName("Should not allow to change gender")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles-single.xml")
+    fun shouldDenyChangingGender() {
+        fillEsIndex()
+        val profileId: Long = 1
+        val profileUpdateRequest = UpdateProfileRequest(
+            title = "XXX",
+            birth = LocalDate.of(1990, 1, 1),
+            gender = Gender.MALE,
+            countryId = "BY",
+            purposes = setOf(Purpose.RELATIONSHIPS),
+        )
+        mockMvc.put("/v1/profiles/$profileId") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(profileUpdateRequest)
+        }.andExpect {
+            status { isBadRequest() }
         }
     }
 
@@ -181,32 +251,32 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             status { isOk() }
             content {
                 contentType(MediaType.APPLICATION_JSON)
-                jsonPath("$.profiles") { isArray() }
-                jsonPath("$.profiles.length()") { value(3) }
+                jsonPath("$.results") { isArray() }
+                jsonPath("$.results.length()") { value(3) }
 
-                jsonPath("$.profiles[0].id") { value("1") }
-                jsonPath("$.profiles[0].gender") { value("FEMALE") }
-                jsonPath("$.profiles[0].title") { value("A") }
-                jsonPath("$.profiles[0].birth") { value("1996-11-17") }
-                jsonPath("$.profiles[0].countryId") { value("RU") }
-                jsonPath("$.profiles[0].purposes.length()") { value(2) }
-                jsonPath("$.profiles[0].purposes") { containsInAnyOrder("DATING", "RELATIONSHIPS") }
+                jsonPath("$.results[0].id") { value("1") }
+                jsonPath("$.results[0].gender") { value("FEMALE") }
+                jsonPath("$.results[0].title") { value("A") }
+                jsonPath("$.results[0].birth") { value("1996-11-17") }
+                jsonPath("$.results[0].countryId") { value("RU") }
+                jsonPath("$.results[0].purposes.length()") { value(2) }
+                jsonPath("$.results[0].purposes") { containsInAnyOrder("DATING", "RELATIONSHIPS") }
 
-                jsonPath("$.profiles[1].id") { value("2") }
-                jsonPath("$.profiles[1].gender") { value("FEMALE") }
-                jsonPath("$.profiles[1].title") { value("B") }
-                jsonPath("$.profiles[1].birth") { value("1996-12-17") }
-                jsonPath("$.profiles[1].countryId") { value("RU") }
-                jsonPath("$.profiles[1].purposes.length()") { value(2) }
-                jsonPath("$.profiles[1].purposes") { containsInAnyOrder("DATING", "SEXTING") }
+                jsonPath("$.results[1].id") { value("2") }
+                jsonPath("$.results[1].gender") { value("FEMALE") }
+                jsonPath("$.results[1].title") { value("B") }
+                jsonPath("$.results[1].birth") { value("1996-12-17") }
+                jsonPath("$.results[1].countryId") { value("RU") }
+                jsonPath("$.results[1].purposes.length()") { value(2) }
+                jsonPath("$.results[1].purposes") { containsInAnyOrder("DATING", "SEXTING") }
 
-                jsonPath("$.profiles[2].id") { value("3") }
-                jsonPath("$.profiles[2].gender") { value("FEMALE") }
-                jsonPath("$.profiles[2].title") { value("C") }
-                jsonPath("$.profiles[2].birth") { value("1997-12-17") }
-                jsonPath("$.profiles[2].countryId") { value("RU") }
-                jsonPath("$.profiles[2].purposes.length()") { value(2) }
-                jsonPath("$.profiles[2].purposes") { containsInAnyOrder("SEXTING", "RELATIONSHIPS") }
+                jsonPath("$.results[2].id") { value("3") }
+                jsonPath("$.results[2].gender") { value("FEMALE") }
+                jsonPath("$.results[2].title") { value("C") }
+                jsonPath("$.results[2].birth") { value("1997-12-17") }
+                jsonPath("$.results[2].countryId") { value("RU") }
+                jsonPath("$.results[2].purposes.length()") { value(2) }
+                jsonPath("$.results[2].purposes") { containsInAnyOrder("SEXTING", "RELATIONSHIPS") }
             }
         }
 
@@ -232,32 +302,32 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             status { isOk() }
             content {
                 contentType(MediaType.APPLICATION_JSON)
-                jsonPath("$.profiles") { isArray() }
-                jsonPath("$.profiles.length()") { value(3) }
+                jsonPath("$.results") { isArray() }
+                jsonPath("$.results.length()") { value(3) }
 
-                jsonPath("$.profiles[0].id") { value("1") }
-                jsonPath("$.profiles[0].gender") { value("FEMALE") }
-                jsonPath("$.profiles[0].title") { value("A") }
-                jsonPath("$.profiles[0].birth") { value("1996-11-17") }
-                jsonPath("$.profiles[0].countryId") { value("RU") }
-                jsonPath("$.profiles[0].purposes.length()") { value(2) }
-                jsonPath("$.profiles[0].purposes") { containsInAnyOrder("DATING", "RELATIONSHIPS") }
+                jsonPath("$.results[0].id") { value("1") }
+                jsonPath("$.results[0].gender") { value("FEMALE") }
+                jsonPath("$.results[0].title") { value("A") }
+                jsonPath("$.results[0].birth") { value("1996-11-17") }
+                jsonPath("$.results[0].countryId") { value("RU") }
+                jsonPath("$.results[0].purposes.length()") { value(2) }
+                jsonPath("$.results[0].purposes") { containsInAnyOrder("DATING", "RELATIONSHIPS") }
 
-                jsonPath("$.profiles[1].id") { value("2") }
-                jsonPath("$.profiles[1].gender") { value("FEMALE") }
-                jsonPath("$.profiles[1].title") { value("B") }
-                jsonPath("$.profiles[1].birth") { value("1996-12-17") }
-                jsonPath("$.profiles[1].countryId") { value("RU") }
-                jsonPath("$.profiles[1].purposes.length()") { value(2) }
-                jsonPath("$.profiles[1].purposes") { containsInAnyOrder("DATING", "SEXTING") }
+                jsonPath("$.results[1].id") { value("2") }
+                jsonPath("$.results[1].gender") { value("FEMALE") }
+                jsonPath("$.results[1].title") { value("B") }
+                jsonPath("$.results[1].birth") { value("1996-12-17") }
+                jsonPath("$.results[1].countryId") { value("RU") }
+                jsonPath("$.results[1].purposes.length()") { value(2) }
+                jsonPath("$.results[1].purposes") { containsInAnyOrder("DATING", "SEXTING") }
 
-                jsonPath("$.profiles[2].id") { value("3") }
-                jsonPath("$.profiles[2].gender") { value("FEMALE") }
-                jsonPath("$.profiles[2].title") { value("C") }
-                jsonPath("$.profiles[2].birth") { value("1997-12-17") }
-                jsonPath("$.profiles[2].countryId") { value("RU") }
-                jsonPath("$.profiles[2].purposes.length()") { value(2) }
-                jsonPath("$.profiles[2].purposes") { containsInAnyOrder("SEXTING", "RELATIONSHIPS") }
+                jsonPath("$.results[2].id") { value("3") }
+                jsonPath("$.results[2].gender") { value("FEMALE") }
+                jsonPath("$.results[2].title") { value("C") }
+                jsonPath("$.results[2].birth") { value("1997-12-17") }
+                jsonPath("$.results[2].countryId") { value("RU") }
+                jsonPath("$.results[2].purposes.length()") { value(2) }
+                jsonPath("$.results[2].purposes") { containsInAnyOrder("SEXTING", "RELATIONSHIPS") }
             }
         }
 
@@ -277,7 +347,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             header("x-user-id", SAMPLE_MALE_PROFILE_ID)
         }.andExpect {
             status { isOk() }
-            jsonPath("$.profiles.length()") { value(4) }
+            jsonPath("$.results.length()") { value(4) }
         }
 
         verify(profileRepo) {
@@ -297,7 +367,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             header("x-user-id", SAMPLE_FEMALE_PROFILE_ID)
         }.andExpect {
             status { isOk() }
-            jsonPath("$.profiles.length()") { value(0) }
+            jsonPath("$.results.length()") { value(0) }
         }
     }
 

@@ -1,0 +1,21 @@
+meta {
+  name: Update profile - F1
+  type: http
+  seq: 7
+}
+
+put {
+  url: http://localhost:8080/core/v1/profiles/1
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "V",
+    "birth": "1996-11-17",
+    "gender": "FEMALE",
+    "purposes": [ "RELATIONSHIPS" ],
+    "countryId": "RU"
+  }
+}

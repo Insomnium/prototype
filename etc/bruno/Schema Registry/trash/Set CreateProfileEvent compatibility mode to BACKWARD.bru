@@ -1,0 +1,21 @@
+meta {
+  name: Set CreateProfileEvent compatibility mode to BACKWARD
+  type: http
+  seq: 2
+}
+
+put {
+  url: http://localhost:8081/config/net.ins.prototype.backend.profile.event.ProfileCreatedEvent
+  body: json
+  auth: inherit
+}
+
+headers {
+  ~Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+}
+
+body:json {
+  {
+    "compatibility": "BACKWARD"
+  }
+}
