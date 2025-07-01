@@ -10,7 +10,7 @@ import java.time.LocalDate
 @Document(indexName = "profile")
 data class ProfileEsEntity(
     @Id
-    val id: String? = null,
+    var id: String? = null,
     @Field(type = FieldType.Long)
     val dbId: Long,
     @Field(type = FieldType.Text)

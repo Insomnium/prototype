@@ -1,6 +1,7 @@
 package net.ins.prototype.backend.conf
 
 import net.ins.prototype.backend.profile.event.ProfileCreatedEvent
+import net.ins.prototype.backend.profile.event.ProfileUpdatedEvent
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.clients.consumer.KafkaConsumer
@@ -42,7 +43,8 @@ open class AbstractTestcontainersTest {
         const val DEFAULT_PROFILES_ES_CONTAINER_FILE_PATH = "/tmp/profiles.ndjson"
         const val DEFAULT_PROFILES_ES_INDEX = "profile"
 
-        const val SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE = "/tmp/profile.json"
+        const val SCHEMA_REGISTRY_PROFILE_CREATED_EVENT_SCHEMA_FILE = "/tmp/profile_created_event_registration.json"
+        const val SCHEMA_REGISTRY_PROFILE_UPDATED_EVENT_SCHEMA_FILE = "/tmp/profile_updated_event_registration.json"
         const val SCHEMA_REGISTRY_PORT = 8081
 
         private val deserializersByTopic: MutableMap<String, KafkaConsumer<*, *>> = ConcurrentHashMap()
@@ -72,8 +74,12 @@ open class AbstractTestcontainersTest {
         private val redpandaContainer: RedpandaContainer =
             RedpandaContainer(DockerImageName.parse("docker.redpanda.com/redpandadata/redpanda:v23.1.2"))
                 .withCopyFileToContainer(
-                    MountableFile.forClasspathResource("kafka/schema/profile.json"),
-                    SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE
+                    MountableFile.forClasspathResource("kafka/schema/profile_created_event_registration.json"),
+                    SCHEMA_REGISTRY_PROFILE_CREATED_EVENT_SCHEMA_FILE,
+                )
+                .withCopyFileToContainer(
+                    MountableFile.forClasspathResource("kafka/schema/profile_updated_event_registration.json"),
+                    SCHEMA_REGISTRY_PROFILE_UPDATED_EVENT_SCHEMA_FILE,
                 )
 
         /**
@@ -94,7 +100,12 @@ open class AbstractTestcontainersTest {
             redpandaContainer.execInContainer(
                 "/bin/sh",
                 "-c",
-                "curl -XPOST -H 'Content-Type: application/json' --data-binary @$SCHEMA_REGISTRY_PROFILE_SCHEMA_FILE http://localhost:$SCHEMA_REGISTRY_PORT/subjects/${ProfileCreatedEvent.SUBJECT}/versions"
+                "curl -XPOST -H 'Content-Type: application/json' --data-binary @$SCHEMA_REGISTRY_PROFILE_CREATED_EVENT_SCHEMA_FILE http://localhost:$SCHEMA_REGISTRY_PORT/subjects/${ProfileCreatedEvent.SUBJECT}/versions"
+            )
+            redpandaContainer.execInContainer(
+                "/bin/sh",
+                "-c",
+                "curl -XPOST -H 'Content-Type: application/json' --data-binary @$SCHEMA_REGISTRY_PROFILE_UPDATED_EVENT_SCHEMA_FILE http://localhost:$SCHEMA_REGISTRY_PORT/subjects/${ProfileUpdatedEvent.SUBJECT}/versions"
             )
         }
     }
@@ -124,7 +135,7 @@ open class AbstractTestcontainersTest {
         assertion: (List<ConsumerRecord<K, V>>) -> Unit,
     ) {
         val consumer = deserializersByTopic.computeIfAbsent(topic) {
-            KafkaConsumer<K, V>(
+            val kafkaConsumer = KafkaConsumer<K, V>(
                 mapOf(
                     ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to appProperties.kafka.bootstrapServers,
                     ConsumerConfig.GROUP_ID_CONFIG to "test-group",
@@ -133,22 +144,17 @@ open class AbstractTestcontainersTest {
                 keyDeserializer,
                 valueDeserializer,
             ) as KafkaConsumer<K, V>
-        }.apply {
-            unsubscribe()
-            subscribe(listOf(topic))
+
+            kafkaConsumer.apply { subscribe(listOf(topic)) }
         }
 
-        try {
-            val records: MutableList<ConsumerRecord<K, V>> = mutableListOf()
-            await.atMost(awaitDuration).until {
-                val recs = consumer.poll(Duration.ofSeconds(3))
-                records += recs.records(topic) as Iterable<ConsumerRecord<K, V>>
-                records.size >= expectedRecordsCount
-            }
-
-            assertion(records)
-        } finally {
-            consumer.unsubscribe()
+        val records: MutableList<ConsumerRecord<K, V>> = mutableListOf()
+        await.atMost(awaitDuration).until {
+            val recs = consumer.poll(Duration.ofSeconds(3))
+            records += recs.records(topic) as Iterable<ConsumerRecord<K, V>>
+            records.size >= expectedRecordsCount
         }
+
+        assertion(records)
     }
 }

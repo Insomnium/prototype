@@ -7,17 +7,27 @@ import net.ins.prototype.backend.profile.model.Purpose
 import org.springframework.stereotype.Component
 
 @Component
-class ProfileEventPublisher : AbstractEventPublisher<ProfileEntity, Long, ProfileEvent>() {
+class ProfileEventPublisher : AbstractEventPublisher<ProfileEventContext, Long, ProfileEvent>() {
 
-    override fun payload(source: ProfileEntity): ProfileEvent = ProfileCreatedEvent(
-        dbId = requireNotNull(source.id),
-        gender = source.gender,
-        birth = source.birth,
-        countryId = source.countryId,
-        purposes = Purpose.unmask(source.purposeMask),
-    )
+    override fun payload(source: ProfileEventContext): ProfileEvent = when (source.type) {
+        ProfileEventType.CREATED -> ProfileCreatedEvent(
+            dbId = requireNotNull(source.profile.id),
+            gender = source.profile.gender,
+            birth = source.profile.birth,
+            countryId = source.profile.countryId,
+            purposes = Purpose.unmask(source.profile.purposeMask),
+        )
+        ProfileEventType.UPDATED -> ProfileUpdatedEvent(
+            dbId = requireNotNull(source.profile.id),
+            birth = source.profile.birth,
+            gender = source.profile.gender,
+            countryId = source.profile.countryId,
+            purposes = Purpose.unmask(source.profile.purposeMask),
+        )
+        else -> TODO("Add support for deletion events")
+    }
 
-    override fun key(source: ProfileEntity): Long = requireNotNull(source.id)
+    override fun key(source: ProfileEventContext): Long = requireNotNull(source.profile.id)
 
     override fun topic(topics: Topics): String = topics.profiles.name
 }

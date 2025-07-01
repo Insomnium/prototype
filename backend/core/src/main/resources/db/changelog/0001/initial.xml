@@ -35,6 +35,7 @@
                 <constraints nullable="false" />
             </column>
             <column name="last_indexed_at" type="timestamp" />
+            <column name="id_index" type="varchar" />
         </createTable>
         <addPrimaryKey tableName="profiles" columnNames="id_profile" constraintName="pk_profiles" />
         <addUniqueConstraint tableName="profiles" columnNames="title" />

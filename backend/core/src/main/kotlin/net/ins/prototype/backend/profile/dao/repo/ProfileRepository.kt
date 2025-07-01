@@ -7,8 +7,16 @@ import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import org.springframework.data.jpa.domain.Specification
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
+import java.time.LocalDateTime
 
 interface ProfileRepository : JpaRepository<ProfileEntity, Long>, JpaSpecificationExecutor<ProfileEntity> {
+
+    @Query("update ProfileEntity p set p.indexId = :indexId, p.lastIndexedAt = :indexedAt where p.id = :id")
+    @Modifying
+    fun setIndexedAt(@Param("id") id: Long, @Param("indexId") indexId: String, @Param("indexedAt") indexedAt: LocalDateTime)
 
     companion object {
 

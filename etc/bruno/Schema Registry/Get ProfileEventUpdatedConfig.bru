@@ -1,12 +1,12 @@
 meta {
-  name: Set CreateProfileEvent compatibility mode to BACKWARD
+  name: Get ProfileEventUpdatedConfig
   type: http
   seq: 3
 }
 
-put {
-  url: http://localhost:8081/config/net.ins.prototype.backend.profile.event.ProfileCreatedEvent
-  body: json
+get {
+  url: http://localhost:8081/config/net.ins.prototype.backend.profile.event.ProfileUpdatedEvent
+  body: none
   auth: inherit
 }
 

@@ -1,0 +1,4 @@
+{
+  "schema": "{\"type\":\"record\",\"name\":\"ProfileUpdatedEvent\",\"namespace\":\"net.ins.prototype.backend.profile.event\",\"fields\":[{\"name\":\"dbId\",\"type\":\"long\"},{\"name\":\"gender\",\"type\":{\"type\":\"enum\",\"name\":\"Gender\",\"namespace\":\"net.ins.prototype.backend.profile.model\",\"symbols\":[\"MALE\",\"FEMALE\"]}},{\"name\":\"birth\",\"type\":{\"type\":\"int\",\"logicalType\":\"date\"}},{\"name\":\"countryId\",\"type\":\"string\"},{\"name\":\"purposes\",\"type\":{\"type\":\"array\",\"items\":{\"type\":\"enum\",\"name\":\"Purpose\",\"namespace\":\"net.ins.prototype.backend.profile.model\",\"symbols\":[\"DATING\",\"SEXTING\",\"RELATIONSHIPS\"]}}}]}",
+  "schemaType": "AVRO"
+}
