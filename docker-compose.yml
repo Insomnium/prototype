@@ -5,6 +5,7 @@ services:
     profiles:
       - all
       - db
+      - keycloak
     ports:
       - 5432:5432
     volumes:
@@ -203,7 +204,31 @@ services:
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
 
-  weblist:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.2
+    container_name: keycloak
+    command: start-dev
+    ports:
+      - 9090:8080
+    depends_on:
+      - postgres
+    profiles:
+      - all
+      - keycloak
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: password
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: ${KC_PG_USER}
+      KC_DB_PASSWORD: ${KC_PG_PASSWORD}
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: true
+#      KEYCLOAK_ADMIN: admin
+#      KEYCLOAK_ADMIN_PASSWORD: password
+
+  weblist: # TODO: change to MinIO
     image: ghcr.io/umputun/weblist:latest
     container_name: weblist
     profiles:
