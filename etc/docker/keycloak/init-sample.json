@@ -1,0 +1,48 @@
+{
+  "realm": "prototype",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      { "name": "admins" },
+      { "name": "users" }
+    ]
+  },
+  "users": [
+    {
+      "username": "ins137",
+      "email": "ins137@example.com",
+      "firstName": "Ins137",
+      "lastName": "Surname_admin",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "passw0rd" }
+      ],
+      "realmRoles": ["admins", "users"]
+    },
+    {
+      "username": "user1",
+      "email": "user1@example.com",
+      "firstName": "Firstname#001",
+      "lastName": "Surname#001",
+      "emailVerified": true,
+      "enabled": true,
+      "credentials": [
+        { "type": "password", "value": "password1" }
+      ],
+      "realmRoles": ["users"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "prototype-client",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "standardFlowEnabled": true,
+      "redirectUris": ["http://localhost:8000/auth/callback"],
+      "webOrigins": ["+"],
+      "publicClient": false,
+      "secret": "950c9349-998c-437f-8a63-ab5d3c0841c6"
+    }
+  ]
+}

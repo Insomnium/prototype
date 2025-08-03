@@ -28,6 +28,24 @@ Currently consists of `core` service:
    
 Makefile is to be done
 
+### Authentication & authorization via Keycloak
+Web UI is available at [localhost:9090](http://localhost:9090/). Credentials: `admin/password`.  
+Backend database for the Keycloak is created in `postgres-prototype` container (see `etc/postgres/02_keycloak.sql`)
+Following dev identity settings are provided with the **keycloak** container (take a look at `etc/docker/keycloak/init-sample.json`):  
+* realm: `prototype`
+* client_id: `prototype-client`
+* client_secret: `950c9349-998c-437f-8a63-ab5d3c0841c6`
+* allowed redirect URIs: ['http://localhost:8000/auth/callback']
+
+To check Authorization Code Grant Type flow use following steps:
+1. Open Authorization URL in a browser: http://localhost:9090/realms/prototype/protocol/openid-connect/auth?client_id=prototype-client&response_type=code&redirect_uri=http://localhost:8000/auth/callback&scope=openid%20profile&state=12345
+2. Enter user credentials (for the admin: `Ins137/passw0rd`)
+![Login](etc/docs/keycloak_001_login.png)
+3. Take code from the network log (`Location` redirect response header):
+![Request auth code](etc/docs/keycloak_002_request-auth-code.png)
+4. Put it as the `code` parameter into "Keycloak/Auth with authorization code", perform POST x-www-form-urlencoded query:
+![Request access token](etc/docs/keycloak_003_request-access-token.png)
+
 # Frontend
 One day maybe
 

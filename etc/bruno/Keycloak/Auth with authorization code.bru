@@ -1,0 +1,23 @@
+meta {
+  name: Auth with authorization code
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:9090/realms/prototype/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  client_id: prototype-client
+  grant_type: authorization_code
+  code: 04ebe083-c6ec-4390-863b-0f0b5035ef55.d1099e94-8860-4a36-b32f-5bfef5ce0ab8.1ca9f0bf-f037-4aeb-b179-49e9671d536b
+  redirect_uri: http://localhost:8000/auth/callback
+  client_secret: 950c9349-998c-437f-8a63-ab5d3c0841c6
+}
+
+settings {
+  encodeUrl: true
+}
