@@ -12,6 +12,8 @@
 
     <modules>
         <module>core</module>
+        <module>api-gateway</module>
+        <module>chat</module>
     </modules>
 
     <properties>
