@@ -1,7 +1,19 @@
-.message_client {
-    background: aqua;
+#messages {
+    display: flex;
+    flex-direction: column;
 }
 
-.message_server {
+.message {
+    max-width: 50%;
+    margin: 1%;
+}
+
+.message.sent {
+    background: aqua;
+    align-self: flex-start;
+}
+
+.message.received {
     background: chartreuse;
+    align-self: flex-end;
 }

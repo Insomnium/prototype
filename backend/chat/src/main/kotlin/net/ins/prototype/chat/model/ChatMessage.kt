@@ -1,4 +1,4 @@
-package net.ins.prototype.chat
+package net.ins.prototype.chat.model
 
 data class ChatMessage(
     val content: String,
