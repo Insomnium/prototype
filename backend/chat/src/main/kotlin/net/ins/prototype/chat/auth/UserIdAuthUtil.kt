@@ -14,3 +14,6 @@ val StompHeaderAccessor.senderId: String
 
 val SimpMessageHeaderAccessor.receiverId: String
     get() = getNativeHeader(P2pHeaders.RECEIVER)?.first() ?: throw MissingSenderHeaderException()
+
+val SimpMessageHeaderAccessor.senderId: String
+    get() = getNativeHeader(P2pHeaders.SENDER)?.first() ?: throw MissingSenderHeaderException()

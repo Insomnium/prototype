@@ -1,6 +1,6 @@
 package net.ins.prototype.chat.web
 
-import net.ins.prototype.chat.model.ChatMessage
+import net.ins.prototype.chat.model.ChatMessageRequest
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -14,7 +14,7 @@ class P2pChatController(
 ) {
 
     @PostMapping("/fanout")
-    fun notifyAll(@RequestBody notification: ChatMessage) {
+    fun notifyAll(@RequestBody notification: ChatMessageRequest) {
         messageTemplate.convertAndSend("/topic/messages", notification)
     }
 }

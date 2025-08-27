@@ -4,3 +4,4 @@ server:
 logging:
   level:
     org.springframework.web: DEBUG
+    org.springframework.messaging.simp: DEBUG

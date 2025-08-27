@@ -1,7 +1,9 @@
 package net.ins.prototype.chat.handler
 
 import net.ins.prototype.chat.auth.receiverId
-import net.ins.prototype.chat.model.ChatMessage
+import net.ins.prototype.chat.auth.senderId
+import net.ins.prototype.chat.model.ChatMessageRequest
+import net.ins.prototype.chat.model.ChatMessageResponse
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
@@ -14,16 +16,16 @@ class P2pChatHandler(
 ) {
 
     @MessageMapping("/chat")
-//    @SendTo("/topic/messages")
     fun onMessageReceived(
-        @Payload message: ChatMessage,
+        @Payload message: ChatMessageRequest,
         headerAccessor: SimpMessageHeaderAccessor,
     ) {
         messagingTemplate.convertAndSendToUser(
             headerAccessor.receiverId,
             "/topic/messages",
-            ChatMessage(
-                content = "Hey, I've just received your message: ${message.content}",
+            ChatMessageResponse(
+                sender = headerAccessor.senderId,
+                content = message.content
             ),
         )
     }

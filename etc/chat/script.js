@@ -14,8 +14,12 @@ function connect() {
     stompClient.connect({ 'X-sender-id': fakeUserId }, frame => {
         console.log('Connected: ' + frame)
 
-        stompClient.subscribe('/topic/messages', message => {
-            showMessage(JSON.parse(message.body)['content'], false)
+        /**
+         * '/user/topic/messages' is translated to '/topic/messages${sessionId}'
+         * by spring due to '/user' subscription prefix
+         */
+        stompClient.subscribe(`/user/topic/messages`, message => {
+            showMessage(JSON.parse(message.body), false)
         })
     })
 }
@@ -24,7 +28,7 @@ function sendMessage() {
     let messageContent = document.getElementById('inputMessage').value
     let receiverId = document.getElementById('receiver_user_id').value || alert('Enter receiver user id first')
     if (messageContent) {
-        showMessage(messageContent, true)
+        showMessage({ 'receiver': receiverId, 'content': messageContent }, true)
         // stompClient.send('/app/chat', {}, messageContent)
         let headers = {
             'X-sender-id': fakeUserId,
@@ -42,11 +46,18 @@ function showMessage(message, isClient) {
     let messageElement = document.createElement('div')
     messageContainer.appendChild(messageElement)
 
+    let messageTitle = document.createElement('p')
+    let messageTypeParticle = isClient ? `< To: ${message['receiver']}` : `> From: ${message['sender']}`
+    messageTitle.innerText = messageTypeParticle
+
     let text = document.createElement('p')
+    text.innerText = message['content']
+
     let date = document.createElement('span')
     let dateValue = new Date()
     date.innerText = dateValue.getHours() + ':' + dateValue.getMinutes() + ':' + dateValue.getSeconds()
-    text.innerText = message
+
+    messageElement.appendChild(messageTitle)
     messageElement.appendChild(text)
     messageElement.appendChild(date)
     if (isClient) {
