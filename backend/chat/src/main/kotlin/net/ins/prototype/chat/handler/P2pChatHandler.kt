@@ -19,14 +19,12 @@ class P2pChatHandler(
     fun onMessageReceived(
         @Payload message: ChatMessageRequest,
         headerAccessor: SimpMessageHeaderAccessor,
-    ) {
-        messagingTemplate.convertAndSendToUser(
-            headerAccessor.receiverId,
-            "/topic/messages",
-            ChatMessageResponse(
-                sender = headerAccessor.senderId,
-                content = message.content
-            ),
-        )
-    }
+    ) = messagingTemplate.convertAndSendToUser(
+        headerAccessor.receiverId,
+        "/topic/messages",
+        ChatMessageResponse(
+            sender = headerAccessor.senderId,
+            content = message.content
+        ),
+    )
 }
