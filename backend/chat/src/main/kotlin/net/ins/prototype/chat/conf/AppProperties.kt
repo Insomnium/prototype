@@ -14,7 +14,7 @@ data class Integrations(
 )
 
 data class Topics(
-    val profiles: Topic,
+    val p2pMessage: Topic,
 )
 
 data class Topic(

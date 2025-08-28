@@ -1,4 +1,4 @@
-package net.ins.prototype.backend.common
+package net.ins.prototype.common
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

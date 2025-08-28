@@ -21,6 +21,8 @@
         <kafka.confluent.avro.version>7.9.0</kafka.confluent.avro.version>
         <avro4k.version>1.10.1</avro4k.version>
         <classgraph.version>4.8.179</classgraph.version>
+        <protobuf.version>3.25.1</protobuf.version>
+        <common-util.version>0.0.1-SNAPSHOT</common-util.version>
 
         <kotest.jvm.version>4.0.7</kotest.jvm.version>
         <kotest.version>5.9.1</kotest.version>
@@ -79,13 +81,11 @@
             <artifactId>kotlinx-serialization-core-jvm</artifactId>
             <version>1.8.1</version>
         </dependency>
-
         <dependency>
             <groupId>io.github.classgraph</groupId>
             <artifactId>classgraph</artifactId>
             <version>${classgraph.version}</version>
         </dependency>
-
         <dependency>
             <groupId>io.confluent</groupId>
             <artifactId>kafka-schema-serializer</artifactId>
@@ -116,7 +116,11 @@
             <groupId>org.liquibase</groupId>
             <artifactId>liquibase-core</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>net.ins.prototype</groupId>
+            <artifactId>common-util</artifactId>
+            <version>${common-util.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
@@ -211,6 +215,22 @@
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
         <testSourceDirectory>${project.basedir}/src/test/kotlin</testSourceDirectory>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>io.github.ascopes</groupId>
+                    <artifactId>protobuf-maven-plugin</artifactId>
+                    <version>3.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.6.1</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
@@ -226,5 +246,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

@@ -1,0 +1,5 @@
+app:
+  integrations:
+    topics:
+      p2p-message:
+        name: p2p-message

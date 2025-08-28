@@ -5,41 +5,7 @@ var socket = null
 var stompClient = null
 var fakeUserId = null
 
-function connect() {
-    socket = socket || new SockJS('http://localhost:8082/ws')
-    stompClient = stompClient || Stomp.over(socket)
-
-    fakeUserId = document.getElementById('fake_hardcoded_user_id').value;
-
-    stompClient.connect({ 'X-sender-id': fakeUserId }, frame => {
-        console.log('Connected: ' + frame)
-
-        /**
-         * '/user/topic/messages' is translated to '/topic/messages${sessionId}'
-         * by spring due to '/user' subscription prefix
-         */
-        stompClient.subscribe(`/user/topic/messages`, message => {
-            showMessage(JSON.parse(message.body), false)
-        })
-    })
-}
-
-function sendMessage() {
-    let messageContent = document.getElementById('inputMessage').value
-    let receiverId = document.getElementById('receiver_user_id').value || alert('Enter receiver user id first')
-    if (messageContent) {
-        showMessage({ 'receiver': receiverId, 'content': messageContent }, true)
-        // stompClient.send('/app/chat', {}, messageContent)
-        let headers = {
-            'X-sender-id': fakeUserId,
-            'X-receiver-id': receiverId,
-        }
-        stompClient.send('/app/chat', headers, JSON.stringify({ 'content': messageContent }))
-        document.getElementById('inputMessage').value = ''
-    }
-}
-
-function showMessage(message, isClient) {
+const showMessage = (message, isClient) => {
     let messageContainer = document.createElement('div')
     messageContainer.classList.add('message')
 
@@ -47,8 +13,7 @@ function showMessage(message, isClient) {
     messageContainer.appendChild(messageElement)
 
     let messageTitle = document.createElement('p')
-    let messageTypeParticle = isClient ? `< To: ${message['receiver']}` : `> From: ${message['sender']}`
-    messageTitle.innerText = messageTypeParticle
+    messageTitle.innerText = isClient ? `< To: ${message['receiver']}` : `> From: ${message['sender']}`
 
     let text = document.createElement('p')
     text.innerText = message['content']
@@ -66,10 +31,44 @@ function showMessage(message, isClient) {
         messageContainer.classList.add('received')
     }
     document.getElementById('messages').appendChild(messageContainer)
-}
+};
 
-function onInputEnter(e) {
+function connect() {
+    socket = socket || new SockJS('http://localhost:8082/ws')
+    stompClient = stompClient || Stomp.over(socket)
+
+    fakeUserId = document.getElementById('fake_hardcoded_user_id').value;
+
+    stompClient.connect({ 'X-sender-id': fakeUserId }, frame => {
+        console.log('Connected: ' + frame)
+
+        /**
+         * '/user/topic/messages' is translated to '/topic/messages${sessionId}'
+         * by spring due to '/user' subscription prefix
+         */
+        stompClient.subscribe(`/user/topic/messages`, message => {
+            showMessage(JSON.parse(message.body), false)
+        })
+    })
+};
+
+const sendMessage = () => {
+    let messageContent = document.getElementById('inputMessage').value
+    let receiverId = document.getElementById('receiver_user_id').value || alert('Enter receiver user id first')
+    if (messageContent) {
+        showMessage({ 'receiver': receiverId, 'content': messageContent }, true)
+        // stompClient.send('/app/chat', {}, messageContent)
+        let headers = {
+            'X-sender-id': fakeUserId,
+            'X-receiver-id': receiverId,
+        }
+        stompClient.send('/app/chat', headers, JSON.stringify({ 'content': messageContent }))
+        document.getElementById('inputMessage').value = ''
+    }
+};
+
+const onInputEnter = () => {
     if (event.key === 'Enter') {
         sendMessage()
     }
-}
+};

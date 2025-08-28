@@ -1,5 +1,5 @@
 package net.ins.prototype.chat.auth.exception
 
-import net.ins.prototype.chat.auth.P2pHeaders
+import net.ins.prototype.chat.auth.P2pWsHeaders
 
-class MissingReceiverHeaderException : MissingMandatoryHeaderException(P2pHeaders.RECEIVER)
+class MissingReceiverHeaderException : MissingMandatoryHeaderException(P2pWsHeaders.RECEIVER)

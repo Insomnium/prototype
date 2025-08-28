@@ -15,7 +15,7 @@ app:
         schema.registry.url: http://localhost:8081
         value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
         auto.register.schemas: false
-        use.latest.version: true
+        use.latest.version: false
         schema.reflection: true
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.LongDeserializer

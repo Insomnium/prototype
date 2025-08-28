@@ -22,10 +22,6 @@ class WSConf(
     override fun registerStompEndpoints(registry: StompEndpointRegistry): Unit = with(registry) {
         addEndpoint("/ws")
             .setAllowedOrigins("http://localhost:63342")
-//            .addInterceptors(HttpSessionHandshakeInterceptor().apply {
-//                isCreateSession = true
-//            })
-//            .setHandshakeHandler(handshakeInterceptor)
             .withSockJS()
     }
 
