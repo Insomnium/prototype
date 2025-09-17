@@ -6,6 +6,7 @@ services:
       - all
       - db
       - keycloak
+      - core
     ports:
       - 5432:5432
     volumes:
@@ -23,6 +24,7 @@ services:
     profiles:
       - all
       - index
+      - core
     environment:
       - node.name=elasticsearch
       - cluster.name=es-docker-cluster
@@ -30,7 +32,7 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=false
-      - http.cors.allow-origin=http://localhost:8085
+      - http.cors.allow-origin=http://localhost:8085,http://paganblacker.internal:8085
       - http.cors.enabled=true
       - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
       - http.cors.allow-credentials=true
@@ -81,13 +83,16 @@ services:
     profiles:
       - all
       - kafka
+      - core
+      - broker
     ports:
       - "9092:9092"
       - "9101:9101"
+      - "9093:9093"
     environment:
       KAFKA_NODE_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT,PAGANBLACKER_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092,PAGANBLACKER_HOST://paganblacker.internal:9093'
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
@@ -102,7 +107,7 @@ services:
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       KAFKA_PROCESS_ROLES: 'broker,controller'
       KAFKA_CONTROLLER_QUORUM_VOTERS: '1@broker:29093'
-      KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_LISTENERS: 'PLAINTEXT://broker:29092,CONTROLLER://broker:29093,PLAINTEXT_HOST://0.0.0.0:9092,PAGANBLACKER_HOST://0.0.0.0:9093'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
@@ -119,6 +124,7 @@ services:
     profiles:
       - all
       - kafka
+      - core
     depends_on:
       - broker
     ports:
@@ -139,6 +145,7 @@ services:
     profiles:
       - all
       - kafka
+      - core
     depends_on:
       schema-registry:
         condition: service_healthy
@@ -153,6 +160,7 @@ services:
     profiles:
       - all
       - kafka
+      - core
     depends_on:
       - broker
       - schema-registry
@@ -185,6 +193,7 @@ services:
     profiles:
       - all
       - kafka
+      - core
     depends_on:
       - broker
       - schema-registry
@@ -260,6 +269,106 @@ services:
 #      - SYNTAX_HIGHLIGHT=true  # Optional: Enable syntax highlighting for code files
 #      - MULTI_SELECT=true  # Optional: Enable multi-file selection and download
 
+  cassandra-1:
+    image: "cassandra:5.0.5"  # cassandra:4.1.3
+    container_name: "cassandra-1"
+    profiles:
+      - all
+      - cassandra
+    ports:
+      - 7000:7000
+      - 9042:9042
+    networks:
+      - cassandra-net
+    mem_limit: 1g
+    environment:
+      - CASSANDRA_START_RPC=true       # default
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
+      - CASSANDRA_LISTEN_ADDRESS=auto  # default, use IP addr of container # = CASSANDRA_BROADCAST_ADDRESS
+      - CASSANDRA_CLUSTER_NAME=my-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=prototype-dc1
+      - MAX_HEAP_SIZE=768M
+    volumes:
+      - cassandra-node-01:/var/lib/cassandra:rw
+    restart:
+      on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool status" ]
+      interval: 2m
+      start_period: 2m
+      timeout: 10s
+      retries: 3
+
+  cassandra-2:
+    image: "cassandra:5.0.5"  # cassandra:4.1.3
+    container_name: "cassandra-2"
+    profiles:
+      - all
+      - cassandra
+    ports:
+      - 9043:9042    
+    networks:
+      - cassandra-net
+    mem_limit: 1g
+    environment:
+      - CASSANDRA_START_RPC=true       # default
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
+      - CASSANDRA_LISTEN_ADDRESS=auto  # default, use IP addr of container # = CASSANDRA_BROADCAST_ADDRESS
+      - CASSANDRA_CLUSTER_NAME=my-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=prototype-dc1
+      - CASSANDRA_SEEDS=cassandra-1
+      - MAX_HEAP_SIZE=768M
+    depends_on:
+      cassandra-1:
+        condition: service_healthy
+    volumes:
+      - cassandra-node-02:/var/lib/cassandra:rw
+    restart:
+      on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool status" ]
+      interval: 2m
+      start_period: 2m
+      timeout: 10s
+      retries: 3
+
+  cassandra-3:
+    image: "cassandra:5.0.5"  # cassandra:4.1.3
+    container_name: "cassandra-3"
+    profiles:
+      - all
+      - cassandra
+    ports:
+      - 9044:9042
+    networks:
+      - cassandra-net
+    mem_limit: 1g
+    environment:
+      - CASSANDRA_START_RPC=true       # default
+      - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
+      - CASSANDRA_LISTEN_ADDRESS=auto  # default, use IP addr of container # = CASSANDRA_BROADCAST_ADDRESS
+      - CASSANDRA_CLUSTER_NAME=my-cluster
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_DC=prototype-dc1
+      - CASSANDRA_SEEDS=cassandra-1
+      - MAX_HEAP_SIZE=768M
+    depends_on:
+      cassandra-2:
+        condition: service_healthy
+    volumes:
+      - cassandra-node-03:/var/lib/cassandra:rw
+    restart:
+      on-failure
+    healthcheck:
+      test: [ "CMD-SHELL", "nodetool status" ]
+      interval: 2m
+      start_period: 2m
+      timeout: 10s
+      retries: 3
+
+
 volumes:
   elastic_data:
     driver: local
@@ -271,7 +380,13 @@ volumes:
       type: none
       o: bind
       device: ./photo
+  cassandra-node-01:
+  cassandra-node-02:
+  cassandra-node-03:
 
 networks:
   elastic:
     driver: bridge
+  cassandra-net:
+    driver: bridge
+
