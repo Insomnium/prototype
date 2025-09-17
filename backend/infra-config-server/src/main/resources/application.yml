@@ -1,0 +1,43 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: git@github.com:Insomnium/prototype-config.git
+          search-paths:
+            - core
+            - infra # TODO: create
+          # public key must be added to ~/.ssh/known_hosts. E.g.:
+          # github.com ssh-ed25519 $(cat ~/.ssh/path_to_key.pub)
+          host-key-algorithm: ssh-ed25519
+          # git branch
+          default-label: main
+          clone-on-start: true
+          # git refresh interval in seconds
+          refresh-rate: 120
+        # Do not return 404 when particular application/profile not managed via env source
+        accept-empty: true
+
+management:
+  endpoints:
+    web.exposure.include: '*'
+  endpoint:
+    info.access: read_only
+    env.access: read_only
+    configprops.access: read_only
+    loggers.access: read_only
+    metrics.access: read_only
+    threaddump.access: read_only
+    prometheus.access: read_only
+    refresh.access: read_only
+    health:
+      show-details: always
+      access: read_only
+logging:
+  level:
+    org.springframework.cloud.config: DEBUG
