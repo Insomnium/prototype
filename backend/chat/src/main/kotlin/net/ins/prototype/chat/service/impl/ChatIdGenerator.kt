@@ -1,6 +1,7 @@
-package net.ins.prototype.chat.service
+package net.ins.prototype.chat.service.impl
 
 import net.ins.prototype.chat.event.P2pMessageContext
+import net.ins.prototype.chat.service.IdGenerator
 import org.springframework.stereotype.Component
 
 @Component

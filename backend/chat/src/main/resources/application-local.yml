@@ -5,6 +5,7 @@ logging:
   level:
     org.springframework.web: DEBUG
     org.springframework.messaging.simp: DEBUG
+#    org.springframework.security: DEBUG
 
 app:
   kafka:

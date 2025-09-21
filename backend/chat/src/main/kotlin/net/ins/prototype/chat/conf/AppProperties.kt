@@ -7,6 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AppProperties(
     val kafka: KafkaProperties,
     val integrations: Integrations,
+    val instanceId: String,
 )
 
 data class Integrations(

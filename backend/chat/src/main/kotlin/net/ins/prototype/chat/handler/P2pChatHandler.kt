@@ -10,7 +10,7 @@ import net.ins.prototype.chat.event.buildReceiverHeader
 import net.ins.prototype.chat.event.buildSenderHeader
 import net.ins.prototype.chat.model.ChatMessageRequest
 import net.ins.prototype.chat.model.ChatMessageResponse
-import net.ins.prototype.chat.service.ChatIdGenerator
+import net.ins.prototype.chat.service.impl.ChatIdGenerator
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.messaging.handler.annotation.MessageMapping

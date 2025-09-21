@@ -5,7 +5,6 @@ import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer
-import jakarta.annotation.PostConstruct
 import net.ins.prototype.chat.event.UnserializableMessageWrapper.UnserializableMessage
 import net.ins.prototype.common.logger
 import org.apache.kafka.common.serialization.Deserializer
