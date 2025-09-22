@@ -4,6 +4,7 @@
 var socket = null
 var stompClient = null
 var fakeUserId = null
+var serverPort = '8082'
 
 const showMessage = (message, isClient) => {
     let messageContainer = document.createElement('div')
@@ -33,8 +34,12 @@ const showMessage = (message, isClient) => {
     document.getElementById('messages').appendChild(messageContainer)
 };
 
+const changeServerPort = () => {
+    serverPort = document.getElementById('instance_port').value
+}
+
 function connect() {
-    socket = socket || new SockJS('http://localhost:8082/ws')
+    socket = socket || new SockJS(`http://localhost:${serverPort}/ws`)
     stompClient = stompClient || Stomp.over(socket)
 
     fakeUserId = document.getElementById('fake_hardcoded_user_id').value;
