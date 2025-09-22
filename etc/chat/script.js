@@ -50,6 +50,7 @@ function connect() {
 
     fakeUserId = document.getElementById('fake_hardcoded_user_id').value;
 
+
     stompClient.connect({ 'X-sender-id': fakeUserId }, frame => {
         console.log('Connected: ' + frame)
 
@@ -73,7 +74,9 @@ const sendMessage = () => {
             'X-sender-id': fakeUserId,
             'X-receiver-id': receiverId,
         }
-        stompClient.send('/app/chat', headers, JSON.stringify({ 'content': messageContent }))
+        const attendees = [ fakeUserId, receiverId ]
+        const chatName = `${attendees[0]}-${attendees[1]}`
+        stompClient.send(`/app/chat/${chatName}`, headers, JSON.stringify({ 'content': messageContent }))
         document.getElementById('inputMessage').value = ''
     }
 };

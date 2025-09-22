@@ -17,7 +17,7 @@ data class MessageCassandraEntity(
     @Column("created_at")
     val createdAt: Instant,
     @Column("modified_at")
-    val modifiedAt: Instant,
+    val modifiedAt: Instant?,
     @Column("content")
     val content: String,
     @Column("sender_id")

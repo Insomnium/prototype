@@ -7,4 +7,5 @@ data class ChatMessageResponse(
 data class ChatMessage(
     val content: String,
     val sender: String,
+    val chatRoomId: String,
 )

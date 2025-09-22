@@ -1,12 +1,13 @@
 package net.ins.prototype.chat.handler
 
 import com.google.protobuf.Message
-import jakarta.websocket.SendResult
 import net.ins.prototype.chat.auth.receiverId
 import net.ins.prototype.chat.auth.senderId
 import net.ins.prototype.chat.conf.AppProperties
+import net.ins.prototype.chat.dao.repo.MessageCassandraRepo
 import net.ins.prototype.chat.event.P2pMessageContext
 import net.ins.prototype.chat.event.P2pMessageEvent
+import net.ins.prototype.chat.event.buildChatRoomHeader
 import net.ins.prototype.chat.event.buildReceiverHeader
 import net.ins.prototype.chat.event.buildSenderHeader
 import net.ins.prototype.chat.model.ChatMessage
@@ -16,12 +17,14 @@ import net.ins.prototype.chat.service.impl.ChatIdGenerator
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.ApplicationListener
 import org.springframework.kafka.core.KafkaTemplate
+import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
+import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 @Controller
@@ -29,17 +32,19 @@ class P2pChatHandler(
     private val messagingTemplate: SimpMessagingTemplate,
     private val kafkaTemplate: KafkaTemplate<String, Message>,
     private val chatIdGenerator: ChatIdGenerator,
+    private val messageRepo: MessageCassandraRepo,
     appProperties: AppProperties,
 ) : ApplicationListener<SessionSubscribeEvent> {
 
     val p2pMessageTopic = appProperties.integrations.topics.p2pMessage
 
-    @MessageMapping("/chat")
+    @MessageMapping("/chat/{roomId}")
     fun onMessageReceived(
         @Payload message: ChatMessageRequest,
         headerAccessor: SimpMessageHeaderAccessor,
+        @DestinationVariable roomId: String,
     ) {
-        sendToKafka(buildContext(headerAccessor, message))
+        sendToKafka(buildContext(headerAccessor, message, roomId))
             .thenAccept { onSentContext -> sendToSocket(onSentContext) }
     }
 
@@ -65,6 +70,7 @@ class P2pChatHandler(
                     ChatMessage(
                         sender = context.senderId,
                         content = context.content,
+                        chatRoomId = context.roomId,
                     )
                 )
             ),
@@ -84,20 +90,24 @@ class P2pChatHandler(
         listOf(
             context.buildSenderHeader(),
             context.buildReceiverHeader(),
+            context.buildChatRoomHeader(),
         ),
     )
 
     private fun buildContext(
         headerAccessor: SimpMessageHeaderAccessor,
-        message: ChatMessageRequest
+        message: ChatMessageRequest,
+        roomId: String,
     ) = P2pMessageContext(
         senderId = headerAccessor.senderId,
         receiverId = headerAccessor.receiverId,
+        roomId = roomId,
         content = message.content,
     )
 
     override fun onApplicationEvent(event: SessionSubscribeEvent) {
         val subscribedUserId = requireNotNull(event.user?.name)
-        sendToSocket(P2pMessageContext("admin", subscribedUserId, "Welcome back online"))
+        val debug = messageRepo.getMessages("user1-user2", UUID.fromString("beb259e0-9333-11f0-9707-5711f3fa4b98"), 2)
+        sendToSocket(P2pMessageContext("admin", subscribedUserId, content = "Welcome back online"))
     }
 }
