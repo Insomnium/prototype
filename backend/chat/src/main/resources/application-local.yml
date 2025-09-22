@@ -1,11 +1,16 @@
 server:
   port: 8082
 
+spring:
+  cassandra:
+    contact-points: localhost:9042,localhost:9043,localhost:9044
+    keyspace-name: chat
+    local-datacenter: prototype-dc1
+
 logging:
   level:
     org.springframework.web: DEBUG
     org.springframework.messaging.simp: DEBUG
-#    org.springframework.security: DEBUG
 
 app:
   kafka:
