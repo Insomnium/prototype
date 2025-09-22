@@ -13,6 +13,7 @@ app:
         name: p2p-message
 
   kafka:
+    client-id: PAGANBLACKER
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     producer:
       key-serializer: org.apache.kafka.common.serialization.LongSerializer

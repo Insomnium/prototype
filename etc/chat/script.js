@@ -6,6 +6,12 @@ var stompClient = null
 var fakeUserId = null
 var serverPort = '8082'
 
+const showMessages = (messages, isClient) => {
+    for (const message of messages) {
+        showMessage(message, isClient)
+    }
+}
+
 const showMessage = (message, isClient) => {
     let messageContainer = document.createElement('div')
     messageContainer.classList.add('message')
@@ -52,7 +58,7 @@ function connect() {
          * by spring due to '/user' subscription prefix
          */
         stompClient.subscribe(`/user/topic/messages`, message => {
-            showMessage(JSON.parse(message.body), false)
+            showMessages(JSON.parse(message.body)['messages'], false)
         })
     })
 };
