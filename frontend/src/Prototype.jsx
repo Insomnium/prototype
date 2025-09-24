@@ -2,6 +2,8 @@ import ContactSearchContainer from "./component/ContactSearchContainer.jsx";
 import ContactListContainer from "./component/ContactListContainer.jsx";
 import ChatWindow from "./component/ChatWindow.jsx";
 import {useState} from "react";
+import { Provider } from "react-redux";
+import store from "./store/store.js";
 
 const Prototype = () => {
 
@@ -13,18 +15,20 @@ const Prototype = () => {
 
     return (
         <>
-            <div className="contact-list">
-                <div className="contact-list-header">
-                    <h2>Chats</h2>
-                    <button id="new-chat-btn">New Chat</button>
+            <Provider store={store} >
+                <div className="contact-list">
+                    <div className="contact-list-header">
+                        <h2>Chats</h2>
+                        <button id="new-chat-btn">New Chat</button>
+                    </div>
+
+                    <ContactSearchContainer />
+
+                    <ContactListContainer onContactSelected={handleContactSelected} selectedContactId={selectedContactId} />
                 </div>
 
-                <ContactSearchContainer />
-
-                <ContactListContainer onContactSelected={handleContactSelected} selectedContactId={selectedContactId} />
-            </div>
-
-            <ChatWindow selectedContactId={selectedContactId} />
+                <ChatWindow selectedContactId={selectedContactId} />
+            </Provider>
         </>
     )
 };
