@@ -18,7 +18,12 @@ const ContactListContainer = ({onContactSelected, selectedContactId}) => {
     ];
 
     useEffect(() => {
-        setContacts(sampleContacts)
+        // setContacts(sampleContacts)
+        const fetchContacts = async () => {
+            const apiContacts = sampleContacts // TODO: call BE
+            setContacts(apiContacts)
+        }
+        fetchContacts()
     }, []);
 
     const handleContactClick = (contactId) => {
