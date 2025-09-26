@@ -1,9 +1,9 @@
 package net.ins.prototype.backend.profile.event
 
 import net.ins.prototype.backend.common.event.UnserializableEvent
-import net.ins.prototype.backend.common.logger
 import net.ins.prototype.backend.conf.KafkaConf
 import net.ins.prototype.backend.profile.service.ProfileIndexService
+import net.ins.prototype.common.logger
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.kafka.support.Acknowledgment

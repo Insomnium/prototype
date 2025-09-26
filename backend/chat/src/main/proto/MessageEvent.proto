@@ -1,0 +1,11 @@
+syntax = "proto3";
+option java_outer_classname = "ChatMessageWrapper";
+option java_multiple_files = true;
+
+package net.ins.prototype.chat.event;
+
+message P2pMessageEvent {
+    string senderId = 1;
+    string receiverId = 2;
+    string content = 3;
+}

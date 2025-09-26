@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
 
+echo starting
 while ! nc -z schema-registry 8081; do
   echo "Waiting for Schema Registry..."
   sleep 5
