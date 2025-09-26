@@ -37,8 +37,8 @@ const mergeAggregate = (contacts, profiles) => {
     const profile = profilesById[c.id]
     return {
         ...c,
-        avatar: profile.avatar,
-        name: profile.name
+        avatar: profile?.avatar,
+        name: profile?.name
     }
   });
 };

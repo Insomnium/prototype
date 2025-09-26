@@ -46,12 +46,29 @@ const ChatWindowHeader = ({ selectedContact }) => {
 const ChatMessageAreaHint = ({ selectedContact }) => 
     selectedContact == null ? <p>Select a contact from the list to view your conversation</p> : null
 
+const ChatHeaderStatus = ({status}) => {
+    if (status.toLowerCase() == 'online') {
+        return (
+            <div className="status-container" >
+                <p id="current-contact-status">{status}</p>
+                <span id="status-indicator" class="status-indicator-online" />
+            </div>
+        )
+    }
+
+    return (
+        <div className="status-container" >
+            <p id="current-contact-status">{status}</p>
+        </div>
+    )
+};
+
 const ChatHeaderContactPlate = ({ selectedContact }) => {
     if (selectedContact != null) {
         return (
             <>
                 <h3 id="current-contact-name">{selectedContact.name}</h3>
-                <p id="current-contact-status">Online</p>
+                <ChatHeaderStatus status={selectedContact.status} />
             </>
         )
     }
