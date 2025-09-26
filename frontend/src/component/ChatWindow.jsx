@@ -1,20 +1,14 @@
-const ChatWindow = ({ selectedContactId }) => {
+import { useSelector } from "react-redux";
+import { getSelectedContact } from "../store/contactListSlice";
+
+const ChatWindow = () => {
+
+    const selectedContact = useSelector(getSelectedContact)
+
     return (
         <>
             <div className="chat-window">
-                <div className="chat-header">
-                    <div className="chat-header-avatar" id="current-contact-avatar">JD</div>
-                    <div className="chat-header-info">
-                        <h3 id="current-contact-name">Select a contact to start chatting (debug: selectedContactId: {selectedContactId})</h3>
-                        <p id="current-contact-status">Online</p>
-                    </div>
-                </div>
-
-                <div className="chat-messages" id="chat-messages">
-                    <div className="welcome-message">
-                        <p>Select a contact from the list to view your conversation</p>
-                    </div>
-                </div>
+                <ChatWindowHeader selectedContact={selectedContact} />
 
                 <div className="chat-input-container">
                     <textarea className="chat-input" id="message-input" placeholder="Type a message..." rows="1"></textarea>
@@ -28,6 +22,41 @@ const ChatWindow = ({ selectedContactId }) => {
                 </div>
             </div>
         </>
+    )
+}
+
+const ChatWindowHeader = ({ selectedContact }) => {
+    return (
+        <>
+        <div className="chat-header">
+            <div className="chat-header-avatar" id="current-contact-avatar">{selectedContact?.avatar}</div>
+            <div className="chat-header-info">
+                <ChatHeaderContactPlate selectedContact={selectedContact} />
+            </div>
+        </div>
+        <div className="chat-messages" id="chat-messages">
+            <div className="welcome-message">
+                <ChatMessageAreaHint selectedContact={selectedContact} />
+            </div>
+        </div>
+        </>
+    )
+}
+
+const ChatMessageAreaHint = ({ selectedContact }) => 
+    selectedContact == null ? <p>Select a contact from the list to view your conversation</p> : null
+
+const ChatHeaderContactPlate = ({ selectedContact }) => {
+    if (selectedContact != null) {
+        return (
+            <>
+                <h3 id="current-contact-name">{selectedContact.name}</h3>
+                <p id="current-contact-status">Online</p>
+            </>
+        )
+    }
+    return (
+        <h3 id="current-contact-name">Select a contact to start chatting</h3>
     )
 }
 

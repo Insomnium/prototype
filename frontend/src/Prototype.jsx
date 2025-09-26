@@ -1,17 +1,10 @@
 import ContactSearchContainer from "./component/ContactSearchContainer.jsx";
 import ContactListContainer from "./component/ContactListContainer.jsx";
 import ChatWindow from "./component/ChatWindow.jsx";
-import {useState} from "react";
 import { Provider } from "react-redux";
 import store from "./store/store.js";
 
 const Prototype = () => {
-
-    const [selectedContactId, setSelectedContactId] = useState(null)
-
-    const handleContactSelected = (contactId) => {
-        setSelectedContactId(contactId)
-    }
 
     return (
         <>
@@ -24,10 +17,10 @@ const Prototype = () => {
 
                     <ContactSearchContainer />
 
-                    <ContactListContainer onContactSelected={handleContactSelected} selectedContactId={selectedContactId} />
+                    <ContactListContainer />
                 </div>
 
-                <ChatWindow selectedContactId={selectedContactId} />
+                <ChatWindow />
             </Provider>
         </>
     )
