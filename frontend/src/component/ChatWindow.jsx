@@ -1,24 +1,42 @@
 import { useSelector } from "react-redux";
 import { getSelectedContact } from "../store/contactListSlice";
 import { useState } from "react";
+import { format } from "date-fns";
 
 const ChatWindow = () => {
 
+    const [ messages, setMessages ] = useState([])    
+    const [ input, setInput ] = useState('')
     const selectedContact = useSelector(getSelectedContact)
 
     return (
         <>
             <div className="chat-window">
-                <ChatWindowHeader selectedContact={selectedContact} />
-                <ChatInput />
+                <ChatMainArea selectedContact={selectedContact} messages={messages} />
+                <ChatInput 
+                    selectedContact={selectedContact} 
+                    messages={messages} 
+                    setMessages={setMessages}
+                    input={input}
+                    setInput={setInput} />
             </div>
         </>
     )
 };
 
-const ChatInput = () => {
+const ChatMessage = ({ text, timestamp, isClient }) => {
+    const className = 'message ' + (isClient ? 'sent' : 'received')
+    return (
+        <>
+            <div className={className} >
+                <div className="message-text">{text}</div>
+                <div className="message-time">{timestamp}</div>
+            </div>
+        </>
+    )
+};
 
-    const [ input, setInput ] = useState('')
+const ChatInput = ({ selectedContact, messages, setMessages, input, setInput }) => {
     const [ submitionDisabled, setSubmitionDisabled ] = useState(true)
 
     const onChange = (event) => {
@@ -28,9 +46,10 @@ const ChatInput = () => {
     }
 
     const handleSubmit = () => {
-        console.log(`>>> ${input}`)
+        console.log(`>>> [to ${selectedContact.id}]: ${input}`)
         setSubmitionDisabled(true)
         setInput('')
+        setMessages([...messages, { text: input, timestamp: new Date().getTime(), isClient: true }])
     }
 
     const interceptKeyDown = (event) => {
@@ -56,7 +75,7 @@ const ChatInput = () => {
     )
 };
 
-const ChatWindowHeader = ({ selectedContact }) => {
+const ChatMainArea = ({ selectedContact, messages }) => {
     return (
         <>
         <div className="chat-header">
@@ -66,6 +85,11 @@ const ChatWindowHeader = ({ selectedContact }) => {
             </div>
         </div>
         <div className="chat-messages" id="chat-messages">
+            {
+                messages.map(m => (
+                    <ChatMessage key={m.timestamp} isClient={m.isClient} text={m.text} timestamp={format(m.timestamp, 'MM/dd/yyyy HH:mm:ss')} />
+                ))
+            }
             <div className="welcome-message">
                 <ChatMessageAreaHint selectedContact={selectedContact} />
             </div>
@@ -118,6 +142,6 @@ const ChatSubmitButtonSvg = () => {
             </svg>
         </>
     )
-}
+};
 
 export default ChatWindow;
