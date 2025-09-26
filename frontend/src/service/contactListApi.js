@@ -23,14 +23,16 @@ export const contactListApi = {
         { id: 'user3', lastMessage: 'Okay', time: '2025-09-23', status: 'Online' },
         { id: 'user4', lastMessage: 'Fine', time: '2025-09-26', status: 'Offline' },
         { id: 'user5', lastMessage: 'KK', time: '2025-09-26', status: 'Online' },
+        { id: 'user6', lastMessage: 'When?', time: '2025-09-26', status: 'Online' },
     ]
 };
 
 export const profileApi = {
   getProfiles: async (ids) => [
-        { id: 'user2', avatar: 'UT', name: 'User Two' },
-        { id: 'user3', avatar: 'UT', name: 'User Three' },
-        { id: 'user4', avatar: 'UF', name: 'User Four' },
-        { id: 'user5', avatar: 'UF', name: 'User Five' },
+        { id: 'user2', avatar: 'LV', name: 'Liz Vicious' },
+        { id: 'user3', avatar: 'MM', name: 'Melisa Mendiny' },
+        { id: 'user4', avatar: 'DS', name: 'Desirae Spencer' },
+        { id: 'user5', avatar: 'SF', name: 'Sweetie Fox' },
+        { id: 'user6', avatar: 'AT', name: 'Alison Tyler' },
       ]
 };
