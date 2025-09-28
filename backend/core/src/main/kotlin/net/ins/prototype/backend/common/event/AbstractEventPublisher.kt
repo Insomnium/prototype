@@ -1,8 +1,8 @@
 package net.ins.prototype.backend.common.event
 
-import net.ins.prototype.backend.common.logger
 import net.ins.prototype.backend.conf.AppProperties
 import net.ins.prototype.backend.conf.Topics
+import net.ins.prototype.common.logger
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.kafka.core.KafkaTemplate

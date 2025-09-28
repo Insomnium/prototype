@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prototype chat client</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js" ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js" ></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<h2>Enjoy the conversation</h2>
+
+<div id="instance">
+    <input id="instance_port" value="8082" />
+    <button id="instance_port_submit" onclick="changeServerPort()">Change server port</button>
+</div>
+<div id="fake_auth">
+    <input type="user_id" id="fake_hardcoded_user_id" placeholder="Enter your fake-authorized user ID"/>
+    <button id="fake_auth_submit" onclick="connect()" >Fake auth</button>
+</div>
+
+<div id="messages">
+
+</div>
+
+<div id="receiver_id">
+    <input type="receiver_user_id" id="receiver_user_id" placeholder="Receiver id"/>
+</div>
+<div class="field" >
+    <input type="text" id="inputMessage" placeholder="Type message here" onkeydown="onInputEnter(this)"/>
+    <button id="send" onclick="sendMessage()">Send</button>
+</div>
+<script src="script.js"/>
+</body>
+</html>

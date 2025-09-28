@@ -3,10 +3,10 @@ package net.ins.prototype.backend.conf
 import com.github.thake.kafka.avro4k.serializer.KafkaAvro4kSerializer
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
-import net.ins.prototype.backend.common.logger
 import net.ins.prototype.backend.profile.event.Avro4kKotlinProfileDeserializer
 import net.ins.prototype.backend.profile.event.ProfileEvent
 import net.ins.prototype.backend.profile.event.UnserializableProfileEvent
+import net.ins.prototype.common.logger
 import org.apache.kafka.common.serialization.Deserializer
 import org.apache.kafka.common.serialization.LongSerializer
 import org.apache.kafka.common.serialization.Serializer

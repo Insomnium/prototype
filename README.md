@@ -46,6 +46,13 @@ To check Authorization Code Grant Type flow use following steps:
 4. Put it as the `code` parameter into "Keycloak/Auth with authorization code", perform POST x-www-form-urlencoded query:
 ![Request access token](etc/docs/keycloak_003_request-access-token.png)
 
+### Cloud Config Server
+Project contains Spring Cloud Config Server module (`config-server`) that uses separate (private) git 
+repository [prototype-config](https://github.com/Insomnium/prototype-config) as a backend. 
+
+Currently it overrides configuration for the `core` service to connect infrastructure (such as postgres, kafka, elasticsearch) deployed
+on another dedicated host in local network. For more infromation refer to `README.md` and `application.yml` in corresponding maven module. 
+
 # Frontend
 One day maybe
 

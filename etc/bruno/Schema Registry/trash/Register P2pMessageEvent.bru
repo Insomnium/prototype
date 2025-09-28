@@ -1,0 +1,23 @@
+meta {
+  name: Register P2pMessageEvent
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{schema-registry}}/subjects/net.ins.prototype.chat.event.P2pMessageEvent/versions
+  body: json
+  auth: inherit
+}
+
+headers {
+  ~Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+}
+
+body:json {
+  {
+    "schema": "syntax = \"proto3\";\npackage net.ins.prototype.chat.event;\n\noption java_outer_classname = \"ChatMessageWrapper\";\noption java_multiple_files = true;\n\nmessage P2pMessageEvent {\n  string senderId = 1;\n  string receiverId = 2;\n  string content = 3;\n}\n",
+    "schemaType": "PROTOBUF"
+  }
+  
+}
