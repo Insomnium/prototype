@@ -25,6 +25,8 @@
         <lombok.version>1.18.38</lombok.version>
         <protobuf.kafka.serializer.version>8.0.0</protobuf.kafka.serializer.version>
         <common-util.version>0.0.1-SNAPSHOT</common-util.version>
+        <liquibase.version>4.31.1</liquibase.version>
+        <liquibase.jdbc-wrapper.version>4.16.0</liquibase.jdbc-wrapper.version>
 
         <kotest.jvm.version>4.0.7</kotest.jvm.version>
         <kotest.version>5.9.1</kotest.version>
@@ -117,11 +119,31 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-stdlib</artifactId>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.liquibase</groupId>-->
-<!--            <artifactId>liquibase-core</artifactId>-->
-<!--        </dependency>-->
-
+        <!-- Cassandra liquibase stuff -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.liquibase.ext</groupId>
+            <artifactId>liquibase-cassandra</artifactId>
+            <version>${liquibase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.ing.data</groupId>
+            <artifactId>cassandra-jdbc-wrapper</artifactId>
+            <version>4.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <!-- END of Cassandra liquibase stuff -->
         <dependency>
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>

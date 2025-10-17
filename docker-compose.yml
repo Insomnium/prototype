@@ -153,6 +153,23 @@ services:
       - ${PWD}/etc/docker/kafka/schema:/schema
     entrypoint: /bin/sh -c "/schema/register_schema.sh"
 
+  cassandra-init:
+    container_name: cassandra-init
+    image: "cassandra:5.0.5"
+    restart: on-failure
+    profiles:
+      - all
+      - cassandra
+    depends_on:
+      - cassandra-1
+      - cassandra-2
+      - cassandra-3
+    networks:
+      - cassandra-net
+    volumes:
+      - ${PWD}/etc/docker/cassandra/init-chat.cql:/init.cql
+    command: /bin/bash -c "until cqlsh cassandra-1 -f /init.cql; do echo 'Waiting for cassandra readiness probe...'; sleep 2; done; echo 'Keyspaces have been initialized'"
+
   connect:
     image: cnfldemos/cp-server-connect-datagen:0.6.4-7.6.0
     hostname: connect
@@ -270,7 +287,7 @@ services:
 #      - MULTI_SELECT=true  # Optional: Enable multi-file selection and download
 
   cassandra-1:
-    image: "cassandra:5.0.5"  # cassandra:4.1.3
+    image: "cassandra:5.0.5"
     container_name: "cassandra-1"
     profiles:
       - all
@@ -291,8 +308,6 @@ services:
       - MAX_HEAP_SIZE=768M
     volumes:
       - cassandra-node-01:/var/lib/cassandra:rw
-    restart:
-      on-failure
     healthcheck:
       test: [ "CMD-SHELL", "nodetool status" ]
       interval: 2m
@@ -301,7 +316,7 @@ services:
       retries: 3
 
   cassandra-2:
-    image: "cassandra:5.0.5"  # cassandra:4.1.3
+    image: "cassandra:5.0.5"
     container_name: "cassandra-2"
     profiles:
       - all
@@ -325,8 +340,6 @@ services:
         condition: service_healthy
     volumes:
       - cassandra-node-02:/var/lib/cassandra:rw
-    restart:
-      on-failure
     healthcheck:
       test: [ "CMD-SHELL", "nodetool status" ]
       interval: 2m
@@ -335,7 +348,7 @@ services:
       retries: 3
 
   cassandra-3:
-    image: "cassandra:5.0.5"  # cassandra:4.1.3
+    image: "cassandra:5.0.5"
     container_name: "cassandra-3"
     profiles:
       - all
@@ -359,8 +372,6 @@ services:
         condition: service_healthy
     volumes:
       - cassandra-node-03:/var/lib/cassandra:rw
-    restart:
-      on-failure
     healthcheck:
       test: [ "CMD-SHELL", "nodetool status" ]
       interval: 2m

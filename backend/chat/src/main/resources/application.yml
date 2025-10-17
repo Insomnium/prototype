@@ -3,7 +3,25 @@ spring:
 
   config.import: optional:configserver:http://localhost:8888
 
-  cloud.config.fail-fast: true
+#  cloud.config.fail-fast: true
+
+  liquibase:
+    change-log: classpath*:/db/changeset/cassandra/master.xml
+    url: ${CASSANDRA_CLUSTER}
+    driver-class-name: com.ing.data.cassandra.jdbc.CassandraDriver
+    enabled: true
+
+  datasource:
+    name: cassandra_datasource
+    url: ${CASSANDRA_JDBC_URL}
+    driver-class-name: com.ing.data.cassandra.jdbc.CassandraDriver
+    hikari:
+      minimum-idle: 1
+
+  cassandra:
+    contact-points: ${CASSANDRA_CLUSTER}
+    keyspace-name: chat
+    local-datacenter: ${CASSANDRA_DC}
 
 app:
   instance-id: chat_app_${random.uuid}
