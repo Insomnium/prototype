@@ -1,8 +1,8 @@
-package net.ins.prototype.chat.auth.interceptor
+package net.ins.prototype.chat.socket.auth.interceptor
 
-import net.ins.prototype.chat.auth.model.UnauthorizedPrincipal
-import net.ins.prototype.chat.auth.model.UserIdPrincipal
-import net.ins.prototype.chat.auth.senderId
+import net.ins.prototype.chat.socket.auth.model.UnauthorizedPrincipal
+import net.ins.prototype.chat.socket.auth.model.UserIdPrincipal
+import net.ins.prototype.chat.socket.auth.senderId
 import net.ins.prototype.chat.service.UserSessionService
 import net.ins.prototype.common.logger
 import org.springframework.messaging.Message

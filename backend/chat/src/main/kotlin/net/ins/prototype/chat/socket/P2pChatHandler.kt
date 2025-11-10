@@ -1,10 +1,10 @@
-package net.ins.prototype.chat.handler
+package net.ins.prototype.chat.socket
 
 import com.google.protobuf.Message
-import net.ins.prototype.chat.auth.receiverId
-import net.ins.prototype.chat.auth.senderId
+import net.ins.prototype.chat.socket.auth.receiverId
+import net.ins.prototype.chat.socket.auth.senderId
 import net.ins.prototype.chat.conf.AppProperties
-import net.ins.prototype.chat.dao.repo.MessageCassandraRepo
+import net.ins.prototype.chat.dao.repo.MessageCRepo
 import net.ins.prototype.chat.event.P2pMessageContext
 import net.ins.prototype.chat.event.P2pMessageEvent
 import net.ins.prototype.chat.event.buildChatRoomHeader
@@ -32,7 +32,7 @@ class P2pChatHandler(
     private val messagingTemplate: SimpMessagingTemplate,
     private val kafkaTemplate: KafkaTemplate<String, Message>,
     private val chatIdGenerator: ChatIdGenerator,
-    private val messageRepo: MessageCassandraRepo,
+    private val messageRepo: MessageCRepo,
     appProperties: AppProperties,
 ) : ApplicationListener<SessionSubscribeEvent> {
 

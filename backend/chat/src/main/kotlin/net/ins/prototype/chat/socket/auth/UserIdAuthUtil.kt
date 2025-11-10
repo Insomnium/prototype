@@ -1,8 +1,8 @@
-package net.ins.prototype.chat.auth
+package net.ins.prototype.chat.socket.auth
 
-import net.ins.prototype.chat.auth.exception.MissingMandatoryHeaderException
-import net.ins.prototype.chat.auth.exception.MissingReceiverHeaderException
-import net.ins.prototype.chat.auth.exception.MissingSenderHeaderException
+import net.ins.prototype.chat.socket.exception.MissingMandatoryHeaderException
+import net.ins.prototype.chat.socket.exception.MissingReceiverHeaderException
+import net.ins.prototype.chat.socket.exception.MissingSenderHeaderException
 import org.springframework.messaging.support.NativeMessageHeaderAccessor
 
 object P2pWsHeaders {

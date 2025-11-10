@@ -1,4 +1,4 @@
-package net.ins.prototype.chat.auth.model
+package net.ins.prototype.chat.socket.auth.model
 
 import java.security.Principal
 
