@@ -15,11 +15,13 @@ export const fetchContacts = createAsyncThunk(
 
 export const fetchContactAggregates = createAsyncThunk(
   "fetchContactAggregates",
-  async (_, { rejectedWithValue }) => {
+  async (userId, { rejectedWithValue }) => {
     try {
-      const contacts = await contactListApi.getContacts();
-      const profiles = await profileApi.getProfiles(contacts.map(c => c.id));
+      console.log(`Fetching contacts for: ${userId}`)
+      const contacts = await contactListApi.getContacts(userId);
+      const profiles = await profileApi.getProfiles(contacts.data.map(c => c.contactId));
       const aggregates = mergeAggregate(contacts, profiles);
+      console.dir(aggregates);
       return aggregates;
     } catch (e) {
         rejectedWithValue(e.response?.data || "Failed to load contact aggregates");
@@ -28,17 +30,17 @@ export const fetchContactAggregates = createAsyncThunk(
 );
 
 const mergeAggregate = (contacts, profiles) => {
-  const profilesById = profiles.reduce((profile, p) => {
+  const profilesById = profiles.data.results.reduce((profile, p) => {
     profile[p.id] = p; // Key by 'id' property
     return profile;
   }, {});
 
-  return contacts.map(c => {
-    const profile = profilesById[c.id]
+  return contacts.data.map(c => {
+    const profile = profilesById[c.contactId]
     return {
         ...c,
         avatar: profile?.avatar,
-        name: profile?.name
+        name: profile?.title
     }
   });
 };

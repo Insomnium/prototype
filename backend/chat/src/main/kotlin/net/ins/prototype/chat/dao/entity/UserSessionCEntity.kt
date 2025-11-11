@@ -6,7 +6,7 @@ import org.springframework.data.cassandra.core.mapping.PrimaryKey
 import org.springframework.data.cassandra.core.mapping.Table
 
 @Table("user_session")
-data class UserSessionCassandraEntity(
+data class UserSessionCEntity(
     @PrimaryKey("user_id")
     val id: String,
     @field:Column("instance_id")

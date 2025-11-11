@@ -1,13 +1,15 @@
 package net.ins.prototype.chat.dao.repo
 
+import com.datastax.oss.driver.api.core.DefaultConsistencyLevel
 import net.ins.prototype.chat.dao.entity.MessageCassandraEntity
 import net.ins.prototype.chat.dao.entity.P2pMessagePk
 import org.springframework.data.cassandra.repository.CassandraRepository
+import org.springframework.data.cassandra.repository.Consistency
 import org.springframework.data.cassandra.repository.Query
 import org.springframework.data.repository.query.Param
 import java.util.UUID
 
-interface MessageCassandraRepo : CassandraRepository<MessageCassandraEntity, P2pMessagePk> {
+interface MessageCRepo : CassandraRepository<MessageCassandraEntity, P2pMessagePk> {
 
     @Query("""
         select *
@@ -17,6 +19,7 @@ interface MessageCassandraRepo : CassandraRepository<MessageCassandraEntity, P2p
         order by message_id desc
         limit :pageSize
     """)
+    @Consistency(DefaultConsistencyLevel.LOCAL_QUORUM)
     fun getMessages(
         @Param("roomId") roomId: String,
         @Param("afterMessageId") messageId: UUID,

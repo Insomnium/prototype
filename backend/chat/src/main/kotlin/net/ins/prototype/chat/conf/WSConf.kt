@@ -1,6 +1,6 @@
 package net.ins.prototype.chat.conf
 
-import net.ins.prototype.chat.auth.interceptor.UserIdAuthChannelInterceptor
+import net.ins.prototype.chat.socket.auth.interceptor.UserIdAuthChannelInterceptor
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.config.ChannelRegistration
 import org.springframework.messaging.simp.config.MessageBrokerRegistry

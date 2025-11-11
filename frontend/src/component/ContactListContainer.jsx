@@ -2,15 +2,18 @@ import { useEffect } from "react";
 import Contact from "./Contact.jsx";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchContactAggregates, getAllContacts, setSelectedContact } from "../store/contactListSlice.js";
+import { getFakeUserId } from "../store/fakeAuthSlice.js";
 
 const ContactListContainer = () => {
 
     const dispatch = useDispatch()
+    const fakeUserId = useSelector(getFakeUserId)
     const contacts = useSelector(getAllContacts)
 
     useEffect(() => {
-        dispatch(fetchContactAggregates())
-    }, [dispatch]);
+        const userId = fakeUserId;
+        dispatch(fetchContactAggregates(userId))
+    }, [dispatch, fakeUserId]);
 
     return (
         <>

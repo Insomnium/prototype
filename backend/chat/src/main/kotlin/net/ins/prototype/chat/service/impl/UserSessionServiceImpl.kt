@@ -3,6 +3,7 @@ package net.ins.prototype.chat.service.impl
 import net.ins.prototype.chat.conf.AppProperties
 import net.ins.prototype.chat.dao.entity.UserSessionCEntity
 import net.ins.prototype.chat.dao.repo.UserSessionCRepo
+import net.ins.prototype.chat.service.UserSessionService
 import org.springframework.stereotype.Service
 import java.time.Instant
 
@@ -10,9 +11,9 @@ import java.time.Instant
 class UserSessionServiceImpl(
     private val appProperties: AppProperties,
     private val userSessionCRepo: UserSessionCRepo,
-) {
+) : UserSessionService {
 
-    fun registerSession(userId: String) {
+    override fun registerSession(userId: String) {
         userSessionCRepo.save(
             UserSessionCEntity(
                 id = userId,
