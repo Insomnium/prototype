@@ -7,12 +7,15 @@ Currently consists of `core` service:
 * Postgres as a primary DB
 * ElasticSearch: indexing and searching performance improvement
 * Kafka to asynchronously index profiles being created
+* Spring Websocket for real-time chatting
+* Cassandra as a chat contacts and message history store
 
 ## Plans
-* Core service extension with support for basic business features like profile editing, including photos uploading (CDN?)
-* Spring Cloud Gateway based API Gateway (security, observability, underlying services scalability)
-* Dedicated chatting service
-* Observability (logging and tracing at least)
+- [X] Core service extension with support for basic business features like profile editing, including photos uploading (CDN?)
+- [ ] Spring Cloud Gateway based API Gateway (security, observability, underlying services scalability)
+- [ ] Dedicated chatting service **[In Progress]**
+- [ ] Observability (logging and tracing at least)
+- [ ] Simple SPA web frontend as a proof-of-concept **[In Progress]**
 
 ## Setup
 
@@ -54,7 +57,7 @@ Currently it overrides configuration for the `core` service to connect infrastru
 on another dedicated host in local network. For more infromation refer to `README.md` and `application.yml` in corresponding maven module. 
 
 # Frontend
-One day maybe
+Under construction, ReactJS based. I have neither FE skills nor motivation to gain them. Most of the frontend part of the project is a vibecoding results.
 
 # Local env URIs  
 [ElasticVue](http://localhost:8085/)  
