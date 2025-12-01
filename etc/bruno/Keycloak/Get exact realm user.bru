@@ -1,0 +1,20 @@
+meta {
+  name: Get exact realm user
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:9090/admin/realms/prototype/users?username=user_1
+  body: json
+  auth: none
+}
+
+params:query {
+  username: user_1
+}
+
+script:pre-request {
+  const accessToken = bru.getEnvVar('keycloak_access_token');
+  req.setHeader('Authorization', 'Bearer ' + accessToken);
+}

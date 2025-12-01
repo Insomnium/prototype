@@ -1,0 +1,16 @@
+meta {
+  name: List ream roles
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://localhost:9090/admin/realms/prototype/roles
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const accessToken = bru.getEnvVar('keycloak_access_token');
+  req.setHeader('Authorization', 'Bearer ' + accessToken);
+}
