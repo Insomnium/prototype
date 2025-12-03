@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!./.venv/bin/python
 
 from os import access
 import requests
@@ -135,8 +135,7 @@ def generate_chats(cql_session, profile_id, profile_ids):
     opponents_ids = [p_id for p_id in profile_ids if p_id != profile_id]
     print(f"Opponents for {profile_id} are: {opponents_ids}")
     for opponent_id in opponents_ids:
-        sorted_opponents = sorted([profile_id, opponent_id])
-        persist_chatroom(cql_session, sorted_opponents[0], sorted_opponents[1])
+        persist_chatroom(cql_session, profile_id, opponent_id)
 
 
 def persist_chatroom(cql_session, profile_id, opponent_id):
@@ -165,7 +164,7 @@ if __name__ == '__main__':
         keycloak_create_user(profile, keycloak_access_token)
         print(f"Profile {profile['title']} created with id: {profile_id}")
 
-    # Pre-generate chats (all-to-all)
+    # Pre-generate chats (all-to-all)i
     for profile_id in profile_ids:
         generate_chats(cassandra_session, profile_id, profile_ids)
 

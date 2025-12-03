@@ -1,9 +1,9 @@
 #!/usr/bin/bash
 
-./cleanup.sh
+./etc/cleanup.sh
 
 echo "Reuploading data"
-source ./.venv/bin/activate \
+source ./venv/bin/activate \
     && pip install -r ./etc/requirements \
     && python ./etc/init.py
 
