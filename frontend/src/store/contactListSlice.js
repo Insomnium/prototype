@@ -40,7 +40,8 @@ const mergeAggregate = (contacts, profiles) => {
     return {
         ...c,
         avatar: profile?.avatar,
-        name: profile?.title
+        name: profile?.title,
+        status: 'online'
     }
   });
 };
@@ -52,14 +53,29 @@ const contactListSlice = createSlice({
     contacts: [],
     error: null,
     searchTerm: null,
+    messagesByContact: { 216: [ { text: 'hi there', timestamp: new Date().getTime(), isClient: true } ] },
+    selectedContact: null
   },
   reducers: {
-    setSearchTerm: (state, action) => {
-      state.searchTerm = action.payload;
-    },
-    setSelectedContact: (state, action) => {
-      state.selectedContact = action.payload;
-    }
+      setSearchTerm: (state, action) => {
+          state.searchTerm = action.payload;
+      },
+      setSelectedContact: (state, action) => {
+          const contact = action.payload
+          const contactId = contact.contactId;
+          state.selectedContact = contact;
+          console.log(">>> set selected contact: ")
+          console.dir(contact)
+          const contactMessages = state.messagesByContact[contactId]
+          if (!contactMessages) {
+              const debug = { ...state.messagesByContact, [contactId]: [] }
+              state.messagesByContact = debug
+          }
+      },
+      sendMessage: (state, action) => {
+          // state.messagesByContact = { ...state.messagesByContact,  }
+          state.messagesByContact[state.selectedContact.contactId].push(action.payload)
+      }
   },
   extraReducers: (builder) => {
     builder
@@ -91,11 +107,15 @@ const contactListSlice = createSlice({
 });
 
 // export actions. Actions are matched with reducers
-export const { setSearchTerm, setSelectedContact } = contactListSlice.actions;
+export const { setSearchTerm, setSelectedContact, sendMessage } = contactListSlice.actions;
 
 // export selectors (selectors get part of the store state)
 export const getAllContacts = (state) => state.contacts.contacts;
 export const selectSearchTerm = (state) => state.searchTerm;
 export const getSelectedContact = (state) => state.contacts.selectedContact;
+export const getSelectedContactMessages = (state) => {
+    const contacts = state.contacts;
+    return (contacts.selectedContact && contacts.selectedContact && contacts.messagesByContact[contacts.selectedContact.contactId]) || [];
+}
 
 export default contactListSlice.reducer;

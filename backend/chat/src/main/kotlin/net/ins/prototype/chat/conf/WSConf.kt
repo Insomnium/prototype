@@ -21,7 +21,7 @@ class WSConf(
 
     override fun registerStompEndpoints(registry: StompEndpointRegistry): Unit = with(registry) {
         addEndpoint("/ws")
-            .setAllowedOrigins("http://localhost:63342")
+            .setAllowedOrigins("http://localhost:63342", "http://localhost:5173")
             .withSockJS()
     }
 
