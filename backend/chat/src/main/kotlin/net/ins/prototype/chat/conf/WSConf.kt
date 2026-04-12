@@ -1,5 +1,6 @@
 package net.ins.prototype.chat.conf
 
+import net.ins.prototype.chat.socket.auth.interceptor.HandshakeQueryParamSenderIdExtractorInterceptor
 import net.ins.prototype.chat.socket.auth.interceptor.UserIdAuthChannelInterceptor
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.simp.config.ChannelRegistration
@@ -12,6 +13,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 class WSConf(
     private val userIdAuthChannelInterceptor: UserIdAuthChannelInterceptor,
+    private val handshakeQueryParamSenderIdExtractorInterceptor: HandshakeQueryParamSenderIdExtractorInterceptor,
 ) : WebSocketMessageBrokerConfigurer {
 
     override fun configureMessageBroker(registry: MessageBrokerRegistry): Unit = with(registry) {
@@ -22,6 +24,7 @@ class WSConf(
     override fun registerStompEndpoints(registry: StompEndpointRegistry): Unit = with(registry) {
         addEndpoint("/ws")
             .setAllowedOrigins("http://localhost:63342", "http://localhost:5173")
+            .addInterceptors(handshakeQueryParamSenderIdExtractorInterceptor)
             .withSockJS()
     }
 

@@ -45,10 +45,10 @@ const changeServerPort = () => {
 }
 
 function connect() {
-    socket = socket || new SockJS(`http://localhost:${serverPort}/ws`)
+    fakeUserId = document.getElementById('fake_hardcoded_user_id').value;
+    socket = socket || new SockJS(`http://localhost:${serverPort}/ws?userId=${fakeUserId}`)
     stompClient = stompClient || Stomp.over(socket)
 
-    fakeUserId = document.getElementById('fake_hardcoded_user_id').value;
 
 
     stompClient.connect({ 'X-sender-id': fakeUserId }, frame => {

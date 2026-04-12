@@ -4,6 +4,8 @@ import net.ins.prototype.chat.socket.auth.model.UnauthorizedPrincipal
 import net.ins.prototype.chat.socket.auth.model.UserIdPrincipal
 import net.ins.prototype.chat.socket.auth.senderId
 import net.ins.prototype.chat.service.UserSessionService
+import net.ins.prototype.chat.socket.auth.P2pWsQueryParams
+import net.ins.prototype.chat.socket.auth.userId
 import net.ins.prototype.common.logger
 import org.springframework.messaging.Message
 import org.springframework.messaging.MessageChannel
@@ -34,7 +36,7 @@ class UserIdAuthChannelInterceptor(
     }
 
     private fun setMessageUserId(accessor: StompHeaderAccessor) {
-        accessor.user = runCatching { UserIdPrincipal(accessor.senderId) }.getOrElse { UnauthorizedPrincipal() }
+        accessor.user = runCatching { UserIdPrincipal(accessor.userId) }.getOrElse { UnauthorizedPrincipal() }
     }
 
     private fun registerSession(accessor: StompHeaderAccessor) {
