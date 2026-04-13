@@ -20,6 +20,10 @@ object P2pWsSessionAttributes {
     const val USER_ID = "userId"
 }
 
+object P2pConstants {
+    const val ADMIN_SENDER_ID = "admin"
+}
+
 val <T : NativeMessageHeaderAccessor> T.senderId: String
     get() = getNativeHeader(P2pWsHeaders.SENDER) { MissingSenderHeaderException() }
 
