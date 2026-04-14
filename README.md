@@ -59,7 +59,7 @@ Project contains Spring Cloud Config Server module (`config-server`) that uses s
 repository [prototype-config](https://github.com/Insomnium/prototype-config) as a backend. 
 
 Currently, it overrides configuration for the `core` service to connect infrastructure (such as postgres, kafka, elasticsearch) deployed
-on another dedicated host in local network. For more infromation refer to `README.md` and `application.yml` in corresponding maven module. 
+on another dedicated host in local network. For more infromation refer to `README.md` and `application.yml` in corresponding maven module.    
 
 # Frontend
 Under construction, ReactJS based. I have neither FE skills nor motivation to gain them. Most of the frontend part of the project is a vibecoding results.
