@@ -1,8 +1,10 @@
 package net.ins.prototype.chat.conf
 
 import com.google.protobuf.Message
+import io.confluent.kafka.schemaregistry.SchemaProvider
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient
+import io.confluent.kafka.schemaregistry.protobuf.ProtobufSchemaProvider
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
 import io.confluent.kafka.serializers.protobuf.KafkaProtobufSerializer
 import net.ins.prototype.chat.event.UnserializableMessageWrapper.UnserializableMessage
@@ -38,6 +40,8 @@ class KafkaConf(
     fun schemaRegistryClient(): SchemaRegistryClient = CachedSchemaRegistryClient(
         appProperties.kafka.consumer.properties["schema.registry.url"],
         100,
+        listOf<SchemaProvider>(ProtobufSchemaProvider()), // FIXME: these params have been added for schema-registry in tests as provider was not being autoconfigured
+        null,
     )
 
     // -------------------      Producer      -------------------

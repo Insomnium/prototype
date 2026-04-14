@@ -19,7 +19,7 @@ const ContactListContainer = () => {
         <>
             <div className="contacts-container" id="contacts-container">
                 {contacts.map(contact => (
-                    <Contact key={contact.id} contact={contact} onClick={() => dispatch(setSelectedContact(contact))} />
+                    <Contact key={contact.contactId} contact={contact} onClick={() => dispatch(setSelectedContact(contact))} />
                 ))}
             </div>
         </>

@@ -1,5 +1,5 @@
-import { useSelector } from "react-redux";
-import { getSelectedContact } from "../store/contactListSlice";
+import {useDispatch, useSelector} from "react-redux";
+import {getSelectedContact, getSelectedContactMessages, sendMessage} from "../store/contactListSlice";
 import { useState } from "react";
 import { format } from "date-fns";
 
@@ -8,15 +8,17 @@ const ChatWindow = () => {
     const [ messages, setMessages ] = useState([])    
     const [ input, setInput ] = useState('')
     const selectedContact = useSelector(getSelectedContact)
+    const selectedContactMessages = useSelector(getSelectedContactMessages)
+    const dispatch = useDispatch()
 
     return (
         <>
             <div className="chat-window">
-                <ChatMainArea selectedContact={selectedContact} messages={messages} />
+                <ChatMainArea selectedContact={selectedContact} messages={selectedContactMessages} />
                 <ChatInput 
                     selectedContact={selectedContact} 
-                    messages={messages} 
-                    setMessages={setMessages}
+                    messages={selectedContactMessages}
+                    setMessages={(it) => dispatch(sendMessage(it))}
                     input={input}
                     setInput={setInput} />
             </div>
@@ -47,9 +49,10 @@ const ChatInput = ({ selectedContact, messages, setMessages, input, setInput }) 
 
     const handleSubmit = () => {
         console.log(`>>> [to ${selectedContact.id}]: ${input}`)
+        console.log(selectedContact)
         setSubmitionDisabled(true)
         setInput('')
-        setMessages([...messages, { text: input, timestamp: new Date().getTime(), isClient: true }])
+        setMessages({ text: input, timestamp: new Date().getTime(), isClient: true })
     }
 
     const interceptKeyDown = (event) => {
@@ -102,7 +105,7 @@ const ChatMessageAreaHint = ({ selectedContact }) =>
     selectedContact == null ? <p>Select a contact from the list to view your conversation</p> : null
 
 const ChatHeaderStatus = ({status}) => {
-    if (status.toLowerCase() == 'online') {
+    if (status.toLowerCase() === 'online') {
         return (
             <div className="status-container" >
                 <p id="current-contact-status">{status}</p>
