@@ -1,12 +1,17 @@
 package net.ins.prototype.chat.socket
 
+import io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
+import io.kotest.assertions.assertSoftly
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.equals.shouldBeEqual
 import net.ins.prototype.chat.AbstractTestcontainersTest
 import net.ins.prototype.chat.PrototypeStompClientSessionProvider
+import net.ins.prototype.chat.event.P2pKafkaHeaders
+import net.ins.prototype.chat.event.P2pMessageEvent
 import net.ins.prototype.chat.model.ChatMessageRequest
 import net.ins.prototype.chat.socket.auth.P2pConstants
+import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
@@ -79,5 +84,38 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
         // and: USER_C does not receive any messages
         val receivedMessagesC = sessionWrapperC.awaitForMessages(expectedMessagesCount = Int.MAX_VALUE, awaitMs = MESSAGE_AWAIT_TIMEOUT_MILLIS)
         receivedMessagesC.shouldBeEmpty()
+
+        assertEventPublished<String, P2pMessageEvent>(
+            topic = appProperties.integrations.topics.p2pMessage.name,
+            keyDeserializer = StringDeserializer(),
+            valueDeserializer = KafkaProtobufDeserializer(
+                schemaRegistryClient,
+                appProperties.kafka.consumer.buildProperties(null),
+                P2pMessageEvent::class.java,
+            ),
+            expectedRecordsCount = 1,
+        ) {
+            assertSoftly {
+                it shouldHaveSize 1
+                val p2pMessageEvent = it.first()
+
+                val chatRoomHeaders = p2pMessageEvent.headers().headers(P2pKafkaHeaders.CHAT_ROOM)
+                chatRoomHeaders shouldHaveSize 1
+                chatRoomHeaders.first().value().toString(charset = Charsets.UTF_8) shouldBeEqual "p2p_${USER_A}_${USER_B}"
+
+                val senderHeaders = p2pMessageEvent.headers().headers(P2pKafkaHeaders.SENDER)
+                senderHeaders shouldHaveSize 1
+                senderHeaders.first().value().toString(charset = Charsets.UTF_8) shouldBeEqual USER_A.toString()
+
+                val receiverHeaders = p2pMessageEvent.headers().headers(P2pKafkaHeaders.RECEIVER)
+                receiverHeaders shouldHaveSize 1
+                receiverHeaders.first().value().toString(charset = Charsets.UTF_8) shouldBeEqual USER_B.toString()
+
+                val body = p2pMessageEvent.value()
+                body.content shouldBeEqual messageContent
+                body.senderId shouldBeEqual USER_A.toString()
+                body.receiverId shouldBeEqual USER_B.toString()
+            }
+        }
     }
 }
