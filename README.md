@@ -4,9 +4,9 @@ The first idea came to mind is a dating service. Why? Да хз.
 
 # Backend
 Currently consists of `core` service: 
-* Postgres as a primary DB
+* Postgres as a primary DB for profiles
 * ElasticSearch: indexing and searching performance improvement
-* Kafka to asynchronously index profiles being created
+* Kafka to asynchronously index profiles being created, chat messages replication
 * Spring Websocket for real-time chatting
 * Cassandra as a chat contacts and message history store
 
@@ -23,12 +23,17 @@ Currently consists of `core` service:
 
 1. Use `docker-compose.yml` from the root folder to setup local infrastructure. Run: `docker compose --profile all up`
 2. Build and run core service
-    1. Navigate `backend/core/core` folder
-    2. Build service via `./mvnw clean package`
-    3. Run it by executing `java -jar target/{path-to-executable-jar} --spring.profiles.active=local`
-    4. Check out APIs (e.g. using Bruno collection from _etc/.bruno_ folder in the root of the project)
-    5. Track results in DB, ES, Kafka (see [Local env URIs](#-local-env-uris) section)    
-   
+   1. Navigate `backend/core` folder
+   2. Build service via `./mvnw clean package`
+   3. Run it by executing `java -jar target/{path-to-executable-jar} --spring.profiles.active=local`
+   4. Check out APIs (e.g. using Bruno collection from _etc/.bruno_ folder in the root of the project)
+   5. Track results in DB, ES, Kafka (see [Local env URIs](#-local-env-uris) section)
+3. Build and run chat service
+   1. Navigate to `backend/chat` folder
+   2. Build service via `./mvnw clean package`
+   3. Run it by executing `java -jar target/{path-to-executable-jar} --spring.profiles.active=local`
+   4. Open either `etc/index.html` for simple test or build and run FE SPA (see [Frontend](#-frontend) section)
+
 Makefile is to be done
 
 ### Authentication & authorization via Keycloak
@@ -53,11 +58,22 @@ To check Authorization Code Grant Type flow use following steps:
 Project contains Spring Cloud Config Server module (`config-server`) that uses separate (private) git 
 repository [prototype-config](https://github.com/Insomnium/prototype-config) as a backend. 
 
-Currently it overrides configuration for the `core` service to connect infrastructure (such as postgres, kafka, elasticsearch) deployed
+Currently, it overrides configuration for the `core` service to connect infrastructure (such as postgres, kafka, elasticsearch) deployed
 on another dedicated host in local network. For more infromation refer to `README.md` and `application.yml` in corresponding maven module. 
 
 # Frontend
 Under construction, ReactJS based. I have neither FE skills nor motivation to gain them. Most of the frontend part of the project is a vibecoding results.
+Currently, there are two implementations of FE
+
+## Ugly fast-check
+Open `etc/chat/index.html` in any browser. 
+1. `Change server port` button configures WS backend (chat service) server port, multiple instances supported
+2. `Fake auth` button sets userId for `X-sender-id` WS header
+3. `Receiver id` text input is mapped to `X-recipient-id` WS header. Chat opponent whose session is opened in another browser tab/window
+4. `Send` button sends message to the opponent, apparently
+
+## ReactJS SPA
+Implementation is in progress. Now it's able to fetch contacts and profiles info from core and chat BE APIs. TODO: add support for WS integration.
 
 # Local env URIs  
 [ElasticVue](http://localhost:8085/)  
