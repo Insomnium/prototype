@@ -22,6 +22,7 @@ object P2pWsSessionAttributes {
 
 object P2pConstants {
     const val ADMIN_SENDER_ID = "admin"
+    const val P2P_MESSAGE_EVENT_SUBJECT = "net.ins.prototype.chat.event.P2pMessageEvent"
 }
 
 val <T : NativeMessageHeaderAccessor> T.senderId: String

@@ -25,7 +25,8 @@ fun StompSession.awaitForMessages(
     topic: String = "/user/topic/messages",
     expectedMessagesCount: Int = 1,
     userMessagesOnly: Boolean = true,
-): CopyOnWriteArrayList<ChatMessage> {
+    awaitMs: Long = 1000,
+): List<ChatMessage> {
     val receivedMessages = CopyOnWriteArrayList<ChatMessage>()
     val countDownLatch = CountDownLatch(expectedMessagesCount)
     subscribe(topic, object : StompSessionHandlerAdapter() {
@@ -41,6 +42,6 @@ fun StompSession.awaitForMessages(
             repeat(receivedMessages.size) { countDownLatch.countDown() }
         }
     })
-    countDownLatch.await(3, TimeUnit.SECONDS)
+    countDownLatch.await(awaitMs, TimeUnit.MILLISECONDS)
     return receivedMessages
 }

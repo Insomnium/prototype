@@ -192,6 +192,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>redpanda</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.dbunit</groupId>
             <artifactId>dbunit</artifactId>
             <version>${dbunit.version}</version>
