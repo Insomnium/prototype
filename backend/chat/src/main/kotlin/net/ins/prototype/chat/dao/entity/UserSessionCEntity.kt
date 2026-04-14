@@ -1,9 +1,9 @@
 package net.ins.prototype.chat.dao.entity
 
-import com.squareup.wire.Instant
 import org.springframework.data.cassandra.core.mapping.Column
 import org.springframework.data.cassandra.core.mapping.PrimaryKey
 import org.springframework.data.cassandra.core.mapping.Table
+import java.time.Instant
 
 @Table("user_session")
 data class UserSessionCEntity(
