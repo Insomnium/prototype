@@ -6,3 +6,5 @@ app:
 
 logging.level:
   org.springframework.messaging: DEBUG
+  org.springframework.kafka: DEBUG
+  org.apache.kafka: DEBUG

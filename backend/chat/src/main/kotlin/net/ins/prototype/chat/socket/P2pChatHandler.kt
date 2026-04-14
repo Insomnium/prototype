@@ -1,19 +1,16 @@
 package net.ins.prototype.chat.socket
 
 import com.google.protobuf.Message
-import net.ins.prototype.chat.socket.auth.receiverId
-import net.ins.prototype.chat.socket.auth.senderId
 import net.ins.prototype.chat.conf.AppProperties
 import net.ins.prototype.chat.dao.repo.MessageCRepo
-import net.ins.prototype.chat.event.P2pMessageContext
-import net.ins.prototype.chat.event.P2pMessageEvent
-import net.ins.prototype.chat.event.buildChatRoomHeader
-import net.ins.prototype.chat.event.buildReceiverHeader
-import net.ins.prototype.chat.event.buildSenderHeader
+import net.ins.prototype.chat.event.*
 import net.ins.prototype.chat.model.ChatMessage
 import net.ins.prototype.chat.model.ChatMessageRequest
 import net.ins.prototype.chat.model.ChatMessageResponse
 import net.ins.prototype.chat.service.impl.ChatIdGenerator
+import net.ins.prototype.chat.socket.auth.P2pConstants
+import net.ins.prototype.chat.socket.auth.receiverId
+import net.ins.prototype.chat.socket.auth.senderId
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.ApplicationListener
 import org.springframework.kafka.core.KafkaTemplate
@@ -24,7 +21,6 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor
 import org.springframework.messaging.simp.SimpMessagingTemplate
 import org.springframework.stereotype.Controller
 import org.springframework.web.socket.messaging.SessionSubscribeEvent
-import java.util.UUID
 import java.util.concurrent.CompletableFuture
 
 @Controller
@@ -107,7 +103,6 @@ class P2pChatHandler(
 
     override fun onApplicationEvent(event: SessionSubscribeEvent) {
         val subscribedUserId = requireNotNull(event.user?.name)
-        val debug = messageRepo.getMessages("user1-user2", UUID.fromString("beb259e0-9333-11f0-9707-5711f3fa4b98"), 2)
-        sendToSocket(P2pMessageContext("admin", subscribedUserId, content = "Welcome back online"))
+        sendToSocket(P2pMessageContext(P2pConstants.ADMIN_SENDER_ID, subscribedUserId, content = "Welcome back online"))
     }
 }

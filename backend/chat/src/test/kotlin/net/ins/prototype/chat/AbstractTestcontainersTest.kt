@@ -14,7 +14,7 @@ import org.testcontainers.utility.DockerImageName
 import org.testcontainers.utility.MountableFile
 
 @Testcontainers
-abstract class AbstractTestcontainersTest {
+open class AbstractTestcontainersTest {
 
     companion object {
 
@@ -25,13 +25,14 @@ abstract class AbstractTestcontainersTest {
         @JvmStatic
         @Container
         @ServiceConnection
-        val cassandraContainer = CassandraContainer("cassandra:5.0.5")
-            .withEnv("CASSANDRA_DC", "prototype-dc1")
-            .withInitScript("cassandra/init-chat.cql")
+        private val kafkaContainer = ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.8.0"))
 
         @JvmStatic
         @Container
-        private val kafkaContainer = ConfluentKafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.8.0"))
+        @ServiceConnection
+        val cassandraContainer = CassandraContainer("cassandra:5.0.5")
+            .withEnv("CASSANDRA_DC", "prototype-dc1")
+            .withInitScript("cassandra/init-chat.cql")
 
         @JvmStatic
         @Container
@@ -45,7 +46,7 @@ abstract class AbstractTestcontainersTest {
         @DynamicPropertySource
         @JvmStatic
         fun dynamicProperties(registry: DynamicPropertyRegistry) {
-            registry.add("app.kafka.bootstrap-servers") { kafkaContainer.bootstrapServers }
+            registry.add("app.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers)
             registry.add("app.kafka.producer.properties.schema.registry.url") { redpandaContainer.schemaRegistryAddress }
             registry.add("app.kafka.consumer.properties.schema.registry.url") { redpandaContainer.schemaRegistryAddress }
             registry.add("spring.cassandra.contact-points") { cassandraContainer.contactPoints }

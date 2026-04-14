@@ -250,7 +250,6 @@
                 <configuration>
                     <protocVersion>${protobuf.version}</protocVersion>
                     <cleanOutputDirectories>true</cleanOutputDirectories>
-<!--                    <protoc>com.google.protobuf:protoc:${protobuf.version}:exe:${os.detected.classifier}</protoc>-->
                     <protoc kind="binary-maven">
                         <version>${protobuf.version}</version>
                     </protoc>

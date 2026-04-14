@@ -11,20 +11,24 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 
+@Import(AbstractTestcontainersTest::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class P2pChatHandlerTest : AbstractTestcontainersTest() {
+
+    companion object {
+        private const val USER_A = 1
+        private const val USER_B = 2
+        private const val USER_C = 3
+    }
 
     @LocalServerPort
     private var serverPort: Int = 0
 
     private val sessionProvider: PrototypeStompClientSessionProvider = PrototypeStompClientSessionProvider()
-
-    private val USER_A = 1
-    private val USER_B = 2
-    private val USER_C = 3
 
     @AfterEach
     fun tearDown() {
@@ -38,19 +42,14 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
             userId = USER_A,
         )
 
-        val sessionWrapperB = sessionProvider.establishSession(
-            serverPort = serverPort,
-            userId = USER_B,
-        )
-
-        val receivedMessagesB = sessionWrapperB.awaitForMessages(
+        val receivedMessagesA = sessionWrapperA.awaitForMessages(
             expectedMessagesCount = 1,
             userMessagesOnly = false,
         )
 
-        receivedMessagesB shouldHaveSize 1
-        receivedMessagesB[0].sender shouldBeEqual P2pConstants.ADMIN_SENDER_ID
-        receivedMessagesB[0].content shouldBeEqual "Welcome back online"
+        receivedMessagesA shouldHaveSize 1
+        receivedMessagesA[0].sender shouldBeEqual P2pConstants.ADMIN_SENDER_ID
+        receivedMessagesA[0].content shouldBeEqual "Welcome back online"
     }
 
     @Test
@@ -64,7 +63,7 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
         val messageContent = "Hey, UserB"
         sessionWrapperA.sendMessage(receiverId = USER_B, payload = ChatMessageRequest(messageContent))
 
-        // then: USER_B receives messaeg
+        // then: USER_B receives message
         val receivedMessagesB = sessionWrapperB.awaitForMessages(expectedMessagesCount = 1)
         receivedMessagesB shouldHaveSize 1
         receivedMessagesB[0].sender shouldBeEqual USER_A.toString()

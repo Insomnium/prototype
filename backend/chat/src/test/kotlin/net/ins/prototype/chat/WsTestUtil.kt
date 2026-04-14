@@ -29,6 +29,7 @@ fun StompSession.awaitForMessages(
 ): List<ChatMessage> {
     val receivedMessages = CopyOnWriteArrayList<ChatMessage>()
     val countDownLatch = CountDownLatch(expectedMessagesCount)
+
     subscribe(topic, object : StompSessionHandlerAdapter() {
 
         override fun getPayloadType(headers: StompHeaders): Type = ChatMessageResponse::class.java
@@ -42,6 +43,7 @@ fun StompSession.awaitForMessages(
             repeat(receivedMessages.size) { countDownLatch.countDown() }
         }
     })
+
     countDownLatch.await(awaitMs, TimeUnit.MILLISECONDS)
     return receivedMessages
 }
