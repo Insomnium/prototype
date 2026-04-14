@@ -1,6 +1,8 @@
 spring:
   application.name: core
 
+  config.import: optional:configserver:http://localhost:8888
+
   datasource:
     driver-class-name: org.postgresql.Driver
 
@@ -18,6 +20,7 @@ app:
         name: profile
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    client-id: PAGANBLACKER
     producer:
       key-serializer: org.apache.kafka.common.serialization.LongSerializer
       properties:

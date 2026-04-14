@@ -1,0 +1,50 @@
+spring:
+  application.name: chat
+
+  config.import: optional:configserver:http://localhost:8888
+
+#  cloud.config.fail-fast: true
+
+  liquibase:
+    change-log: classpath*:/db/changeset/cassandra/master.xml
+    url: ${CASSANDRA_CLUSTER}
+    driver-class-name: com.ing.data.cassandra.jdbc.CassandraDriver
+    enabled: true
+
+  datasource:
+    name: cassandra_datasource
+    url: ${CASSANDRA_JDBC_URL}
+    driver-class-name: com.ing.data.cassandra.jdbc.CassandraDriver
+    hikari:
+      minimum-idle: 1
+
+  cassandra:
+    contact-points: ${CASSANDRA_CLUSTER}
+    keyspace-name: chat
+    local-datacenter: ${CASSANDRA_DC}
+
+app:
+  instance-id: chat_app_${random.uuid}
+  integrations:
+    topics:
+      p2p-message:
+        name: p2p-message
+
+  kafka:
+    client-id: PAGANBLACKER
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.LongSerializer
+      properties:
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
+        value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
+        auto.register.schemas: false
+        use.latest.version: false
+        schema.reflection: true
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: io.confluent.kafka.serializers.protobuf.KafkaProtobufDeserializer
+      properties:
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
+        auto.reset.offset: earliest
+        enable.auto.commit: false

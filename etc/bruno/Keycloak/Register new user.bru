@@ -1,0 +1,34 @@
+meta {
+  name: Register new user
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:9090/admin/realms/prototype/users
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "username": "user_1",
+    "firstName": "User1FirstName",
+    "lastName": "User1LastName",
+    "email": "user_1@mail.org",
+    "emailVerified": true,
+    "enabled": true,
+    "credentials": [
+      {
+        "type": "password",
+        "value": "password",
+        "temporary": false
+      }
+    ]
+  }
+}
+
+script:pre-request {
+  const accessToken = bru.getEnvVar('keycloak_access_token');
+  req.setHeader('Authorization', 'Bearer ' + accessToken);
+}

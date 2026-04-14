@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="create_tables" author="pb">
+        <sql dbms="cassandra" endDelimiter=";">
+            <![CDATA[
+            create table chat.user_session (
+                user_id varchar,
+                instance_id varchar,
+                created_at timestamp,
+                primary key ((user_id))
+            );
+
+            create table chat.p2p_room (
+                room_id varchar,
+                created_at timestamp,
+                message_id timeuuid,
+                modified_at timestamp,
+                content text,
+                sender_id varchar,
+                receiver_id varchar,
+                is_delivered boolean,
+                is_read boolean,
+                primary key ((room_id), message_id)
+            )
+            with clustering order by (message_id desc);
+
+            create table chat.contacts_by_user (
+                user_id varchar,
+                contact_id varchar,
+                is_blocked boolean,
+                is_favourite boolean,
+                tags set<text>,
+                primary key ((user_id), contact_id)
+            ) with clustering order by (contact_id asc);
+        ]]>
+        </sql>
+    </changeSet>
+</databaseChangeLog>

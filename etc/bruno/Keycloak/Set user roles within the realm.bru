@@ -1,0 +1,16 @@
+meta {
+  name: Set user roles within the realm
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:9090/admin/realms/prototype/users
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const accessToken = bru.getEnvVar('keycloak_access_token');
+  req.setHeader('Authorization', 'Bearer ' + accessToken);
+}

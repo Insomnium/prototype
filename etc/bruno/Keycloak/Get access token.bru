@@ -1,0 +1,23 @@
+meta {
+  name: Get access token
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:9090/realms/master/protocol/openid-connect/token
+  body: formUrlEncoded
+  auth: inherit
+}
+
+body:form-urlencoded {
+  client_id: admin-cli
+  username: admin
+  password: password
+  grant_type: password
+}
+
+script:post-response {
+  const respBody = res.getBody();
+  bru.setEnvVar('keycloak_access_token',respBody.access_token);
+}

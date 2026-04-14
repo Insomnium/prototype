@@ -1,0 +1,25 @@
+meta {
+  name: Assign user role
+  type: http
+  seq: 9
+}
+
+post {
+  url: http://localhost:9090/admin/realms/prototype/users/2d1d6112-77c2-4fd2-81e4-6fb3e2a7f806/role-mappings/realm
+  body: json
+  auth: none
+}
+
+body:json {
+  [
+    {
+      "id": "334095b3-eeaa-45e7-b1be-066d4d74c0f4",
+      "name": "users"
+    }
+  ]
+}
+
+script:pre-request {
+  const accessToken = bru.getEnvVar('keycloak_access_token');
+  req.setHeader('Authorization', 'Bearer ' + accessToken);
+}

@@ -1,0 +1,15 @@
+meta {
+  name: Resolve P2pMessageEvent schema
+  type: http
+  seq: 8
+}
+
+get {
+  url: {{schema-registry}}/subjects/net.ins.prototype.chat.event.P2pMessageEvent/latest
+  body: json
+  auth: inherit
+}
+
+headers {
+  ~Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+}

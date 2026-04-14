@@ -1,0 +1,21 @@
+meta {
+  name: Get P2pMessageEventConfig
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:8081/config/net.ins.prototype.chat.event.P2pMessageEvent
+  body: none
+  auth: inherit
+}
+
+headers {
+  ~Content-Type: Content-Type -> application/vnd.schemaregistry.v1+json
+}
+
+body:json {
+  {
+    "compatibility": "BACKWARD"
+  }
+}

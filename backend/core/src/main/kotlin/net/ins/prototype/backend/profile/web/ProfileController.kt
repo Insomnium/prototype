@@ -45,7 +45,7 @@ class ProfileController(
 ) {
 
     @GetMapping
-    fun list(
+    fun find(
         @RequestHeader("x-user-id") userId: Long,
         @Valid @ModelAttribute request: ProfileSearchRequest,
     ): EntityListResponse<Profile> = EntityListResponse(
@@ -58,6 +58,10 @@ class ProfileController(
             )
         ).map(profileResponseConverter::convert)
     )
+
+    @GetMapping("/list")
+    fun list(@RequestParam("ids") profileIds: List<Long>): EntityListResponse<Profile> =
+        EntityListResponse(profileService.getByIds(profileIds).map(profileResponseConverter::convert))
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

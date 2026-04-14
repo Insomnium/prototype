@@ -14,7 +14,7 @@ body {
 
 /* Contact List Styles */
 .contact-list {
-  width: 1000px;
+  width: 350px;
   background-color: #fff;
   border-right: 1px solid #e0e0e0;
   display: flex;
@@ -256,4 +256,17 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+
+.status-container {
+  display: flex;
+  align-items: center;
+}
     
+.status-indicator-online {
+  width: 10px; /* Adjust size as needed */
+  height: 10px; /* Adjust size as needed */
+  background-color: #00ff00; /* Green color */
+  border-radius: 50%; /* Makes it a circle */
+  display: inline-block; /* Allows it to sit next to other elements */
+  margin-left: 5px; /* Optional: Add some spacing */
+}

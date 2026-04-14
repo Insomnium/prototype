@@ -1,0 +1,10 @@
+app:
+  kafka:
+    producer:
+      properties:
+        use.latest.version: true
+
+logging.level:
+  org.springframework.messaging: DEBUG
+  org.springframework.kafka: DEBUG
+  org.apache.kafka: DEBUG
