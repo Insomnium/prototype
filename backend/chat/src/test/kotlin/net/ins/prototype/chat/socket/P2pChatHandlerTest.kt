@@ -23,6 +23,8 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
         private const val USER_A = 1
         private const val USER_B = 2
         private const val USER_C = 3
+
+        private const val MESSAGE_AWAIT_TIMEOUT_MILLIS = 5000L
     }
 
     @LocalServerPort
@@ -45,6 +47,7 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
         val receivedMessagesA = sessionWrapperA.awaitForMessages(
             expectedMessagesCount = 1,
             userMessagesOnly = false,
+            awaitMs = MESSAGE_AWAIT_TIMEOUT_MILLIS,
         )
 
         receivedMessagesA shouldHaveSize 1
@@ -64,17 +67,17 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
         sessionWrapperA.sendMessage(receiverId = USER_B, payload = ChatMessageRequest(messageContent))
 
         // then: USER_B receives message
-        val receivedMessagesB = sessionWrapperB.awaitForMessages(expectedMessagesCount = 1)
+        val receivedMessagesB = sessionWrapperB.awaitForMessages(expectedMessagesCount = 1, awaitMs = MESSAGE_AWAIT_TIMEOUT_MILLIS)
         receivedMessagesB shouldHaveSize 1
         receivedMessagesB[0].sender shouldBeEqual USER_A.toString()
         receivedMessagesB[0].content shouldBeEqual messageContent
 
         // and: USER_A does not receive any messages
-        val receivedMessagesA = sessionWrapperA.awaitForMessages(expectedMessagesCount = Int.MAX_VALUE)
+        val receivedMessagesA = sessionWrapperA.awaitForMessages(expectedMessagesCount = Int.MAX_VALUE, awaitMs = MESSAGE_AWAIT_TIMEOUT_MILLIS)
         receivedMessagesA.shouldBeEmpty()
 
         // and: USER_C does not receive any messages
-        val receivedMessagesC = sessionWrapperC.awaitForMessages(expectedMessagesCount = Int.MAX_VALUE)
+        val receivedMessagesC = sessionWrapperC.awaitForMessages(expectedMessagesCount = Int.MAX_VALUE, awaitMs = MESSAGE_AWAIT_TIMEOUT_MILLIS)
         receivedMessagesC.shouldBeEmpty()
     }
 }
