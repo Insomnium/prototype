@@ -77,7 +77,7 @@ Implementation is in progress. Now it's able to fetch contacts and profiles info
 
 # Local env URIs  
 [ElasticVue](http://localhost:8085/)  
-[Kafka Control Center](http://localhost:9021/)
+[Kafka Control Center](http://localhost:9021/)  
 [Minio](http://localhost:9001/)
 
 # Important note

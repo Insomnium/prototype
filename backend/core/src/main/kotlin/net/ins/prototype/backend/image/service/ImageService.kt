@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile
 
 interface ImageService {
 
-    fun saveImage(file: MultipartFile, profileId: Long): ImageEntity
+    fun saveImage(userId: Long, file: MultipartFile, profileId: Long): ImageEntity
 
     fun getAllByProfileId(profileId: Long): List<ImageEntity>
 

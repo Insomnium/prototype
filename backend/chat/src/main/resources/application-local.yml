@@ -7,6 +7,10 @@ spring:
     local-datacenter: prototype-dc1
   liquibase:
     url: jdbc:cassandra://localhost:9042/chat?compliancemode=Liquibase&localdatacenter=prototype-dc1
+  boot:
+    admin:
+      client:
+        url: http://localhost:1111
 
 logging:
   level:

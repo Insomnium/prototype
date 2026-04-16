@@ -1,6 +1,7 @@
 package net.ins.prototype.backend.profile.web
 
 import jakarta.validation.Valid
+import net.ins.prototype.backend.common.web.model.CoreProfileHeaders
 import net.ins.prototype.backend.common.web.model.EntityIdResponse
 import net.ins.prototype.backend.common.web.model.EntityListResponse
 import net.ins.prototype.backend.common.web.model.EntityResponse
@@ -35,7 +36,7 @@ class ProfileController(
 
     @GetMapping
     fun find(
-        @RequestHeader("x-user-id") userId: Long,
+        @RequestHeader(CoreProfileHeaders.USER_ID) userId: Long,
         @Valid @ModelAttribute request: ProfileSearchRequest,
     ): EntityListResponse<Profile> = EntityListResponse(
         results = profileIndexService.findAll(
@@ -70,7 +71,8 @@ class ProfileController(
     @ResponseStatus(HttpStatus.ACCEPTED)
     fun update(
         @PathVariable("id") id: Long,
-        @Valid @RequestBody request: UpdateProfileRequest, // TODO: validate id == x-user-id
+        @Valid @RequestBody request: UpdateProfileRequest,
+        @RequestHeader(CoreProfileHeaders.USER_ID) userId: Long,
     ): EntityResponse<Profile> = EntityResponse(
         profileService.update(
             UpdateProfileContext(
@@ -80,6 +82,7 @@ class ProfileController(
                 gender = request.gender,
                 countryId = request.countryId,
                 purposes = request.purposes,
+                userIdHeader = userId,
             )
         ).let(profileResponseConverter::convert)
     )
@@ -88,7 +91,8 @@ class ProfileController(
     fun uploadPhoto(
         @RequestParam("file") file: MultipartFile,
         @PathVariable("id") profileId: Long,
-    ): EntityIdResponse<Long> = EntityIdResponse(requireNotNull(imageService.saveImage(file, profileId).id))
+        @RequestHeader(CoreProfileHeaders.USER_ID) userId: Long,
+    ): EntityIdResponse<Long> = EntityIdResponse(requireNotNull(imageService.saveImage(userId, file, profileId).id))
 
     @GetMapping("/{id}/images")
     fun listProfilePhotos(@PathVariable("id") profileId: Long): EntityListResponse<Image> =

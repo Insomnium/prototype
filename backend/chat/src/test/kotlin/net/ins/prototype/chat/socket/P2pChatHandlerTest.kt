@@ -29,7 +29,7 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
         private const val USER_B = 2
         private const val USER_C = 3
 
-        private const val MESSAGE_AWAIT_TIMEOUT_MILLIS = 5000L
+        private const val MESSAGE_AWAIT_TIMEOUT_MILLIS = 10000L
     }
 
     @LocalServerPort

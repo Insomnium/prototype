@@ -29,8 +29,8 @@ services:
       - node.name=elasticsearch
       - cluster.name=es-docker-cluster
       - discovery.type=single-node
-      - bootstrap.memory_lock=false # 2026.04.16 - turned off to fix startup on Windows host with WSL
-      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
       - xpack.security.enabled=false
       - http.cors.allow-origin=http://localhost:8085,http://paganblacker.internal:8085
       - http.cors.enabled=true
@@ -45,7 +45,6 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
-    mem_limit: 2g
     networks:
       - elastic
 
@@ -189,7 +188,6 @@ services:
       - schema-registry
     ports:
       - "8083:8083"
-    mem_limit: 2g
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
