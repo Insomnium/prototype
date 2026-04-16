@@ -22,6 +22,7 @@
         <avro4k.version>1.10.1</avro4k.version>
         <classgraph.version>4.8.179</classgraph.version>
         <protobuf.version>3.25.1</protobuf.version>
+        <minio.version>9.0.0</minio.version>
         <common-util.version>0.0.1-SNAPSHOT</common-util.version>
 
         <kotest.jvm.version>4.0.7</kotest.jvm.version>
@@ -145,6 +146,12 @@
             <optional>true</optional>
         </dependency>
         <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>${minio.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
@@ -199,6 +206,11 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>redpanda</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>minio</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

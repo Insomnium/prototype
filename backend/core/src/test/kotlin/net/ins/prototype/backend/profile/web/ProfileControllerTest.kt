@@ -5,12 +5,16 @@ import com.github.springtestdbunit.DbUnitTestExecutionListener
 import com.github.springtestdbunit.annotation.DatabaseSetup
 import com.github.springtestdbunit.annotation.DatabaseTearDown
 import io.kotest.assertions.assertSoftly
+import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldContainExactlyInAnyOrder
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
-import io.kotest.matchers.string.shouldStartWith
+import io.minio.BucketExistsArgs
+import io.minio.GetObjectArgs
+import io.minio.MinioClient
 import net.ins.prototype.backend.conf.AbstractTestcontainersTest
 import net.ins.prototype.backend.image.dao.repo.ImageRepository
 import net.ins.prototype.backend.meta.TestProfile
@@ -51,7 +55,6 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.multipart
 import org.springframework.test.web.servlet.post
 import org.springframework.test.web.servlet.put
-import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDate
 
@@ -81,6 +84,9 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
 
     @Autowired
     private lateinit var profileEventDeserializer: Deserializer<ProfileEvent>
+
+    @Autowired
+    private lateinit var minioClient: MinioClient
 
     @BeforeEach
     fun beforeEach() {
@@ -390,7 +396,15 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         val profileId: Long = 1
         mockMvc.multipart("/v1/profiles/$profileId/images") {
             contentType = MediaType.IMAGE_PNG
-            file(MockMultipartFile("file", readResourcesFile("/images/fox.png")))
+            file(
+                MockMultipartFile(
+                    "file",
+                    "fox.png",
+                    MediaType.IMAGE_PNG_VALUE,
+                    readResourcesFile("/images/fox.png"),
+                ))
+        }.andDo {
+            print()
         }.andExpect {
             status { isOk() }
         }
@@ -405,8 +419,23 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             image.hidden shouldBeEqual false
             image.primary shouldBeEqual true
             image.internalFileName.shouldNotBeNull()
-            image.folderUri shouldStartWith Path.of(appProperties.images.fsBaseUri, profileId.toString()).toAbsolutePath().toString()
-            image.cdnUri shouldBeEqual "${appProperties.images.cdnBaseUri}/$profileId/${image.internalFileName}"
+            image.extension shouldBeEqual "png"
+            image.folderUri shouldBeEqual "${appProperties.objectStorage.profilePhotoFolder}/$profileId"
+            image.cdnUri shouldBeEqual "${appProperties.objectStorage.cdnBaseUrl}/${appProperties.objectStorage.profilePhotoFolder}/$profileId/${image.internalFileName}"
+        }
+
+        minioClient.bucketExists(BucketExistsArgs.builder().bucket(appProperties.objectStorage.photoBucket).build()).shouldBeTrue()
+        val imageEntity = imageRepo.findAll().first()
+        val s3ObjectId =
+            "${appProperties.objectStorage.profilePhotoFolder}/$profileId/${imageEntity.internalFileName}"
+
+        val objectRequestArgs = GetObjectArgs.builder()
+            .bucket(appProperties.objectStorage.photoBucket)
+            .`object`(s3ObjectId)
+            .build()
+
+        shouldNotThrow<Exception> {
+            minioClient.getObject(objectRequestArgs)
         }
     }
 
@@ -420,7 +449,14 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
         val profileId: Long = 1
         mockMvc.multipart("/v1/profiles/$profileId/images") {
             contentType = MediaType.IMAGE_PNG
-            file(MockMultipartFile("file", readResourcesFile("/images/fox.png")))
+            file(
+                MockMultipartFile(
+                    "file",
+                    "fox.png",
+                    MediaType.IMAGE_PNG_VALUE,
+                    readResourcesFile("/images/fox.png"),
+                )
+            )
         }.andExpect {
             status { isOk() }
         }

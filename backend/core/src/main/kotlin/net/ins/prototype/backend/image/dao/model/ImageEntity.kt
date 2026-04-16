@@ -28,4 +28,6 @@ class ImageEntity(
     val cdnUri: String,
     @Column(name = "internal_file_name")
     val internalFileName: String,
+    @Column(name = "extension")
+    val extension: String,
 )

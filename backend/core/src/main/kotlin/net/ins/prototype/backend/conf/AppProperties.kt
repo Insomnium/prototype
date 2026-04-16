@@ -7,7 +7,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class AppProperties(
     val kafka: KafkaProperties,
     val integrations: Integrations,
-    val images: Images,
+    val objectStorage: ObjectStorage,
 )
 
 data class Integrations(
@@ -22,7 +22,16 @@ data class Topic(
     val name: String,
 )
 
-data class Images(
-    val fsBaseUri: String,
-    val cdnBaseUri: String,
-)
+data class ObjectStorage(
+    val connectionUrl: String,
+    val cdnBaseUrl: String,
+    val user: String,
+    val password: String,
+    val photoBucket: String,
+    val profilePhotoFolder: String,
+) {
+
+    override fun toString(): String {
+        return "ObjectStorage(url='$connectionUrl', user='$user', photoBucket='$photoBucket', profilePhotoFolder='$profilePhotoFolder')"
+    }
+}

@@ -69,6 +69,9 @@
             <column name="internal_file_name" type="varchar" >
                 <constraints nullable="false" />
             </column>
+            <column name="extension" type="varchar">
+                <constraints nullable="false" />
+            </column>
         </createTable>
         <addPrimaryKey tableName="images" columnNames="id_image" />
         <addForeignKeyConstraint baseTableName="images" baseColumnNames="id_profile" constraintName="image_to_profile_fk"

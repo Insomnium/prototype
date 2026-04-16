@@ -18,6 +18,13 @@ app:
     topics:
       profiles:
         name: profile
+  object-storage:
+    connection-url: ${MINIO_BASE_URL}
+    cdn-base-url: ${MINIO_BASE_URL}
+    user: ${MINIO_USER}
+    password: ${MINIO_PASSWORD}
+    photo-bucket: profile-albums
+    profile-photo-folder: profiles
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
     client-id: PAGANBLACKER
@@ -36,8 +43,3 @@ app:
         schema.registry.url: ${SCHEMA_REGISTRY_URL}
         auto.reset.offset: earliest
         enable.auto.commit: false
-  images:
-    fs-base-uri: ${FS_BASE_URL}
-    cdn-base-uri: ${CDN_BASE_URL}
-
-

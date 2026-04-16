@@ -1,17 +1,17 @@
 package net.ins.prototype.backend.profile.web
 
 import jakarta.validation.Valid
-import net.ins.prototype.backend.image.service.ImageService
 import net.ins.prototype.backend.common.web.model.EntityIdResponse
 import net.ins.prototype.backend.common.web.model.EntityListResponse
 import net.ins.prototype.backend.common.web.model.EntityResponse
+import net.ins.prototype.backend.image.service.ImageService
 import net.ins.prototype.backend.image.web.converter.ImageResponseConverter
 import net.ins.prototype.backend.image.web.model.Image
 import net.ins.prototype.backend.profile.model.Profile
-import net.ins.prototype.backend.profile.service.context.NewProfileContext
-import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.ProfileIndexService
 import net.ins.prototype.backend.profile.service.ProfileService
+import net.ins.prototype.backend.profile.service.context.NewProfileContext
+import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.context.UpdateProfileContext
 import net.ins.prototype.backend.profile.web.converter.ProfileResponseConverter
 import net.ins.prototype.backend.profile.web.model.CreateProfileRequest
@@ -19,18 +19,7 @@ import net.ins.prototype.backend.profile.web.model.ProfileSearchRequest
 import net.ins.prototype.backend.profile.web.model.UpdateProfileRequest
 import org.springframework.http.HttpStatus
 import org.springframework.validation.annotation.Validated
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
 @RestController

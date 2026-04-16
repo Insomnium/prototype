@@ -29,8 +29,8 @@ services:
       - node.name=elasticsearch
       - cluster.name=es-docker-cluster
       - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - bootstrap.memory_lock=false # 2026.04.16 - turned off to fix startup on Windows host with WSL
+      - "ES_JAVA_OPTS=-Xms1024m -Xmx1024m"
       - xpack.security.enabled=false
       - http.cors.allow-origin=http://localhost:8085,http://paganblacker.internal:8085
       - http.cors.enabled=true
@@ -45,12 +45,14 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    mem_limit: 2g
     networks:
       - elastic
 
   kibana:
     image: kibana:8.17.3
     container_name: kibana
+    restart: on-failure
     profiles:
       - all
       - index
@@ -66,6 +68,7 @@ services:
   elasticvue:
     image: cars10/elasticvue
     container_name: elasticvue
+    restart: on-failure
     profiles:
       - all
       - index
@@ -84,6 +87,7 @@ services:
       - all
       - kafka
       - core
+      - chat
       - broker
     ports:
       - "9092:9092"
@@ -159,6 +163,7 @@ services:
     restart: on-failure
     profiles:
       - all
+      - chat
       - cassandra
     depends_on:
       - cassandra-1
@@ -178,11 +183,13 @@ services:
       - all
       - kafka
       - core
+      - chat
     depends_on:
       - broker
       - schema-registry
     ports:
       - "8083:8083"
+    mem_limit: 2g
     environment:
       CONNECT_BOOTSTRAP_SERVERS: 'broker:29092'
       CONNECT_REST_ADVERTISED_HOST_NAME: connect
@@ -211,6 +218,7 @@ services:
       - all
       - kafka
       - core
+      - chat
     depends_on:
       - broker
       - schema-registry
@@ -241,6 +249,8 @@ services:
     profiles:
       - all
       - keycloak
+      - core
+      - chat
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: password
@@ -256,35 +266,45 @@ services:
     volumes:
       - ${PWD}/etc/docker/keycloak/init-sample.json:/opt/keycloak/data/import/realm-export.json
 
-  weblist: # TODO: change to MinIO
-    image: ghcr.io/umputun/weblist:latest
-    container_name: weblist
+  minio:
+    image: quay.io/minio/minio
+    container_name: minio
     profiles:
       - all
       - cdn
+      - core
     ports:
-      - "9000:8080"
-    volumes:
-      - weblist:/data:rw
+      - "9000:9000"
+      - "9001:9001"
+    command: server --console-address ":9001" /data/
     environment:
-#      - LISTEN=:8080
-      - THEME=light
-      - ROOT_DIR=/data
-      - EXCLUDE=.git,.env
-#      - AUTH=your_password  # Optional: Enable password authentication
-#      - AUTH_USER=admin  # Optional: Custom username for authentication (default: weblist)
-#      - SESSION_SECRET=your_secure_key  # Optional: Secret for signing session tokens
-#      - SESSION_TTL=24h  # Optional: Session timeout duration
-      - BRAND_NAME=Admin Console  # Optional: Display company name in navbar
-#      - BRAND_COLOR=#3498db  # Optional: Custom color for navbar
-#      - CUSTOM_FOOTER="<a href='https://example.com'>Example</a> | © 2025"  # Optional: Custom footer text
-#      - SFTP_ENABLED=true   # Optional: Enable SFTP server
-#      - SFTP_USER=sftp_user # Optional: Username for SFTP access
-#      - SFTP_ADDRESS=:2022  # Optional: SFTP port
-#      - SFTP_KEY=/data/ssh_key  # Optional: Path to SSH host key
-#      - SFTP_AUTHORIZED=/data/authorized_keys  # Optional: Path to authorized_keys file for public key auth
-#      - SYNTAX_HIGHLIGHT=true  # Optional: Enable syntax highlighting for code files
-#      - MULTI_SELECT=true  # Optional: Enable multi-file selection and download
+      MINIO_ROOT_USER: ${MINIO_ADMIN_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ADMIN_PASSWORD}
+    volumes:
+      - minio_storage:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  minio-init:
+    image: quay.io/minio/minio
+    container_name: minio-init
+    profiles:
+      - all
+      - cdn
+      - core
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set prototype_minio http://minio:9000 ${MINIO_ADMIN_USER} ${MINIO_ADMIN_PASSWORD};
+      /usr/bin/mc mb prototype_minio/profile-photos;
+      /usr/bin/mc anonymous set public prototype_minio/profile-photos;
+      exit 0;
+      "
 
   cassandra-1:
     image: "cassandra:5.0.5"
@@ -292,6 +312,7 @@ services:
     profiles:
       - all
       - cassandra
+      - chat
     ports:
       - 7000:7000
       - 9042:9042
@@ -322,6 +343,7 @@ services:
     profiles:
       - all
       - cassandra
+      - chat
     ports:
       - 9043:9042    
     networks:
@@ -355,6 +377,7 @@ services:
     profiles:
       - all
       - cassandra
+      - chat
     ports:
       - 9044:9042
     networks:
@@ -382,21 +405,16 @@ services:
       timeout: 10s
       retries: 3
 
-
 volumes:
   elastic_data:
     driver: local
   postgres_data:
     driver: local
-  weblist:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./photo
   cassandra-node-01:
   cassandra-node-02:
   cassandra-node-03:
+  minio_storage:
+    driver: local
 
 networks:
   elastic:

@@ -16,6 +16,7 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
+import org.testcontainers.containers.MinIOContainer
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.elasticsearch.ElasticsearchContainer
 import org.testcontainers.junit.jupiter.Container
@@ -82,6 +83,13 @@ open class AbstractTestcontainersTest {
                     SCHEMA_REGISTRY_PROFILE_UPDATED_EVENT_SCHEMA_FILE,
                 )
 
+        @JvmStatic
+        @Container
+        private val minioContainer: MinIOContainer = MinIOContainer(
+            DockerImageName.parse("quay.io/minio/minio")
+                .asCompatibleSubstituteFor("minio/minio")
+        )
+
         /**
          * Postgres and ES properties are populated via [@ServiceConnection] as these datasources are mapped to standard spring boot
          * application properties
@@ -92,6 +100,10 @@ open class AbstractTestcontainersTest {
             registry.add("app.kafka.bootstrap-servers", kafkaContainer::getBootstrapServers)
             registry.add("app.kafka.producer.properties.schema.registry.url") { redpandaContainer.schemaRegistryAddress }
             registry.add("app.kafka.consumer.properties.schema.registry.url") { redpandaContainer.schemaRegistryAddress }
+            registry.add("app.object-storage.connection-url") { minioContainer.s3URL }
+            registry.add("app.object-storage.cdn-base-url") { minioContainer.s3URL }
+            registry.add("app.object-storage.user") { minioContainer.userName }
+            registry.add("app.object-storage.password") { minioContainer.password }
         }
 
         @JvmStatic
