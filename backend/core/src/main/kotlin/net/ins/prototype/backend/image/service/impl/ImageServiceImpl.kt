@@ -6,34 +6,31 @@ import net.ins.prototype.backend.conf.AppProperties
 import net.ins.prototype.backend.image.dao.model.ImageEntity
 import net.ins.prototype.backend.image.dao.repo.ImageRepository
 import net.ins.prototype.backend.image.service.ImageService
+import net.ins.prototype.backend.image.service.ObjectStorageService
 import net.ins.prototype.backend.profile.service.ProfileService
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.UUID
-import kotlin.io.path.absolutePathString
 
 @Service
 class ImageServiceImpl(
     private val appProperties: AppProperties,
     private val imageRepository: ImageRepository,
     private val profileService: ProfileService,
+    private val objectStorage: ObjectStorageService,
 ) : ImageService {
 
     override fun saveImage(file: MultipartFile, profileId: Long): ImageEntity {
         // TODO: add meaningful configurable images per profile limit
         profileService.getById(profileId)
-        val profileFolder = preserveProfileFolder(profileId)
-        val internalFileName = saveBinary(profileFolder, file)
+        val objectEntity = objectStorage.savePhoto(profileId, file)
         return imageRepository.save(
             ImageEntity(
                 id = null,
                 profileId = profileId,
-                folderUri = profileFolder.absolutePathString(),
-                cdnUri = "${appProperties.images.cdnBaseUri}/$profileId/$internalFileName",
-                internalFileName = internalFileName,
+                folderUri = objectEntity.folder,
+                cdnUri = objectEntity.fullCdnUrl,
+                internalFileName = objectEntity.internalFileName,
+                extension = objectEntity.extension,
                 primary = !imageRepository.existsByProfileId(profileId),
             )
         )
@@ -54,21 +51,5 @@ class ImageServiceImpl(
         if (imageForRemoval.primary) {
             profileImages.firstOrNull { it.id != id }?.run { imageRepository.save(this.apply { primary = true }) }
         }
-    }
-
-    private fun preserveProfileFolder(profileId: Long): Path {
-        val profileFolder = Path.of(appProperties.images.fsBaseUri, profileId.toString())
-        if (!Files.exists(profileFolder)) {
-            Files.createDirectories(profileFolder)
-        }
-        return profileFolder
-    }
-
-    private fun saveBinary(folder: Path, file: MultipartFile): String {
-        val extension = requireNotNull(file.originalFilename).substringAfterLast(".")
-        val internalFileName = "${UUID.randomUUID()}.$extension"
-        val destination = folder.resolve(internalFileName)
-        file.transferTo(destination)
-        return internalFileName
     }
 }

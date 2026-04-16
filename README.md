@@ -78,6 +78,7 @@ Implementation is in progress. Now it's able to fetch contacts and profiles info
 # Local env URIs  
 [ElasticVue](http://localhost:8085/)  
 [Kafka Control Center](http://localhost:9021/)
+[Minio](http://localhost:9001/)
 
 # Important note
 I've got another username, which've I used in a couple of commits from another machine, Github considers them as authored by another GH account. That's a freaking coincidence.

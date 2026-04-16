@@ -1,4 +1,4 @@
 app:
-  images:
-    fs-base-uri: ${PWD}/photo
-    cdn-base-uri: http://dummy/view
+  object-storage:
+    photo-bucket: integration-test-bucket
+    profile-photo-folder: integration-test-folder
