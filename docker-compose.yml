@@ -297,7 +297,8 @@ services:
       - 9042:9042
     networks:
       - cassandra-net
-    mem_limit: 1g
+    restart: on-failure
+    mem_limit: 2g
     environment:
       - CASSANDRA_START_RPC=true       # default
       - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
@@ -305,7 +306,7 @@ services:
       - CASSANDRA_CLUSTER_NAME=my-cluster
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - CASSANDRA_DC=prototype-dc1
-      - MAX_HEAP_SIZE=768M
+      - MAX_HEAP_SIZE=1024M
     volumes:
       - cassandra-node-01:/var/lib/cassandra:rw
     healthcheck:
@@ -325,7 +326,8 @@ services:
       - 9043:9042    
     networks:
       - cassandra-net
-    mem_limit: 1g
+    restart: on-failure
+    mem_limit: 2g
     environment:
       - CASSANDRA_START_RPC=true       # default
       - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
@@ -334,7 +336,7 @@ services:
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - CASSANDRA_DC=prototype-dc1
       - CASSANDRA_SEEDS=cassandra-1
-      - MAX_HEAP_SIZE=768M
+      - MAX_HEAP_SIZE=1024M
     depends_on:
       cassandra-1:
         condition: service_healthy
@@ -357,7 +359,8 @@ services:
       - 9044:9042
     networks:
       - cassandra-net
-    mem_limit: 1g
+    restart: on-failure
+    mem_limit: 2g
     environment:
       - CASSANDRA_START_RPC=true       # default
       - CASSANDRA_RPC_ADDRESS=0.0.0.0  # default
@@ -366,7 +369,7 @@ services:
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - CASSANDRA_DC=prototype-dc1
       - CASSANDRA_SEEDS=cassandra-1
-      - MAX_HEAP_SIZE=768M
+      - MAX_HEAP_SIZE=1024M
     depends_on:
       cassandra-2:
         condition: service_healthy
