@@ -10,6 +10,11 @@ spring:
   elasticsearch:
     uris: http://localhost:9200
 
+  boot:
+    admin:
+      client:
+        url: http://localhost:1111
+
 app:
   kafka:
     bootstrap-servers: localhost:9092

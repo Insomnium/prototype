@@ -5,6 +5,11 @@ spring:
 
 #  cloud.config.fail-fast: true
 
+  boot:
+    admin:
+      client:
+        url: ${SBA_URL}
+
   liquibase:
     change-log: classpath*:/db/changeset/cassandra/master.xml
     url: ${CASSANDRA_CLUSTER}
@@ -48,3 +53,18 @@ app:
         schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
         auto.reset.offset: earliest
         enable.auto.commit: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      post:
+        enabled: true
+      show-values: always
+    configprops:
+      show-values: always
+    health:
+      show-details: ALWAYS

@@ -4,3 +4,9 @@ server:
 spring:
   application.name: spring-boot-admin
   config.import: optional:configserver:http://localhost:8888
+  boot:
+    admin:
+      ui:
+        available-languages:
+          - en
+          - ru

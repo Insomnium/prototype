@@ -9,6 +9,11 @@ spring:
   liquibase:
     change-log: classpath*:db/changelog/master.xml
 
+  boot:
+    admin:
+      client:
+        url: ${SBA_URL}
+
 server:
   servlet:
     context-path: /core
@@ -43,3 +48,18 @@ app:
         schema.registry.url: ${SCHEMA_REGISTRY_URL}
         auto.reset.offset: earliest
         enable.auto.commit: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    env:
+      post:
+        enabled: true
+      show-values: always
+    configprops:
+      show-values: always
+    health:
+      show-details: ALWAYS
