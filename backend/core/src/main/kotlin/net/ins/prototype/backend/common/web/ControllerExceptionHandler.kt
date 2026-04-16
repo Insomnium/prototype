@@ -1,10 +1,11 @@
 package net.ins.prototype.backend.common.web
 
-import net.ins.prototype.backend.common.web.model.FieldValidationError
-import net.ins.prototype.backend.common.web.model.RequestValidationResponse
+import net.ins.prototype.backend.common.exception.AccessDeniedException
 import net.ins.prototype.backend.common.exception.ContextValidationException
 import net.ins.prototype.backend.common.exception.EntityNotFoundException
+import net.ins.prototype.backend.common.web.model.FieldValidationError
 import net.ins.prototype.backend.common.web.model.InvalidRequestResponse
+import net.ins.prototype.backend.common.web.model.RequestValidationResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -28,4 +29,9 @@ class ControllerExceptionHandler {
     fun handleEntityNotFoundException(e: EntityNotFoundException): ResponseEntity<InvalidRequestResponse> = ResponseEntity
         .status(HttpStatus.NOT_FOUND)
         .body(InvalidRequestResponse("entity.notFound", e.message ?: "No entity found"))
+
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<InvalidRequestResponse> = ResponseEntity
+        .status(HttpStatus.FORBIDDEN)
+        .body(InvalidRequestResponse("Access denied", e.message ?: "Access denied"))
 }

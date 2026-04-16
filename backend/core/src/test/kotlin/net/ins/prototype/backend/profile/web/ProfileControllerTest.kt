@@ -12,9 +12,11 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.comparables.shouldBeLessThan
 import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.minio.BucketExistsArgs
 import io.minio.GetObjectArgs
 import io.minio.MinioClient
+import net.ins.prototype.backend.common.web.model.CoreProfileHeaders
 import net.ins.prototype.backend.conf.AbstractTestcontainersTest
 import net.ins.prototype.backend.image.dao.repo.ImageRepository
 import net.ins.prototype.backend.meta.TestProfile
@@ -174,6 +176,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             accept = MediaType.APPLICATION_JSON
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(profileUpdateRequest)
+            header(CoreProfileHeaders.USER_ID, profileId)
         }.andExpect {
             status { isAccepted() }
         }
@@ -225,8 +228,32 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             accept = MediaType.APPLICATION_JSON
             contentType = MediaType.APPLICATION_JSON
             content = objectMapper.writeValueAsString(profileUpdateRequest)
+            header(CoreProfileHeaders.USER_ID, profileId)
         }.andExpect {
             status { isBadRequest() }
+        }
+    }
+
+    @Test
+    @DisplayName("Should not allow account change when X-User-Id header mismatch request body profileId")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles-single.xml")
+    fun shouldDenyAnotherAccountModification() {
+        fillEsIndex()
+        val profileId: Long = 1
+        val profileUpdateRequest = UpdateProfileRequest(
+            title = "XXX",
+            birth = LocalDate.of(1990, 1, 1),
+            gender = Gender.FEMALE,
+            countryId = "BY",
+            purposes = setOf(Purpose.RELATIONSHIPS),
+        )
+        mockMvc.put("/v1/profiles/$profileId") {
+            accept = MediaType.APPLICATION_JSON
+            contentType = MediaType.APPLICATION_JSON
+            content = objectMapper.writeValueAsString(profileUpdateRequest)
+            header(CoreProfileHeaders.USER_ID, 99999)
+        }.andExpect {
+            status { isForbidden() }
         }
     }
 
@@ -239,7 +266,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             queryParam("gender", "FEMALE")
             queryParam("purposes", "DATING,SEXTING")
             queryParam("countryId", "RU")
-            header("x-user-id", SAMPLE_FEMALE_PROFILE_ID)
+            header(CoreProfileHeaders.USER_ID, SAMPLE_FEMALE_PROFILE_ID)
         }.andExpect { status { isBadRequest() } }
     }
 
@@ -252,7 +279,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
             queryParam("gender", "FEMALE")
             queryParam("purposes", "DATING,SEXTING")
             queryParam("countryId", "RU")
-            header("x-user-id", SAMPLE_MALE_PROFILE_ID)
+            header(CoreProfileHeaders.USER_ID, SAMPLE_MALE_PROFILE_ID)
         }.andExpect {
             status { isOk() }
             content {
@@ -381,12 +408,38 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
     @DisplayName("Should respond with error on image uploading for non-existing profile")
     @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
     fun shouldNotUploadImageForNonExistingProfile() {
-        mockMvc.multipart("/v1/profiles/999/images") {
+        val nonExistentProfileId = 999
+        mockMvc.multipart("/v1/profiles/$nonExistentProfileId/images") {
             contentType = MediaType.IMAGE_PNG
             file(MockMultipartFile("file", readResourcesFile("/images/fox.png")))
+            header(CoreProfileHeaders.USER_ID, nonExistentProfileId)
         }.andExpect {
             status { isNotFound() }
         }
+    }
+
+    @Test
+    @DisplayName("Should not allow upload images for profileId that mismatch X-User-Id header")
+    @DatabaseSetup("classpath:/dbunit/0001/profiles.xml")
+    fun shouldNotAllowAnotherProfileImageUpload() {
+        val profileId: Long = 1
+        mockMvc.multipart("/v1/profiles/$profileId/images") {
+            contentType = MediaType.IMAGE_PNG
+            file(
+                MockMultipartFile(
+                    "file",
+                    "fox.png",
+                    MediaType.IMAGE_PNG_VALUE,
+                    readResourcesFile("/images/fox.png"),
+                ))
+            header(CoreProfileHeaders.USER_ID, 9999)
+        }.andDo {
+            print()
+        }.andExpect {
+            status { isForbidden() }
+        }
+
+        imageRepo.count() shouldBe 0
     }
 
     @Test
@@ -403,6 +456,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
                     MediaType.IMAGE_PNG_VALUE,
                     readResourcesFile("/images/fox.png"),
                 ))
+            header(CoreProfileHeaders.USER_ID, profileId)
         }.andDo {
             print()
         }.andExpect {
@@ -457,6 +511,7 @@ class ProfileControllerTest : AbstractTestcontainersTest() {
                     readResourcesFile("/images/fox.png"),
                 )
             )
+            header(CoreProfileHeaders.USER_ID, profileId)
         }.andExpect {
             status { isOk() }
         }

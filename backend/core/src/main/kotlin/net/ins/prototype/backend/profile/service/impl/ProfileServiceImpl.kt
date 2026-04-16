@@ -11,9 +11,11 @@ import net.ins.prototype.backend.profile.event.ProfileEventPublisher
 import net.ins.prototype.backend.profile.event.ProfileEventType
 import net.ins.prototype.backend.profile.service.ProfileService
 import net.ins.prototype.backend.profile.service.context.NewProfileContext
+import net.ins.prototype.backend.profile.service.context.ProfileModificationContext
 import net.ins.prototype.backend.profile.service.context.ProfileSearchContext
 import net.ins.prototype.backend.profile.service.context.UpdateProfileContext
 import net.ins.prototype.backend.profile.validation.NewProfileContextValidator
+import net.ins.prototype.backend.profile.validation.ProfileModificationContextValidator
 import net.ins.prototype.backend.profile.validation.UpdateProfileContextValidator
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -23,6 +25,7 @@ import java.time.LocalDateTime
 class ProfileServiceImpl(
     private val profileRepository: ProfileRepository,
     private val newProfileContextValidator: NewProfileContextValidator,
+    private val profileModificationContextValidator: ProfileModificationContextValidator,
     private val updateProfileContextValidator: UpdateProfileContextValidator,
     private val profileContextToEntityConverter: ProfileContextToProfileEntityConverter,
     private val profileEventPublisher: ProfileEventPublisher,
@@ -45,6 +48,7 @@ class ProfileServiceImpl(
     override fun findAll(search: ProfileSearchContext): List<ProfileEntity> = profileRepository.findAll(ProfileRepository.search(search))
 
     override fun update(context: UpdateProfileContext): ProfileEntity {
+        profileModificationContextValidator.validate(ProfileModificationContext(context.userIdHeader, context.id))
         updateProfileContextValidator.validate(context)
         val updatedDbProfile = profileRepository.save(profileEntityUpdateConverter.convert(getById(context.id) to context))
         profileEventPublisher.publish(ProfileEventContext(updatedDbProfile, ProfileEventType.UPDATED))

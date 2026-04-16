@@ -11,4 +11,5 @@ data class UpdateProfileContext(
     val gender: Gender? = null,
     val countryId: String? = null,
     val purposes: Set<Purpose>? = null,
+    val userIdHeader: Long,
 )
