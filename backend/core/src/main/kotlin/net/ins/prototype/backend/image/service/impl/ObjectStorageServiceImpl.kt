@@ -4,6 +4,7 @@ import io.minio.BucketExistsArgs
 import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
+import jakarta.annotation.PostConstruct
 import net.ins.prototype.backend.conf.AppProperties
 import net.ins.prototype.backend.image.service.ObjectStorageService
 import net.ins.prototype.backend.image.service.ObjectStorageService.ObjectStorageEntity
@@ -22,9 +23,12 @@ class ObjectStorageServiceImpl(
     private val rootFolder: String = appProperties.objectStorage.profilePhotoFolder
     private val cdnBaseUrl: String = appProperties.objectStorage.cdnBaseUrl
 
-    override fun savePhoto(profileId: Long, binary: MultipartFile): ObjectStorageEntity {
+    @PostConstruct
+    fun init() {
         preservePhotoBucket()
+    }
 
+    override fun savePhoto(profileId: Long, binary: MultipartFile): ObjectStorageEntity {
         val fileName = requireNotNull(binary.originalFilename) {
             "File name can not be empty"
         }
@@ -53,9 +57,9 @@ class ObjectStorageServiceImpl(
 
     private fun preservePhotoBucket() {
         if (!minioClient.bucketExists(bucket.toBucketRequest())) {
-            logger.warn("Missing $bucket bucket")
+            logger.warn("Missing '$bucket' bucket")
             minioClient.makeBucket(bucket.toMakeBucketRequest())
-            logger.info("Bucket $bucket successfully created")
+            logger.info("Bucket '$bucket' successfully created")
         }
     }
 

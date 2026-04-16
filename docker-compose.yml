@@ -288,24 +288,6 @@ services:
       timeout: 20s
       retries: 3
 
-  minio-init:
-    image: quay.io/minio/minio
-    container_name: minio-init
-    profiles:
-      - all
-      - cdn
-      - core
-    depends_on:
-      minio:
-        condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      /usr/bin/mc alias set prototype_minio http://minio:9000 ${MINIO_ADMIN_USER} ${MINIO_ADMIN_PASSWORD};
-      /usr/bin/mc mb prototype_minio/profile-photos;
-      /usr/bin/mc anonymous set public prototype_minio/profile-photos;
-      exit 0;
-      "
-
   cassandra-1:
     image: "cassandra:5.0.5"
     container_name: "cassandra-1"
