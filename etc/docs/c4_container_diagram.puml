@@ -1,0 +1,55 @@
+@startuml
+!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define DEVICONS2 https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/refs/heads/main/icons/devicons2
+!include DEVICONS/react.puml
+!include DEVICONS/java.puml
+!include DEVICONS/postgresql.puml
+!include DEVICONS2/kotlin.puml
+!include DEVICONS2/elasticsearch.puml
+!include DEVICONS2/apachekafka_original.puml
+!include DEVICONS2/cassandra.puml
+
+Person(regularUser, "System User", "Regular")
+
+Boundary(prototype, "Prototype") {
+
+    Container(reactSPA, "ReactJS SPA", "ReactJS, redux, axios", $sprite="react")
+    Container(apiGW, "API Gateway", "Spring Boot, Spring Cloud Gateway, Spring Security", $sprite="kotlin")
+    Container(profileAPI, "Core profile API", "Spring Boot, Spring MVC, Spring Data JPA", $sprite="kotlin")
+    ContainerDb(profilePostgres, "Profiles", "Postgres", $sprite="postgresql")
+    SystemQueue(profilesKafka, "Profiles Kafka", "Kafka", $sprite="apachekafka_original")
+    ContainerDb(profilesElastic, "Profiles ES", "Elasticsearch", $sprite="elasticsearch")
+
+    Rel_D(regularUser, reactSPA, "Uses", "HTTP REST")
+    Rel_D(reactSPA, apiGW, "Uses", "HTTP REST")
+    Rel_D(apiGW, profileAPI, "Uses", "HTTP REST")
+    Rel_D(profileAPI, profilePostgres, "Uses", "TCP JDBC")
+    BiRel_D(profileAPI, profilesKafka, "Publishes/Consumes profile profile updates for ES index, Payment metadata", "TCP")
+    Rel_D(profileAPI, profilesElastic, "Reads index", "TCP")
+
+
+    Container(chatAPI, "Chat API", "Spring Boot, Spring Websocket, Spring MVC, Spring Data Cassandra", $sprite="kotlin")
+    ContainerDb(chatCassandra, "Chat DB", "Apache Cassandra", $sprite="cassandra")
+    SystemQueue(chatKafka, "Chat Kafka", "Kafka", $sprite="apachekafka_original")
+    Rel_D(apiGW, chatAPI, "Uses", "HTTP REST, HTTP WS")
+    Rel_D(chatAPI, chatCassandra, "Uses", "TCP")
+    BiRel_D(chatAPI, chatKafka, "Publishes/Consumes chat messages", "TCP")
+
+    Container(paymentAdapter, "Payment Adapter", "Spring Boot, Spring MVC", $sprite="kotlin")
+    Rel_L(apiGW, paymentAdapter, "Uses", "HTTP REST")
+
+    Rel_D(paymentAdapter, profilesKafka, "Publishes payment metadata", "TCP")
+
+    ' Container(sba, "Spring Boot Admin Server", "Spring Boot Admin Server", $sprite="kotlin")
+    ' Rel_R(sba, apiGW, "Reads technical metadata", "Java RMI")
+    ' Rel_R(sba, profileAPI, "Reads technical metadata", "Java RMI")
+    ' Rel_R(sba, chatAPI, "Reads technical metadata", "Java RMI")
+}
+
+System_Ext(extPaymentGW, "Payment GW", "External Payment System")
+Rel_R(paymentAdapter, extPaymentGW, "Uses", "HTTP")
+
+SHOW_FLOATING_LEGEND()
+
+@enduml
