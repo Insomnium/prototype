@@ -2,6 +2,9 @@
 Boredom.
 The first idea came to mind is a dating service. Why? Да хз.
 
+# Container diagram
+![c4_container](etc/docs/c4_ccontainer_diagram.png)
+
 # Backend
 Currently consists of `core` service: 
 * Postgres as a primary DB for profiles
@@ -16,6 +19,7 @@ Currently consists of `core` service:
 - [ ] Dedicated chatting service **[In Progress]**
 - [ ] Observability (logging and tracing at least)
 - [ ] Simple SPA web frontend as a proof-of-concept **[In Progress]**
+- [ ] Payment Gateway + paid features
 
 ## Setup
 
