@@ -311,7 +311,7 @@ services:
     volumes:
       - cassandra-node-01:/var/lib/cassandra:rw
     healthcheck:
-      test: [ "CMD-SHELL", "nodetool status" ]
+      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -eq 1 ] || exit 1"]
       interval: 2m
       start_period: 2m
       timeout: 10s
@@ -345,7 +345,7 @@ services:
     volumes:
       - cassandra-node-02:/var/lib/cassandra:rw
     healthcheck:
-      test: [ "CMD-SHELL", "nodetool status" ]
+      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -eq 2 ] || exit 1"]
       interval: 2m
       start_period: 2m
       timeout: 10s
@@ -379,7 +379,7 @@ services:
     volumes:
       - cassandra-node-03:/var/lib/cassandra:rw
     healthcheck:
-      test: [ "CMD-SHELL", "nodetool status" ]
+      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -eq 3 ] || exit 1"]
       interval: 2m
       start_period: 2m
       timeout: 10s
