@@ -17,6 +17,12 @@ services:
       POSTGRES_USER: ${CORE_PG_PASSWORD}
       POSTGRES_PASSWORD: ${CORE_PG_DATABASE}
       POSTGRES_HOST_AUTH_METHOD: ${CORE_PG_AUTH_METHOD}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app_core -d core_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   elasticsearch:
     image: elasticsearch:8.17.3
@@ -47,6 +53,11 @@ services:
       - "9300:9300"
     networks:
       - elastic
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -vq '\"status\":\"red\"'"]
+      interval: 20s
+      timeout: 10s
+      retries: 5
 
   kibana:
     image: kibana:8.17.3
@@ -61,8 +72,15 @@ services:
       - "5601:5601"
     networks:
       - elastic
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 30s
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
 
   elasticvue:
     image: cars10/elasticvue
@@ -77,6 +95,15 @@ services:
       - "8085:8080"
     networks:
       - elastic
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "http://localhost:8080" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
 
   broker:
     image: confluentinc/cp-server:7.9.0
@@ -119,6 +146,11 @@ services:
       # Replace CLUSTER_ID with a unique base64 UUID using "bin/kafka-storage.sh random-uuid"
       # See https://docs.confluent.io/kafka/operations-tools/kafka-tools.html#kafka-storage-sh
       CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    healthcheck:
+      test: [ "CMD-SHELL", "kafka-topics --bootstrap-server localhost:9092 --list" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.9.0
@@ -207,6 +239,11 @@ services:
       CONNECT_PRODUCER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringProducerInterceptor"
       CONNECT_CONSUMER_INTERCEPTOR_CLASSES: "io.confluent.monitoring.clients.interceptor.MonitoringConsumerInterceptor"
       CONNECT_PLUGIN_PATH: "/usr/share/java,/usr/share/confluent-hub-components"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8083/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   control-center:
     image: confluentinc/cp-enterprise-control-center:7.9.0
@@ -235,6 +272,12 @@ services:
       CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 1
       CONFLUENT_METRICS_TOPIC_REPLICATION: 1
       PORT: 9021
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9021/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.3.2
@@ -263,6 +306,11 @@ services:
 #      KEYCLOAK_ADMIN_PASSWORD: password
     volumes:
       - ${PWD}/etc/docker/keycloak/init-sample.json:/opt/keycloak/data/import/realm-export.json
+#    healthcheck: # TODO: make an image with curl
+#      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 5
 
   minio:
     image: quay.io/minio/minio
@@ -311,7 +359,7 @@ services:
     volumes:
       - cassandra-node-01:/var/lib/cassandra:rw
     healthcheck:
-      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -eq 1 ] || exit 1"]
+      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -ge 1 ] || exit 1"]
       interval: 2m
       start_period: 2m
       timeout: 10s
@@ -345,7 +393,7 @@ services:
     volumes:
       - cassandra-node-02:/var/lib/cassandra:rw
     healthcheck:
-      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -eq 2 ] || exit 1"]
+      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -ge 2 ] || exit 1"]
       interval: 2m
       start_period: 2m
       timeout: 10s
@@ -379,7 +427,7 @@ services:
     volumes:
       - cassandra-node-03:/var/lib/cassandra:rw
     healthcheck:
-      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -eq 3 ] || exit 1"]
+      test: ["CMD-SHELL", "[ $$(nodetool status | grep '^UN' | wc -l) -ge 3 ] || exit 1"]
       interval: 2m
       start_period: 2m
       timeout: 10s
