@@ -11,14 +11,14 @@ import Stomp from "stompjs";
 
 const Chat = () => {
 
-    const dispatch = useDispatch()
-    const fakeUserId = useSelector(getFakeUserId)
+    const dispatch = useDispatch();
+    const fakeUserId = useSelector(getFakeUserId);
+
+    let stompClient = null;
 
     useEffect(() => {
         const userId = fakeUserId;
-        dispatch(fetchContactAggregates(userId))
-
-        let stompClient = null;
+        dispatch(fetchContactAggregates(userId));
 
         if (userId > 0) {
             const socket = new SockJS(`http://localhost:8082/ws?userId=${userId}`);
@@ -63,7 +63,15 @@ const Chat = () => {
                 <ContactListContainer />
             </div>
 
-            <ChatWindow doSendMessage={(msg) =>  console.log(`Sending ${msg}`) } />
+            <ChatWindow doSendMessage={(msg, receiverId) => {
+                console.log(`Sending ${msg} to ${receiverId}`);
+                console.dir(msg)
+                const headers = {
+                    'X-sender-id': fakeUserId,
+                    'X-receiver-id': receiverId,
+                }
+                stompClient.send('/app/chat', headers, JSON.stringify({ 'content': msg['text'] }));
+            }} />
         </>
     )
 };

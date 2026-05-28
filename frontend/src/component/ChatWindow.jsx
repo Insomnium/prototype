@@ -49,13 +49,13 @@ const ChatInput = ({ selectedContact, messages, setMessages, input, setInput, do
     }
 
     const handleSubmit = () => {
-        console.log(`>>> [to ${selectedContact.id}]: ${input}`)
+        console.log(`>>> [to ${selectedContact.contactId}]: ${input}`)
         console.log(selectedContact)
         setSubmitionDisabled(true)
         setInput('')
         const outboundMessage = { text: input, timestamp: new Date().getTime(), isClient: true }
         setMessages(outboundMessage)
-        doSendMessage(outboundMessage)
+        doSendMessage(outboundMessage, selectedContact.contactId)
     }
 
     const interceptKeyDown = (event) => {

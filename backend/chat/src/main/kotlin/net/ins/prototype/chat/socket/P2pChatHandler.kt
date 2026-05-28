@@ -3,18 +3,22 @@ package net.ins.prototype.chat.socket
 import com.google.protobuf.Message
 import net.ins.prototype.chat.conf.AppProperties
 import net.ins.prototype.chat.dao.repo.MessageCRepo
-import net.ins.prototype.chat.event.*
+import net.ins.prototype.chat.event.P2pMessageContext
+import net.ins.prototype.chat.event.P2pMessageEvent
+import net.ins.prototype.chat.event.buildChatRoomHeader
+import net.ins.prototype.chat.event.buildReceiverHeader
+import net.ins.prototype.chat.event.buildSenderHeader
 import net.ins.prototype.chat.model.ChatMessage
 import net.ins.prototype.chat.model.ChatMessageRequest
 import net.ins.prototype.chat.model.ChatMessageResponse
 import net.ins.prototype.chat.service.impl.ChatIdGenerator
 import net.ins.prototype.chat.socket.auth.P2pConstants
+import net.ins.prototype.chat.socket.auth.chatId
 import net.ins.prototype.chat.socket.auth.receiverId
 import net.ins.prototype.chat.socket.auth.senderId
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.springframework.context.ApplicationListener
 import org.springframework.kafka.core.KafkaTemplate
-import org.springframework.messaging.handler.annotation.DestinationVariable
 import org.springframework.messaging.handler.annotation.MessageMapping
 import org.springframework.messaging.handler.annotation.Payload
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor
@@ -34,13 +38,12 @@ class P2pChatHandler(
 
     val p2pMessageTopic = appProperties.integrations.topics.p2pMessage
 
-    @MessageMapping("/chat/{roomId}")
+    @MessageMapping("/chat") // TODO: roomId must not be determined on the client side. Generate UUID on the BE
     fun onMessageReceived(
         @Payload message: ChatMessageRequest,
         headerAccessor: SimpMessageHeaderAccessor,
-        @DestinationVariable roomId: String,
     ) {
-        sendToKafka(buildContext(headerAccessor, message, roomId))
+        sendToKafka(buildContext(headerAccessor, message, headerAccessor.chatId))
             .thenAccept { onSentContext -> sendToSocket(onSentContext) }
     }
 
