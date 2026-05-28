@@ -34,6 +34,9 @@ val <T : NativeMessageHeaderAccessor> T.receiverId: String
 val <T: StompHeaderAccessor> T.userId: String
     get() = sessionAttributes?.get(P2pWsSessionAttributes.USER_ID) as? String ?: throw MissingSessionException()
 
+val <T: NativeMessageHeaderAccessor> T.chatId: String
+    get() = with(sortedSetOf(this.senderId, this.receiverId)) { "${this.first}-${this.last}" }
+
 private fun NativeMessageHeaderAccessor.getNativeHeader(
     key: String,
     onException: () -> MissingMandatoryHeaderException,

@@ -71,7 +71,7 @@ class PrototypeStompClientSessionProvider(
             payload: ChatMessageRequest,
         ) {
             val headers = StompHeaders().apply {
-                destination = "/app/chat/${buildChatRoomId(receiverId)}"
+                destination = "/app/chat"
                 set(P2pWsHeaders.SENDER, userId.toString())
                 set(P2pWsHeaders.RECEIVER, receiverId.toString())
             }

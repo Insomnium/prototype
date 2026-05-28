@@ -74,9 +74,8 @@ const sendMessage = () => {
             'X-sender-id': fakeUserId,
             'X-receiver-id': receiverId,
         }
-        const attendees = [ fakeUserId, receiverId ]
-        const chatName = `${attendees[0]}-${attendees[1]}`
-        stompClient.send(`/app/chat/${chatName}`, headers, JSON.stringify({ 'content': messageContent }))
+        const attendees = [ fakeUserId, receiverId ].sort()
+        stompClient.send(`/app/chat`, headers, JSON.stringify({ 'content': messageContent }))
         document.getElementById('inputMessage').value = ''
     }
 };
