@@ -3,7 +3,7 @@ import {getSelectedContact, getSelectedContactMessages, sendMessage} from "../st
 import { useState } from "react";
 import { format } from "date-fns";
 
-const ChatWindow = () => {
+const ChatWindow = ({ doSendMessage }) => {
 
     const [ input, setInput ] = useState('')
     const selectedContact = useSelector(getSelectedContact)
@@ -19,7 +19,9 @@ const ChatWindow = () => {
                     messages={selectedContactMessages}
                     setMessages={(it) => dispatch(sendMessage(it))}
                     input={input}
-                    setInput={setInput} />
+                    setInput={setInput}
+                    doSendMessage={doSendMessage}
+                     />
             </div>
         </>
     )
@@ -37,7 +39,7 @@ const ChatMessage = ({ text, timestamp, isClient }) => {
     )
 };
 
-const ChatInput = ({ selectedContact, messages, setMessages, input, setInput }) => {
+const ChatInput = ({ selectedContact, messages, setMessages, input, setInput, doSendMessage }) => {
     const [ submitionDisabled, setSubmitionDisabled ] = useState(true)
 
     const onChange = (event) => {
@@ -51,7 +53,9 @@ const ChatInput = ({ selectedContact, messages, setMessages, input, setInput }) 
         console.log(selectedContact)
         setSubmitionDisabled(true)
         setInput('')
-        setMessages({ text: input, timestamp: new Date().getTime(), isClient: true })
+        const outboundMessage = { text: input, timestamp: new Date().getTime(), isClient: true }
+        setMessages(outboundMessage)
+        doSendMessage(outboundMessage)
     }
 
     const interceptKeyDown = (event) => {
