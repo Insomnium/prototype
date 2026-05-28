@@ -82,9 +82,5 @@ class PrototypeStompClientSessionProvider(
             session.disconnect()
             stompClient.stop()
         }
-
-
-        private fun buildChatRoomId(receiverId: Int): String =
-            with(sortedSetOf(userId, receiverId)) { return "${first - last}" }
     }
 }

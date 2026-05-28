@@ -1,5 +1,6 @@
 package net.ins.prototype.chat.socket.auth
 
+import net.ins.prototype.chat.model.ChatRoomId
 import net.ins.prototype.chat.socket.exception.MissingMandatoryHeaderException
 import net.ins.prototype.chat.socket.exception.MissingReceiverHeaderException
 import net.ins.prototype.chat.socket.exception.MissingSenderHeaderException
@@ -35,7 +36,7 @@ val <T: StompHeaderAccessor> T.userId: String
     get() = sessionAttributes?.get(P2pWsSessionAttributes.USER_ID) as? String ?: throw MissingSessionException()
 
 val <T: NativeMessageHeaderAccessor> T.chatId: String
-    get() = with(sortedSetOf(this.senderId, this.receiverId)) { "${this.first}-${this.last}" }
+    get() = ChatRoomId(this.senderId, this.receiverId).toRoomId()
 
 private fun NativeMessageHeaderAccessor.getNativeHeader(
     key: String,
