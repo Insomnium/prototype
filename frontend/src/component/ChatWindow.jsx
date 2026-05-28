@@ -5,7 +5,6 @@ import { format } from "date-fns";
 
 const ChatWindow = () => {
 
-    const [ messages, setMessages ] = useState([])    
     const [ input, setInput ] = useState('')
     const selectedContact = useSelector(getSelectedContact)
     const selectedContactMessages = useSelector(getSelectedContactMessages)

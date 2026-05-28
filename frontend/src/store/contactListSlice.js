@@ -53,7 +53,7 @@ const contactListSlice = createSlice({
     contacts: [],
     error: null,
     searchTerm: null,
-    messagesByContact: { 216: [ { text: 'hi there', timestamp: new Date().getTime(), isClient: true } ] },
+    messagesByContact: { },
     selectedContact: null
   },
   reducers: {
@@ -73,8 +73,22 @@ const contactListSlice = createSlice({
           }
       },
       sendMessage: (state, action) => {
-          // state.messagesByContact = { ...state.messagesByContact,  }
           state.messagesByContact[state.selectedContact.contactId].push(action.payload)
+      },
+      receiveMessage: (state, action) => {
+        action.payload.forEach(originMessage => {
+          const senderId = parseInt(originMessage['sender']);
+          const messagePayload = originMessage['content'];
+          const clientTimestamp = new Date().getTime();
+
+          state.messagesByContact[senderId] = state.messagesByContact[senderId] || [];
+
+          state.messagesByContact[senderId].push({
+            text: messagePayload,
+            timestamp: clientTimestamp,
+            isClient: false
+          });
+        });
       }
   },
   extraReducers: (builder) => {
@@ -107,7 +121,7 @@ const contactListSlice = createSlice({
 });
 
 // export actions. Actions are matched with reducers
-export const { setSearchTerm, setSelectedContact, sendMessage } = contactListSlice.actions;
+export const { setSearchTerm, setSelectedContact, sendMessage, receiveMessage } = contactListSlice.actions;
 
 // export selectors (selectors get part of the store state)
 export const getAllContacts = (state) => state.contacts.contacts;
