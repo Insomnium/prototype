@@ -1,5 +1,6 @@
 package net.ins.prototype.chat.event
 
+import net.ins.prototype.chat.model.ChatRoomId
 import org.apache.kafka.common.header.internals.RecordHeader
 import java.util.TreeSet
 
@@ -16,8 +17,8 @@ fun P2pMessageContext.buildReceiverHeader(): RecordHeader =
     RecordHeader(P2pKafkaHeaders.RECEIVER, receiverId.toUtf8ByteArray())
 
 fun P2pMessageContext.buildChatRoomHeader(): RecordHeader =
-    RecordHeader(P2pKafkaHeaders.CHAT_ROOM, sortedSetOf(senderId, receiverId).buildChatRoomId().toUtf8ByteArray())
+    RecordHeader(P2pKafkaHeaders.CHAT_ROOM, listOf(senderId, receiverId).buildChatRoomId().toUtf8ByteArray())
 
 private fun String.toUtf8ByteArray(): ByteArray = toByteArray(charset = Charsets.UTF_8)
 
-fun TreeSet<String>.buildChatRoomId(): String = "p2p_${first}_${last}"
+fun List<String>.buildChatRoomId(): String = "p2p_${ChatRoomId(first(), last())}"
