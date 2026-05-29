@@ -7,7 +7,6 @@
         <artifactId>prototype</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
-    <groupId>net.ins.prototype</groupId>
     <artifactId>commons</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>commons</name>
