@@ -4,7 +4,13 @@ spring:
   config.import: optional:configserver:http://localhost:8888
 
   datasource:
+    url: ${POSTGRES_JDBC_URL}
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
+
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}
 
   liquibase:
     change-log: classpath*:db/changelog/master.xml
@@ -36,7 +42,7 @@ app:
     producer:
       key-serializer: org.apache.kafka.common.serialization.LongSerializer
       properties:
-        schema.registry.url: ${SCHEMA_REGISTRY_URL}
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
         value.subject.name.strategy: io.confluent.kafka.serializers.subject.RecordNameStrategy
         auto.register.schemas: false
         use.latest.version: true
@@ -45,7 +51,7 @@ app:
       key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
       group-id: cg-core.test
       properties:
-        schema.registry.url: ${SCHEMA_REGISTRY_URL}
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL}
         auto.reset.offset: earliest
         enable.auto.commit: false
 

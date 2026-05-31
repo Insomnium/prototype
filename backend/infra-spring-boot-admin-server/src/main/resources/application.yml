@@ -6,6 +6,8 @@ spring:
   config.import: optional:configserver:http://localhost:8888
   boot:
     admin:
+      client:
+        url: ${SBA_ADMIN_CLIENT_URL}
       ui:
         available-languages:
           - en
