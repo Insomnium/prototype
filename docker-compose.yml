@@ -433,6 +433,93 @@ services:
       timeout: 10s
       retries: 3
 
+  app-spring-boot-admin:
+    image: insomnium/infra-spring-boot-admin-server:latest
+    container_name: "app-spring-boot-admin-server"
+    profiles:
+      - all
+      - app
+    ports:
+      - "1111:1111"
+    environment:
+      SBA_ADMIN_CLIENT_URL: http://localhost:11111
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:1111/actuator/health | grep 'UP'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  app-core:
+    image: insomnium/core:latest
+    container_name: "app-core"
+    profiles:
+      - all
+      - app
+    ports:
+      - "8080:8080"
+    networks:
+      - default
+      - elastic
+    environment:
+      SBA_URL: http://app-spring-boot-admin:1111
+      POSTGRES_JDBC_URL: jdbc:postgresql://postgres:5432/core
+      POSTGRES_USERNAME: app_core
+      POSTGRES_PASSWORD: core_password
+      ELASTICSEARCH_URIS: http://elasticsearch:9200
+      KAFKA_BOOTSTRAP_SERVERS: broker:29092
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      MINIO_BASE_URL: http://minio:9000
+      MINIO_USER: admin
+      MINIO_PASSWORD: password
+    depends_on:
+      app-spring-boot-admin:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:8080/core/actuator/health | grep 'UP'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
+  app-chat:
+    image: insomnium/chat:latest
+    container_name: "app-chat"
+    profiles:
+      - all
+      - app
+    ports:
+      - "8082:8080"
+    networks:
+      - default
+      - cassandra-net
+    environment:
+      SBA_URL: http://app-spring-boot-admin:1111
+      CASSANDRA_DC: prototype-dc1
+      CASSANDRA_CLUSTER: cassandra-1:9042,cassandra-2:9043,cassandra-3:9044
+      KAFKA_BOOTSTRAP_SERVERS: broker:29092
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+      CASSANDRA_JDBC_URL: jdbc:cassandra://cassandra-1:9042/chat?compliancemode=Liquibase&localdatacenter=prototype-dc1
+    depends_on:
+      app-spring-boot-admin:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      cassandra-3:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep 'UP'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
 volumes:
   elastic_data:
     driver: local
