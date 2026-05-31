@@ -20,6 +20,16 @@ spring:
       client:
         url: ${SBA_URL}
 
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE_SERVICE_URL}
+  instance:
+    lease-renewal-interval-in-seconds: ${EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS:15}
+    lease-expiration-duration-in-seconds: ${EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS:30}
+
 server:
   servlet:
     context-path: /core

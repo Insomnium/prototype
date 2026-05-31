@@ -28,6 +28,16 @@ spring:
     keyspace-name: chat
     local-datacenter: ${CASSANDRA_DC}
 
+eureka:
+  client:
+    enabled: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: ${EUREKA_DEFAULT_ZONE_SERVICE_URL}
+  instance:
+    lease-renewal-interval-in-seconds: ${EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS:15}
+    lease-expiration-duration-in-seconds: ${EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS:30}
+
 app:
   instance-id: chat_app_${random.uuid}
   integrations:

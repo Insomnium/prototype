@@ -18,6 +18,7 @@
 
         <module>infra-config-server</module>
         <module>infra-spring-boot-admin-server</module>
+        <module>infra-service-registry-eureka</module>
     </modules>
 
     <properties>

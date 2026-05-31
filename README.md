@@ -6,12 +6,18 @@ The first idea came to mind is a dating service. Why? Да хз.
 ![c4_container](etc/docs/c4_ccontainer_diagram.png)
 
 # Backend
-Currently consists of `core` service: 
-* Postgres as a primary DB for profiles
-* ElasticSearch: indexing and searching performance improvement
-* Kafka to asynchronously index profiles being created, chat messages replication
-* Spring Websocket for real-time chatting
-* Cassandra as a chat contacts and message history store
+Currently consists of: 
+* `core` service: 
+  * Postgres as a primary DB for profiles
+  * ElasticSearch: indexing and searching performance improvement
+  * Kafka to asynchronously index profiles being created
+* `chat` service:
+  * Spring Websocket for real-time chatting
+  * Kafka for asynchronously chat messages replication
+  * Cassandra as a chat contacts and message history store
+* Spring Boot Admin Server
+* Spring Cloud Service Registry (eureka-based)
+* Spring Cloud Gateway **TODO**
 
 ## Plans
 - [X] Core service extension with support for basic business features like profile editing, including photos uploading (CDN?)
@@ -25,18 +31,12 @@ Currently consists of `core` service:
 
 ### Run locally
 
-1. Use `docker-compose.yml` from the root folder to setup local infrastructure. Run: `docker compose --profile all up`
-2. Build and run core service
-   1. Navigate `backend/core` folder
-   2. Build service via `./mvnw clean package`
-   3. Run it by executing `java -jar target/{path-to-executable-jar} --spring.profiles.active=local`
-   4. Check out APIs (e.g. using Bruno collection from _etc/.bruno_ folder in the root of the project)
-   5. Track results in DB, ES, Kafka (see [Local env URIs](#-local-env-uris) section)
-3. Build and run chat service
-   1. Navigate to `backend/chat` folder
-   2. Build service via `./mvnw clean package`
-   3. Run it by executing `java -jar target/{path-to-executable-jar} --spring.profiles.active=local`
-   4. Open either `etc/index.html` for simple test or build and run FE SPA (see [Frontend](#-frontend) section)
+1. Use `docker-compose.yml` from the root folder to setup local infrastructure. Run: `docker compose --profile all down && docker compose --profile all up`
+2. Use `./reinit.sh` script to cleanup all the data sources (postgres, cassandra, elasticsearch, keycloak) and generate sample dat:
+   * 5 profiles under the `core` service
+   * 5 user accounts on the `keycloak`
+   * p2p contacts and chat rooms between each and every of the users above
+3. Use `cd frontend && npm install && npm run dev` to quickly build and run simple reactjs based SPA
 
 Makefile is to be done
 
@@ -83,6 +83,8 @@ Implementation is in progress. Now it's able to fetch contacts and profiles info
 [ElasticVue](http://localhost:8085/)  
 [Kafka Control Center](http://localhost:9021/)  
 [Minio](http://localhost:9001/)
+[Spring Boot Admin Server](http://localhost:1111)
+[Eureka Service Registry](http://localhost:9761)
 
 # Important note
 I've got another username, which've I used in a couple of commits from another machine, Github considers them as authored by another GH account. That's a freaking coincidence.

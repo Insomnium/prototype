@@ -7,6 +7,7 @@ services:
       - db
       - keycloak
       - core
+      - infra
     ports:
       - 5432:5432
     volumes:
@@ -31,6 +32,7 @@ services:
       - all
       - index
       - core
+      - infra
     environment:
       - node.name=elasticsearch
       - cluster.name=es-docker-cluster
@@ -66,6 +68,7 @@ services:
     profiles:
       - all
       - index
+      - infra
     environment:
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
@@ -89,6 +92,7 @@ services:
     profiles:
       - all
       - index
+      - infra
     volumes:
       - "${PWD}/etc/docker/elasticvue_conf.json:/usr/share/nginx/html/api/default_clusters.json"
     ports:
@@ -115,6 +119,7 @@ services:
       - core
       - chat
       - broker
+      - infra
     ports:
       - "9092:9092"
       - "9101:9101"
@@ -160,6 +165,7 @@ services:
       - all
       - kafka
       - core
+      - infra
     depends_on:
       - broker
     ports:
@@ -181,6 +187,7 @@ services:
       - all
       - kafka
       - core
+      - infra
     depends_on:
       schema-registry:
         condition: service_healthy
@@ -196,6 +203,7 @@ services:
       - all
       - chat
       - cassandra
+      - infra
     depends_on:
       - cassandra-1
       - cassandra-2
@@ -215,6 +223,7 @@ services:
       - kafka
       - core
       - chat
+      - infra
     depends_on:
       - broker
       - schema-registry
@@ -254,6 +263,7 @@ services:
       - kafka
       - core
       - chat
+      - infra
     depends_on:
       - broker
       - schema-registry
@@ -292,6 +302,7 @@ services:
       - keycloak
       - core
       - chat
+      - infra
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: password
@@ -319,6 +330,7 @@ services:
       - all
       - cdn
       - core
+      - infra
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -341,6 +353,7 @@ services:
       - all
       - cassandra
       - chat
+      - infra
     ports:
       - 7000:7000
       - 9042:9042
@@ -372,6 +385,7 @@ services:
       - all
       - cassandra
       - chat
+      - infra
     ports:
       - 9043:9042    
     networks:
@@ -406,6 +420,7 @@ services:
       - all
       - cassandra
       - chat
+      - infra
     ports:
       - 9044:9042
     networks:
@@ -450,6 +465,25 @@ services:
       retries: 3
       start_period: 5s
 
+  app-eureka-service-registry-server:
+    image: insomnium/infra-service-registry-eureka:latest
+    container_name: "app-eureka-server"
+    profiles:
+      - all
+      - app
+    ports:
+      - "9761:9761"
+    environment:
+      EUREKA_INSTANCE_HOSTNAME: "app-eureka-service-registry-server"
+      EUREKA_SERVER_ENABLE_SELF_PRESERVATION: "false"
+      EUREKA_SERVER_EVICTION_INTERVAL_TIMER_IN_MS: 5000
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:9761/actuator/health | grep 'UP'" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+
   app-core:
     image: insomnium/core:latest
     container_name: "app-core"
@@ -463,6 +497,9 @@ services:
       - elastic
     environment:
       SBA_URL: http://app-spring-boot-admin:1111
+      EUREKA_DEFAULT_ZONE_SERVICE_URL: http://app-eureka-service-registry-server:9761/eureka
+      EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS: 5
+      EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS: 10
       POSTGRES_JDBC_URL: jdbc:postgresql://postgres:5432/core
       POSTGRES_USERNAME: app_core
       POSTGRES_PASSWORD: core_password
@@ -474,6 +511,8 @@ services:
       MINIO_PASSWORD: password
     depends_on:
       app-spring-boot-admin:
+        condition: service_healthy
+      app-eureka-service-registry-server:
         condition: service_healthy
       postgres:
         condition: service_healthy
@@ -501,6 +540,9 @@ services:
       - cassandra-net
     environment:
       SBA_URL: http://app-spring-boot-admin:1111
+      EUREKA_DEFAULT_ZONE_SERVICE_URL: http://app-eureka-service-registry-server:9761/eureka
+      EUREKA_INSTANCE_LEASE_RENEWAL_INTERVAL_IN_SECONDS: 5
+      EUREKA_INSTANCE_LEASE_EXPIRATION_DURATION_IN_SECONDS: 10
       CASSANDRA_DC: prototype-dc1
       CASSANDRA_CLUSTER: cassandra-1:9042,cassandra-2:9043,cassandra-3:9044
       KAFKA_BOOTSTRAP_SERVERS: broker:29092
@@ -508,6 +550,8 @@ services:
       CASSANDRA_JDBC_URL: jdbc:cassandra://cassandra-1:9042/chat?compliancemode=Liquibase&localdatacenter=prototype-dc1
     depends_on:
       app-spring-boot-admin:
+        condition: service_healthy
+      app-eureka-service-registry-server:
         condition: service_healthy
       broker:
         condition: service_healthy
