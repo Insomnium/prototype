@@ -19,7 +19,7 @@ interface MessageCRepo : CassandraRepository<MessageCassandraEntity, P2pMessageP
         order by message_id desc
         limit :pageSize
     """)
-    @Consistency(DefaultConsistencyLevel.LOCAL_QUORUM)
+//    @Consistency(value = DefaultConsistencyLevel.LOCAL_QUORUM)
     fun getMessages(
         @Param("roomId") roomId: String,
         @Param("afterMessageId") messageId: UUID,

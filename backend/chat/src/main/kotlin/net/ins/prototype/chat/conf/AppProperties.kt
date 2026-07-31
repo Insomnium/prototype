@@ -1,7 +1,7 @@
 package net.ins.prototype.chat.conf
 
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties
 
 @ConfigurationProperties("app")
 data class AppProperties(

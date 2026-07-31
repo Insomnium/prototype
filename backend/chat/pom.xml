@@ -15,16 +15,16 @@
 
     <properties>
         <java.version>21</java.version>
-        <kotlin.version>2.1.0</kotlin.version>
+<!--        <kotlin.version>2.1.0</kotlin.version>-->
         <sentry.version>8.3.0</sentry.version>
         <kafka.confluent.avro.version>8.0.0</kafka.confluent.avro.version>
         <avro4k.version>1.10.1</avro4k.version>
         <classgraph.version>4.8.179</classgraph.version>
         <protobuf.version>4.32.0</protobuf.version>
-        <lombok.version>1.18.38</lombok.version>
+        <lombok.version>1.18.46</lombok.version>
         <protobuf.kafka.serializer.version>8.0.0</protobuf.kafka.serializer.version>
         <common-util.version>0.0.1-SNAPSHOT</common-util.version>
-        <liquibase.version>4.31.1</liquibase.version>
+        <liquibase.version>5.0.3</liquibase.version>
         <liquibase.jdbc-wrapper.version>4.16.0</liquibase.jdbc-wrapper.version>
 
         <kotest.jvm.version>4.0.7</kotest.jvm.version>
@@ -73,8 +73,8 @@
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -140,7 +140,17 @@
         <dependency>
             <groupId>com.ing.data</groupId>
             <artifactId>cassandra-jdbc-wrapper</artifactId>
-            <version>4.14.0</version>
+            <version>5.0.2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.datastax.oss</groupId>
+                    <artifactId>java-driver-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cassandra</groupId>
+            <artifactId>java-driver-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -186,22 +196,22 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>cassandra</artifactId>
+            <artifactId>testcontainers-cassandra</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>kafka</artifactId>
+            <artifactId>testcontainers-kafka</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>redpanda</artifactId>
+            <artifactId>testcontainers-redpanda</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
