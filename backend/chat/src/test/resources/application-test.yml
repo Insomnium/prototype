@@ -3,3 +3,14 @@ app:
     producer:
       properties:
         use.latest.version: true
+
+spring:
+  boot:
+    admin:
+      client:
+        enabled: false
+        url: http://localhost:1234
+
+eureka:
+  client:
+    enabled: false

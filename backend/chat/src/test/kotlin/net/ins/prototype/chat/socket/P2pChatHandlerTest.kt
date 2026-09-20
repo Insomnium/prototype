@@ -90,7 +90,7 @@ class P2pChatHandlerTest : AbstractTestcontainersTest() {
             keyDeserializer = StringDeserializer(),
             valueDeserializer = KafkaProtobufDeserializer(
                 schemaRegistryClient,
-                appProperties.kafka.consumer.buildProperties(null),
+                appProperties.kafka.consumer.buildProperties(),
                 P2pMessageEvent::class.java,
             ),
             expectedRecordsCount = 1,

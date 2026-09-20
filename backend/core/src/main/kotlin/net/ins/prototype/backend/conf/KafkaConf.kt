@@ -80,17 +80,16 @@ class KafkaConf(
     @Bean(PROFILE_EVENT_CONSUMER_FACTORY)
     fun profileEventConsumerFactory(
         @Qualifier(PROFILE_ERROR_HANDLING_DESERIALIZER) errorHandlingDeserializer: ErrorHandlingDeserializer<ProfileEvent>,
-    ): ConsumerFactory<Long, ProfileEvent> =
-        DefaultKafkaConsumerFactory<Long, ProfileEvent>(appProperties.kafka.buildConsumerProperties()).apply {
-            setValueDeserializer(errorHandlingDeserializer)
-        }
+    ): ConsumerFactory<Long, ProfileEvent> = DefaultKafkaConsumerFactory<Long, ProfileEvent>(appProperties.kafka.buildConsumerProperties()).apply {
+        valueDeserializer = errorHandlingDeserializer
+    }
 
     @Bean(PROFILE_EVENT_LISTENER_CONTAINER_FACTORY)
     fun profileEventListenerContainerFactory(
         @Qualifier(PROFILE_EVENT_CONSUMER_FACTORY) profileEventConsumerFactory: ConsumerFactory<Long, ProfileEvent>
     ): ConcurrentKafkaListenerContainerFactory<Long, ProfileEvent> = ConcurrentKafkaListenerContainerFactory<Long, ProfileEvent>().apply {
-        consumerFactory = profileEventConsumerFactory
-        isBatchListener = false
+        setConsumerFactory(profileEventConsumerFactory)
+        setBatchListener(false)
         containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
     }
 }

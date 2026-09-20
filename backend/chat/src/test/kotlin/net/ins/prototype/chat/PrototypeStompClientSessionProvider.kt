@@ -1,11 +1,9 @@
 package net.ins.prototype.chat
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import net.ins.prototype.chat.model.ChatMessage
 import net.ins.prototype.chat.model.ChatMessageRequest
 import net.ins.prototype.chat.socket.auth.P2pWsHeaders
-import org.springframework.messaging.converter.MappingJackson2MessageConverter
+import org.springframework.messaging.converter.JacksonJsonMessageConverter
 import org.springframework.messaging.simp.stomp.StompHeaders
 import org.springframework.messaging.simp.stomp.StompSession
 import org.springframework.web.socket.client.standard.StandardWebSocketClient
@@ -19,9 +17,7 @@ class PrototypeStompClientSessionProvider(
     private val sessionByUser: MutableMap<Int, StompSessionWrapper> = mutableMapOf()
 
     companion object {
-        private val jsonMessageConverter: MappingJackson2MessageConverter = MappingJackson2MessageConverter().apply {
-            objectMapper = ObjectMapper().registerKotlinModule()
-        }
+        private val jsonMessageConverter: JacksonJsonMessageConverter = JacksonJsonMessageConverter()
     }
 
     fun establishSession(

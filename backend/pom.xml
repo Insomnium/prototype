@@ -25,14 +25,14 @@
         <java.version>21</java.version>
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
-        <kotlin.version>2.1.0</kotlin.version>
-        <spring-boot.version>3.5.0</spring-boot.version>
-        <spring-cloud.version>2025.0.0</spring-cloud.version>
+        <kotlin.version>2.3.0</kotlin.version>
+        <spring-boot.version>4.1.0</spring-boot.version>
+        <spring-cloud.version>2025.1.2</spring-cloud.version>
         <sentry.version>8.3.0</sentry.version>
         <kafka.confluent.avro.version>7.9.0</kafka.confluent.avro.version>
         <avro4k.version>1.10.1</avro4k.version>
         <classgraph.version>4.8.179</classgraph.version>
-        <codecentric.spring-boot-admin.version>3.5.8</codecentric.spring-boot-admin.version>
+        <codecentric.spring-boot-admin.version>4.1.2</codecentric.spring-boot-admin.version>
 
         <kotest.jvm.version>4.0.7</kotest.jvm.version>
         <kotest.version>5.9.1</kotest.version>
@@ -40,6 +40,9 @@
         <dbunit.version>3.0.0</dbunit.version>
         <spring.test-dbunit.version>1.3.0</spring.test-dbunit.version>
         <jacoco.version>0.8.13</jacoco.version>
+
+        <kotlin.compiler.languageVersion>1.9</kotlin.compiler.languageVersion>
+        <kotlin.compiler.apiVersion>1.9</kotlin.compiler.apiVersion>
     </properties>
 
     <dependencyManagement>
@@ -181,6 +184,8 @@
                             <option>no-arg:annotation=net.ins.prototype.backend.common.meta.NoArgConstructor</option>
                         </pluginOptions>
                         <jvmTarget>21</jvmTarget>
+                        <languageVersion>2.0</languageVersion>
+                        <apiVersion>2.0</apiVersion>
                     </configuration>
                     <dependencies>
                         <dependency>

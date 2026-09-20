@@ -35,7 +35,7 @@ class ProfileEntity(
     var purposeMask: Int,
     @Column(name = "created_at")
     var createdAt: LocalDateTime,
-    @Column("last_indexed_at")
+    @Column(name = "last_indexed_at")
     var lastIndexedAt: LocalDateTime? = null,
     @Column(name = "id_index")
     var indexId: String? = null,

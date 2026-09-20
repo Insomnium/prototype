@@ -14,8 +14,6 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>21</java.version>
-        <kotlin.version>2.1.0</kotlin.version>
         <sentry.version>8.3.0</sentry.version>
         <kafka.confluent.avro.version>7.9.0</kafka.confluent.avro.version>
         <avro4k.version>1.10.1</avro4k.version>
@@ -74,8 +72,8 @@
             <version>${codecentric.spring-boot-admin.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-kafka</artifactId>
         </dependency>
         <dependency>
             <groupId>io.confluent</groupId>
@@ -96,7 +94,6 @@
         <dependency>
             <groupId>org.jetbrains.kotlinx</groupId>
             <artifactId>kotlinx-serialization-core-jvm</artifactId>
-            <version>1.8.1</version>
         </dependency>
         <dependency>
             <groupId>io.github.classgraph</groupId>
@@ -114,7 +111,7 @@
             <version>0.14.0</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.module</groupId>
+            <groupId>tools.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
         </dependency>
         <dependency>
@@ -130,8 +127,8 @@
             <artifactId>kotlin-stdlib</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-liquibase</artifactId>
         </dependency>
         <dependency>
             <groupId>net.ins.prototype</groupId>
@@ -165,6 +162,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-assertions-core</artifactId>
             <version>${kotest.version}</version>
@@ -183,12 +185,12 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>junit-jupiter</artifactId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>postgresql</artifactId>
+            <artifactId>testcontainers-postgresql</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -203,22 +205,22 @@
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>elasticsearch</artifactId>
+            <artifactId>testcontainers-elasticsearch</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>kafka</artifactId>
+            <artifactId>testcontainers-kafka</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>redpanda</artifactId>
+            <artifactId>testcontainers-redpanda</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
-            <artifactId>minio</artifactId>
+            <artifactId>testcontainers-minio</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

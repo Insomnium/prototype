@@ -61,7 +61,7 @@ open class AbstractTestcontainersTest {
         @JvmStatic
         @Container
         @ServiceConnection
-        val elasticSearchContainer: ElasticsearchContainer = ElasticsearchContainer(DockerImageName.parse("elasticsearch:8.17.3"))
+        val elasticSearchContainer: ElasticsearchContainer = ElasticsearchContainer(DockerImageName.parse("elasticsearch:9.4.4"))
             .withEnv("node.name", "elasticsearch")
             .withEnv("xpack.security.enabled", "false")
             .withCopyFileToContainer(MountableFile.forClasspathResource("es/profiles.ndjson"), DEFAULT_PROFILES_ES_CONTAINER_FILE_PATH)

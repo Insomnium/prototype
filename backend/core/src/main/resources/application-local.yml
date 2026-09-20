@@ -8,7 +8,7 @@ spring:
     show-sql: true
 
   elasticsearch:
-    uris: http://localhost:9200
+    uris: localhost:9200
 
   boot:
     admin:
