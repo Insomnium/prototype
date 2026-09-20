@@ -14,11 +14,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>21</java.version>
-        <kotlin.version>2.1.0</kotlin.version>
         <sentry.version>8.3.0</sentry.version>
         <kafka.confluent.avro.version>8.3.1</kafka.confluent.avro.version>
-<!--        <avro4k.version>1.10.1</avro4k.version>-->
         <classgraph.version>4.8.179</classgraph.version>
         <protobuf.version>4.36.2</protobuf.version>
         <lombok.version>1.18.46</lombok.version>
@@ -148,10 +145,10 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.cassandra</groupId>
-            <artifactId>java-driver-core</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.cassandra</groupId>-->
+<!--            <artifactId>java-driver-core</artifactId>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>

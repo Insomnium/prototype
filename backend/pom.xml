@@ -184,6 +184,8 @@
                             <option>no-arg:annotation=net.ins.prototype.backend.common.meta.NoArgConstructor</option>
                         </pluginOptions>
                         <jvmTarget>21</jvmTarget>
+                        <languageVersion>2.0</languageVersion>
+                        <apiVersion>2.0</apiVersion>
                     </configuration>
                     <dependencies>
                         <dependency>
