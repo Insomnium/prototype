@@ -17,9 +17,7 @@ class PrototypeStompClientSessionProvider(
     private val sessionByUser: MutableMap<Int, StompSessionWrapper> = mutableMapOf()
 
     companion object {
-        private val jsonMessageConverter: JacksonJsonMessageConverter = JacksonJsonMessageConverter().apply {
-//            this.registerKotlinModule()
-        }
+        private val jsonMessageConverter: JacksonJsonMessageConverter = JacksonJsonMessageConverter()
     }
 
     fun establishSession(
