@@ -68,34 +68,28 @@ class KafkaConf(
     @Suppress("UNCHECKED_CAST")
     fun errorHandlingDeserializer(
         @Qualifier(PROFILE_EVENT_DESERIALIZER) deserializer: Deserializer<ProfileEvent>,
-    ): ErrorHandlingDeserializer<ProfileEvent> {
-        val errorHandlingDeserializer = ErrorHandlingDeserializer(
-            deserializer,
-        )
-        errorHandlingDeserializer.setFailedDeserializationFunction {
+    ): ErrorHandlingDeserializer<ProfileEvent> = ErrorHandlingDeserializer(
+        deserializer,
+    ).apply {
+        setFailedDeserializationFunction {
             logger.error("Failed to deserialize message from ${it.topic}", it.exception)
             UnserializableProfileEvent()
         }
-        return errorHandlingDeserializer
     }
 
     @Bean(PROFILE_EVENT_CONSUMER_FACTORY)
     fun profileEventConsumerFactory(
         @Qualifier(PROFILE_ERROR_HANDLING_DESERIALIZER) errorHandlingDeserializer: ErrorHandlingDeserializer<ProfileEvent>,
-    ): ConsumerFactory<Long, ProfileEvent> {
-        val defaultKafkaConsumerFactory = DefaultKafkaConsumerFactory<Long, ProfileEvent>(appProperties.kafka.buildConsumerProperties())
-        defaultKafkaConsumerFactory.setValueDeserializer(errorHandlingDeserializer)
-        return defaultKafkaConsumerFactory
+    ): ConsumerFactory<Long, ProfileEvent> = DefaultKafkaConsumerFactory<Long, ProfileEvent>(appProperties.kafka.buildConsumerProperties()).apply {
+        valueDeserializer = errorHandlingDeserializer
     }
 
     @Bean(PROFILE_EVENT_LISTENER_CONTAINER_FACTORY)
     fun profileEventListenerContainerFactory(
         @Qualifier(PROFILE_EVENT_CONSUMER_FACTORY) profileEventConsumerFactory: ConsumerFactory<Long, ProfileEvent>
-    ): ConcurrentKafkaListenerContainerFactory<Long, ProfileEvent> {
-        val concurrentKafkaListenerContainerFactory = ConcurrentKafkaListenerContainerFactory<Long, ProfileEvent>()
-        concurrentKafkaListenerContainerFactory.setConsumerFactory(profileEventConsumerFactory)
-        concurrentKafkaListenerContainerFactory.setBatchListener(false)
-        concurrentKafkaListenerContainerFactory.containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
-        return concurrentKafkaListenerContainerFactory
+    ): ConcurrentKafkaListenerContainerFactory<Long, ProfileEvent> = ConcurrentKafkaListenerContainerFactory<Long, ProfileEvent>().apply {
+        setConsumerFactory(profileEventConsumerFactory)
+        setBatchListener(false)
+        containerProperties.ackMode = ContainerProperties.AckMode.MANUAL_IMMEDIATE
     }
 }
