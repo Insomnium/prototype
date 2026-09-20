@@ -5,6 +5,8 @@ spring:
   cassandra:
     contact-points: localhost:9042,localhost:9043,localhost:9044
     local-datacenter: prototype-dc1
+  datasource:
+    url: jdbc:cassandra://localhost:9042/chat?compliancemode=Liquibase&localdatacenter=prototype-dc1
   liquibase:
     url: jdbc:cassandra://localhost:9042/chat?compliancemode=Liquibase&localdatacenter=prototype-dc1
   boot:
