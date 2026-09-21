@@ -13,9 +13,6 @@
     <description>infra-spring-boot-admin-server</description>
     <packaging>jar</packaging>
 
-    <properties>
-        <kotest.version>5.9.1</kotest.version>
-    </properties>
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
