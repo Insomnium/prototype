@@ -1,3 +1,6 @@
+![Instructions Coverage](.github/badges/jacoco.svg)
+![Branches Coverage](.github/badges/branches.svg)
+
 # Motivation
 Boredom.
 The first idea came to mind is a dating service. Why? Да хз.
